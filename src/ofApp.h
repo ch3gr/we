@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxOpenCv.h"
+#include "ofxCv.h"
 
 class ofApp : public ofBaseApp{
 
@@ -32,5 +33,5 @@ class ofApp : public ofBaseApp{
 		ofxCvColorImage		CvImg;
 		ofxCvHaarFinder		Finder;
 
-		
+		ofxCv::ObjectFinder Finder2;
 };

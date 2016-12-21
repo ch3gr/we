@@ -1,5 +1,9 @@
 #include "ofApp.h"
 
+
+using namespace ofxCv;
+using namespace cv;
+
 //--------------------------------------------------------------
 void ofApp::setup(){
 	CamW = 640;
@@ -12,16 +16,15 @@ void ofApp::setup(){
 	//finder.setup("haarcascade_frontalface_alt.xml");
 	//finder.setup("HS.xml");
 	
+	Finder2.setup("haarcascade_frontalface_default.xml");
+	Finder2.setPreset(ObjectFinder::Fast);
 }
 
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	
-	
 	Cam.update();
-
 	
 	if (Cam.isFrameNew()) {
 		
@@ -29,6 +32,8 @@ void ofApp::update(){
 		CvImg.resize(CvImg.width*CvScale, CvImg.height*CvScale);
 
 		Finder.findHaarObjects(CvImg.getPixels());
+
+		Finder2.update(Cam);
 	}
 
 
@@ -42,16 +47,19 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	Cam.draw(0, 0);
+	Finder2.draw();
 
 	CvImg.draw(CamW+50, 0);
 
 
 	ofNoFill();
+	ofSetColor(0, 0, 255);
 	for (unsigned int i = 0; i < Finder.blobs.size(); i++) {
 		ofRectangle cur = Finder.blobs[i].boundingRect;
 		ofDrawRectangle(cur.x/CvScale, cur.y/CvScale, cur.width/CvScale, cur.height/CvScale);
 	}
 
+	ofSetColor(255, 255, 255);
 	if (Finder.blobs.size() > 0) {
 		ofImage face = Cam.getPixels();
 		ofRectangle cur = Finder.blobs[0].boundingRect;
