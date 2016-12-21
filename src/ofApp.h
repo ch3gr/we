@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ofMain.h"
-#include "ofxOpenCv.h"
 #include "ofxCv.h"
 
 class ofApp : public ofBaseApp{
@@ -27,11 +26,6 @@ class ofApp : public ofBaseApp{
 		ofVideoGrabber 		Cam;
 		int 				CamW;
 		int 				CamH;
-		float				CvScale;
-
-		ofImage Frame;
-		ofxCvColorImage		CvImg;
-		ofxCvHaarFinder		Finder;
-
-		ofxCv::ObjectFinder Finder2;
+		
+		ofxCv::ObjectFinder Finder;
 };
