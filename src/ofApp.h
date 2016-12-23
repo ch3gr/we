@@ -1,7 +1,9 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxOpenCv.h"
 #include "ofxCv.h"
+using namespace cv;
 
 class ofApp : public ofBaseApp{
 
@@ -22,10 +24,30 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-
+/*
 		ofVideoGrabber 		Cam;
 		int 				CamW;
 		int 				CamH;
 		
-		ofxCv::ObjectFinder Finder;
+		ofxCv::ObjectFinder Finder;*/
+		
+
+
+
+		vector<cv::Rect> objects;
+		CascadeClassifier classifier;
+		Ptr<FaceRecognizer> model;
+
+		ofImage graySmall;
+
+		vector<cv::Mat> images, faces;
+		vector<ofImage> ofFaces;
+		vector<int> labels;
+
+		int currentTest, currentResult;
+
+		int result;
+
+		ofVideoGrabber cam;
+		ofPixels gray;
 };
