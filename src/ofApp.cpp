@@ -6,25 +6,23 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	/*CamW = 640;
-	CamH = 480;
-	Cam.setup(CamW, CamH);
-
+	//Cam.setup(CamW, CamH);
+	//Finder.setup("haarcascade_frontalface_default.xml");
+	//Finder.setPreset(ObjectFinder::Fast); */
 	
-	Finder.setup("haarcascade_frontalface_default.xml");
-	Finder.setPreset(ObjectFinder::Fast);*/
 
-
-
-
-
-
+	camW = 640;
+	camH = 480;
+	camProxySize = 0.5;
+	
+	finder.setup("haarcascade_frontalface_default.xml");
+	finder.setPreset(ObjectFinder::Fast);
 
 	// setup face detection
 	classifier.load(ofToDataPath("haarcascade_frontalface_alt.xml"));
 
-	ofSetFrameRate(10);
-	cam.initGrabber(320, 240);
+	//ofSetFrameRate(10);
+	cam.initGrabber(camW, camH);
 
 	// load images from data directory
 	ofDirectory dir;
@@ -97,22 +95,12 @@ void ofApp::setup(){
 	// The following lines create an Eigenfaces model for
 	// face recognition and train it with the images and labels
 	model = createEigenFaceRecognizer();
-	//model = createFisherFaceRecognizer();
 	model->train(faces, labels);
 
 	currentTest = 0;
 	currentResult = -1;
 
-
-	
-	confidence = 0.0;
-
 }
-
-
-
-
-
 
 
 
@@ -131,31 +119,16 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-	//Cam.update();
-	//
-	//if (Cam.isFrameNew()) {
-	//	Finder.update(Cam);
-	//}
-
-
-	//// FPS on title bar
-	//std::stringstream strm;
-	//strm << "fps: " << ofGetFrameRate();
-	//ofSetWindowTitle(strm.str());
-
-
-
-
-
-
-
-
-
-
 	cam.update();
 	if (cam.isFrameNew()) {
+
 		//ofxCv::convertColor(cam, gray, CV_RGB2GRAY);
-		Mat color = ofxCv::toCv(cam);
+		ofImage frame = cam.getPixels();
+		frame.resize(camW*camProxySize, camH*camProxySize );
+		finder.update(cam);
+
+
+		Mat color = ofxCv::toCv(frame);
 		Mat grey;
 		cvtColor(color, grey, CV_RGB2GRAY);
 
@@ -171,14 +144,17 @@ void ofApp::update(){
 
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
 
-			//currentResult = model->predict(smallMat);
-			model->predict(smallMat, currentResult, confidence);
+			currentResult = model->predict(smallMat);
 		}
 
 	}
 	//currentResult = model->predict(faces[currentTest]);
 
 
+
+	std::stringstream strm;
+	strm << "fps: " << ofGetFrameRate();
+	ofSetWindowTitle(strm.str());
 
 
 }
@@ -197,29 +173,18 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	/*Cam.draw(0, 0);
-	Finder.draw();
-
-	
-	
-	if (Finder.size() > 0) {
-		ofImage face = Cam.getPixels();
-		
-		face.crop(Finder.getObject(0).getMinX(), Finder.getObject(0).getMinY(), Finder.getObject(0).getWidth(), Finder.getObject(0).getHeight());
-		face.resize(100, 100);
-		face.draw(0, CamH + 25);
-	}
-	if (Finder.size() > 1) {
-		ofImage face = Cam.getPixels();
-		face.crop(Finder.getObject(1).getMinX(), Finder.getObject(1).getMinY(), Finder.getObject(1).getWidth(), Finder.getObject(1).getHeight());
-		face.resize(100, 100);
-		face.draw(120, CamH + 25);
-	}*/
-
-
-
 	ofSetColor(255, 255, 255);
-	cam.draw(0, 300);
+	cam.draw(0, 0);
+	finder.draw();
+
+	for (int i = 0; i < finder.size(); ++i) {
+		ofImage face = cam.getPixels();
+		ofRectangle crop = finder.getObject(i);
+		face.crop(crop.x, crop.y, crop.width, crop.width);
+		face.resize(100, 100);
+		face.draw(camW, i*face.getHeight());
+	}
+
 
 	int x = 0;
 	for (int i = 0; i<ofFaces.size(); i++) {
@@ -229,28 +194,50 @@ void ofApp::draw(){
 		else {
 			ofSetColor(255);
 		}
-		ofFaces[i].draw(x, 0);
-		ofDrawBitmapString(i, x, 30);
+		ofFaces[i].draw(x, camH + 100);
+		ofDrawBitmapString(i, x, camH + 120);
 		if (currentTest == i) {
 			ofSetColor(255, 0, 0);
-			//ofDrawBitmapString("Test", x, ofFaces[i].height + 20);
-			ofDrawBitmapString("Test", x, 120);
+			ofDrawBitmapString("Test", x, camH+200);
 		}
 		//x += ofFaces[i].width;
 		x += 120;
 	}
 
-	ofDrawBitmapString("Testing image " + ofToString(currentTest + 1) + ", which I, the computer, think is image " + ofToString(currentResult + 1), 20, 200);
-	ofDrawBitmapString( confidence, 20, 230);
+
+	for(int i = 0; i < objects.size(); ++i) {
+		
+		ofImage face = cam.getPixels();
+		ofRectangle crop = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height );
+		crop.x /= camProxySize;
+		crop.y /= camProxySize;
+		crop.scale(1/camProxySize);
+		
+		face.crop(crop.x, crop.y, crop.width, crop.height);
+		face.resize(100, 100);
+		face.draw(i*crop.width, camH);
+
+		ofNoFill();
+		ofDrawRectangle(crop);
+	}
+
+
+	ofDrawBitmapString("Testing image " + ofToString(currentTest + 1) + ", which I, the computer, think is image " + ofToString(currentResult + 1), 20, camH + 230);
 
 	//ofDrawBitmapString("result: "+ ofToString(result), 20,220);
 
 
-
-
-
 	
 }
+
+
+
+
+
+
+
+
+
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){

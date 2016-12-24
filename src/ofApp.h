@@ -24,15 +24,8 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-/*
-		ofVideoGrabber 		Cam;
-		int 				CamW;
-		int 				CamH;
-		
-		ofxCv::ObjectFinder Finder;*/
-		
 
-
+		ofxCv::ObjectFinder finder;
 
 		vector<cv::Rect> objects;
 		CascadeClassifier classifier;
@@ -48,9 +41,9 @@ class ofApp : public ofBaseApp{
 
 		int result;
 
-		ofVideoGrabber cam;
+		ofVideoGrabber		cam;
+		int 				camW;
+		int 				camH;
+		float				camProxySize;
 		ofPixels gray;
-
-		
-		double confidence ;
 };
