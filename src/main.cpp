@@ -23,6 +23,10 @@ tutorial (the same)
 http://docs.opencv.org/master/da/d60/tutorial_face_main.html
 http://docs.opencv.org/2.4/modules/contrib/doc/facerec/facerec_tutorial.html
 
+
+image types:
+http://stackoverflow.com/questions/35379256/type-difference-on-image-processing-on-openframeworks
+
 */
 
 

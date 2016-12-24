@@ -13,14 +13,14 @@ void ofApp::setup(){
 
 	camW = 640;
 	camH = 480;
-	camProxySize = 0.5;
+	camProxySize = 0.25;
 	
 	finder.setup("haarcascade_frontalface_default.xml");
-	finder.setPreset(ObjectFinder::Fast);
+	//finder.setPreset(ObjectFinder::Fast);
 
 	// setup face detection
-	classifier.load(ofToDataPath("haarcascade_frontalface_alt.xml"));
-
+	
+	classifier.load(ofToDataPath("haarcascade_frontalface_default.xml"));
 	//ofSetFrameRate(10);
 	cam.initGrabber(camW, camH);
 
@@ -58,6 +58,9 @@ void ofApp::setup(){
 		labels.push_back(6);
 	}
 
+	testFace.loadImage("testFace.jpg");
+	testFace.resize(testFace.getWidth()*2, testFace.getWidth()*2);
+
 
 	// use haar classifier to detect faces
 	for (int i = 0; i<images.size(); i++) {
@@ -73,11 +76,8 @@ void ofApp::setup(){
 			// get everybody to the same size
 			Mat smallMat;
 			smallMat.create(100, 100, ofxCv::getCvImageType(roi));
-
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
-
 			faces.push_back(smallMat);
-
 			ofImage toSave;
 			ofxCv::toOf(smallMat, toSave);
 			toSave.update();
@@ -119,16 +119,24 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
+	
 	cam.update();
 	if (cam.isFrameNew()) {
 
 		//ofxCv::convertColor(cam, gray, CV_RGB2GRAY);
-		ofImage frame = cam.getPixels();
-		frame.resize(camW*camProxySize, camH*camProxySize );
-		finder.update(cam);
+		frame = cam.getPixels();
+
+		testFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
+		frame.update();
+
+		// prep frameCompute and run the classifiers
+		frameCompute.clone(frame);
+		frameCompute.resize(camW*camProxySize, camH*camProxySize);
 
 
-		Mat color = ofxCv::toCv(frame);
+		finder.update(frameCompute);
+
+		Mat color = ofxCv::toCv(frameCompute);
 		Mat grey;
 		cvtColor(color, grey, CV_RGB2GRAY);
 
@@ -141,15 +149,12 @@ void ofApp::update(){
 			// get everybody to the same size
 			Mat smallMat;
 			smallMat.create(100, 100, ofxCv::getCvImageType(roi));
-
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
-
 			currentResult = model->predict(smallMat);
 		}
-
 	}
 	//currentResult = model->predict(faces[currentTest]);
-
+	
 
 
 	std::stringstream strm;
@@ -174,16 +179,57 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	ofSetColor(255, 255, 255);
+	ofSetLineWidth(3);
 	cam.draw(0, 0);
-	finder.draw();
+	ofDrawBitmapString("Camera feed", 0,10);
 
+	frameCompute.draw(camW, camH-frameCompute.getHeight());
+	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight()+10);
+
+	//testFace.draw(ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
+	
+
+	// finder Stuff
+	//finder.draw();
 	for (int i = 0; i < finder.size(); ++i) {
-		ofImage face = cam.getPixels();
+		ofImage face;
+		face.clone(frame);
 		ofRectangle crop = finder.getObject(i);
+		crop.x /= camProxySize;
+		crop.y /= camProxySize;
+		crop.scale(1 / camProxySize);
+
 		face.crop(crop.x, crop.y, crop.width, crop.width);
 		face.resize(100, 100);
 		face.draw(camW, i*face.getHeight());
+		ofDrawBitmapString("finder", camW, i*face.getHeight()+10);
+
+		ofNoFill();
+		ofSetColor(255, 0, 0);
+		ofDrawRectangle(crop);
+		ofSetColor(255, 255, 255);
 	}
+
+	// classifier
+	for (int i = 0; i < objects.size(); ++i) {
+		ofImage face;
+		face.clone(frame);
+		ofRectangle crop = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height);
+		crop.x /= camProxySize;
+		crop.y /= camProxySize;
+		crop.scale(1 / camProxySize);
+
+		face.crop(crop.x, crop.y, crop.width, crop.height);
+		face.resize(100, 100);
+		face.draw(i*100, camH);
+		ofDrawBitmapString("classifier", i * 100, camH+10);
+
+		ofNoFill();
+		ofSetColor(0, 0, 255);
+		ofDrawRectangle(crop);
+		ofSetColor(255, 255, 255);
+	}
+	ofSetLineWidth(1);
 
 
 	int x = 0;
@@ -205,21 +251,7 @@ void ofApp::draw(){
 	}
 
 
-	for(int i = 0; i < objects.size(); ++i) {
-		
-		ofImage face = cam.getPixels();
-		ofRectangle crop = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height );
-		crop.x /= camProxySize;
-		crop.y /= camProxySize;
-		crop.scale(1/camProxySize);
-		
-		face.crop(crop.x, crop.y, crop.width, crop.height);
-		face.resize(100, 100);
-		face.draw(i*crop.width, camH);
 
-		ofNoFill();
-		ofDrawRectangle(crop);
-	}
 
 
 	ofDrawBitmapString("Testing image " + ofToString(currentTest + 1) + ", which I, the computer, think is image " + ofToString(currentResult + 1), 20, camH + 230);

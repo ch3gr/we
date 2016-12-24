@@ -41,9 +41,12 @@ class ofApp : public ofBaseApp{
 
 		int result;
 
-		ofVideoGrabber		cam;
 		int 				camW;
 		int 				camH;
 		float				camProxySize;
-		ofPixels gray;
+		ofVideoGrabber		cam;
+		ofImage frame;						// cam + comps
+		ofImage frameCompute;				// reduced frame for computation
+
+		ofImage testFace;
 };
