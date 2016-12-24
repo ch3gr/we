@@ -97,10 +97,15 @@ void ofApp::setup(){
 	// The following lines create an Eigenfaces model for
 	// face recognition and train it with the images and labels
 	model = createEigenFaceRecognizer();
+	//model = createFisherFaceRecognizer();
 	model->train(faces, labels);
 
 	currentTest = 0;
 	currentResult = -1;
+
+
+	
+	confidence = 0.0;
 
 }
 
@@ -166,7 +171,8 @@ void ofApp::update(){
 
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
 
-			currentResult = model->predict(smallMat);
+			//currentResult = model->predict(smallMat);
+			model->predict(smallMat, currentResult, confidence);
 		}
 
 	}
@@ -235,6 +241,7 @@ void ofApp::draw(){
 	}
 
 	ofDrawBitmapString("Testing image " + ofToString(currentTest + 1) + ", which I, the computer, think is image " + ofToString(currentResult + 1), 20, 200);
+	ofDrawBitmapString( confidence, 20, 230);
 
 	//ofDrawBitmapString("result: "+ ofToString(result), 20,220);
 

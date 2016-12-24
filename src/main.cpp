@@ -11,3 +11,18 @@ int main( ){
 	ofRunApp(new ofApp());
 
 }
+
+
+/*
+links
+
+http://docs.opencv.org/trunk/dd/d65/classcv_1_1face_1_1FaceRecognizer.html
+http://docs.opencv.org/2.4/modules/objdetect/doc/cascade_classification.html
+
+tutorial (the same)
+http://docs.opencv.org/master/da/d60/tutorial_face_main.html
+http://docs.opencv.org/2.4/modules/contrib/doc/facerec/facerec_tutorial.html
+
+*/
+
+

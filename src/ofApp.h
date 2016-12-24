@@ -50,4 +50,7 @@ class ofApp : public ofBaseApp{
 
 		ofVideoGrabber cam;
 		ofPixels gray;
+
+		
+		double confidence ;
 };
