@@ -6,61 +6,18 @@ using namespace cv;
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-	//Cam.setup(CamW, CamH);
-	//Finder.setup("haarcascade_frontalface_default.xml");
-	//Finder.setPreset(ObjectFinder::Fast); */
-	
 
 	camW = 640;
 	camH = 480;
-	camProxySize = 0.25;
-	
-	finder.setup("haarcascade_frontalface_default.xml");
-	//finder.setPreset(ObjectFinder::Fast);
-
-	// setup face detection
-	
-	classifier.load(ofToDataPath("haarcascade_frontalface_default.xml"));
 	//ofSetFrameRate(10);
+	camProxySize = 0.25;
 	cam.initGrabber(camW, camH);
 
-	// load images from data directory
+
+	// setup face detection
+	classifier.load(ofToDataPath("haarcascade_frontalface_default.xml"));
+
 	
-	//ofDirectory dir;
-	//int num = dir.listDir("faces1");
-	//for (int i = 0; i<num; i++) {
-	//	// load into OF
-	//	ofImage img;
-	//	img.loadImage(dir.getPath(i));
-
-	//	// convert into openCV, grayscale
-
-	//	Mat color = ofxCv::toCv(img);
-	//	Mat grey;
-	//	cvtColor(color, grey, CV_RGB2GRAY);
-
-	//	images.push_back(grey);
-
-	//	// labels == who you are
-	//	labels.push_back(i);
-	//}
-
-	//num = dir.listDir("faces2");
-	//for (int i = 0; i < num; i++) {
-	//	// load into OF
-	//	ofImage img;
-	//	img.loadImage(dir.getPath(i));
-	//	// convert into openCV, grayscale
-	//	Mat color = ofxCv::toCv(img);
-	//	Mat grey;
-	//	cvtColor(color, grey, CV_RGB2GRAY);
-	//	images.push_back(grey);
-	//	// labels == who you are
-	//	labels.push_back(5);
-	//}
-	//
-
-
 
 	string trainPath = "toTrain";
 	cout << "training directory: " << trainPath << endl;
@@ -100,13 +57,15 @@ void ofApp::setup(){
 	cout << "images : " << images.size() << endl;
 	cout << "labels : " << labels.size() << endl;
 	cout << "ofImages : " << ofFaces.size() << endl;
+	
+	
+	
 
 
-	mousePic = 0;
+	mousePic = ofFaces.size(); // just to select the unknowPerson who is always the group+1
+	unknownFace.loadImage("testFace2.jpg");
 
 
-	/*mouseFace.loadImage("testFace.jpg");
-	mouseFace.resize(mouseFace.getWidth()*2, mouseFace.getWidth()*2);*/
 
 
 	//// use haar classifier to detect faces
@@ -141,11 +100,17 @@ void ofApp::setup(){
 	// load faces into trainer
 	// The following lines create an Eigenfaces model for
 	// face recognition and train it with the images and labels
-	model = createEigenFaceRecognizer();
+	model = createEigenFaceRecognizer(80, 5000);
+	//model = createFisherFaceRecognizer(0, 5000);
+	//model = createLBPHFaceRecognizer();
 	model->train(images, labels);
 
 	
+	
 
+
+
+	personCanvas.allocate(512, 512, GL_RGBA);
 }
 
 
@@ -172,7 +137,11 @@ void ofApp::update(){
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
 		frame = cam.getPixels();
 		
-		mouseFace = ofFaces[mousePic];
+		if (mousePic < ofFaces.size())
+			mouseFace = ofFaces[mousePic];
+		else
+			mouseFace = unknownFace;
+
 		mouseFace.resize(200, 200);
 		mouseFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
 		frame.update();
@@ -180,10 +149,6 @@ void ofApp::update(){
 		// prep frameCompute and run the classifiers
 		frameCompute.clone(frame);
 		frameCompute.resize(camW*camProxySize, camH*camProxySize);
-		//frameCompute.setImageType(OF_IMAGE_GRAYSCALE);		
-
-		// DISABLED
-		//finder.update(frameCompute);
 
 
 		Mat color = ofxCv::toCv(frameCompute);
@@ -192,7 +157,6 @@ void ofApp::update(){
 
 		classifier.detectMultiScale(grey, objects, 1.16, 1, 0);
 
-		//if (objects.size() > 0) {
 		for(int i = 0; i < objects.size(); ++i ){
 			// crops image to face rect
 			Mat roi(grey, objects[i]);
@@ -204,9 +168,15 @@ void ofApp::update(){
 
 			model->predict(smallMat, match[i], confidence[i]);
 			
+
+
+			if (i == 0) {
+				personCanvas.begin();
+				ofClear(255, 255, 255, 1);
+				personCanvas.end();
+			}
 		}
 	}
-	//currentResult = model->predict(faces[currentTest]);
 	
 
 
@@ -215,6 +185,9 @@ void ofApp::update(){
 	ofSetWindowTitle(strm.str());
 
 
+	
+	
+	
 }
 
 
@@ -239,29 +212,6 @@ void ofApp::draw(){
 	frameCompute.draw(camW, camH-frameCompute.getHeight());
 	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight()+10);
 
-	//testFace.draw(ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
-	
-
-	// finder Stuff
-	//finder.draw();
-	for (int i = 0; i < finder.size(); ++i) {
-		ofImage face;
-		face.clone(frame);
-		ofRectangle crop = finder.getObject(i);
-		crop.x /= camProxySize;
-		crop.y /= camProxySize;
-		crop.scale(1 / camProxySize);
-
-		face.crop(crop.x, crop.y, crop.width, crop.width);
-		face.resize(100, 100);
-		face.draw(camW, i*face.getHeight());
-		ofDrawBitmapString("finder", camW, i*face.getHeight()+10);
-
-		ofNoFill();
-		ofSetColor(255, 0, 0);
-		ofDrawRectangle(crop);
-		ofSetColor(255, 255, 255);
-	}
 
 	// classifier
 	for (int i = 0; i < objects.size(); ++i) {
@@ -299,8 +249,9 @@ void ofApp::draw(){
 	}
 
 
-
 	
+	
+	personCanvas.draw(camW + 100, 0);
 }
 
 
@@ -316,21 +267,35 @@ void ofApp::draw(){
 void ofApp::keyPressed(int key){
 
 	if (key == 'd') {
-		for (int i = 0; i < labels.size(); ++i) {
-			cout << labels[i] << endl;
-		}
+//		cout << model->getAlgorithm() << endl;
 	}
 
 	if (key == '+') {
 		mousePic++;
-		if (mousePic >= ofFaces.size())
-			mousePic = ofFaces.size()-1;
+		// include the unknown face
+		if (mousePic > ofFaces.size())
+			mousePic = ofFaces.size()-0;
 	}
 	if (key == '-') {
 		mousePic--;
 		if (mousePic < 0)
 			mousePic = 0;
 	}
+
+	if (key == ']') {
+		double thress = model->getDouble("threshold");
+		thress += 250;
+		model->set("threshold", thress);
+		cout << "Model thress: " << thress << endl;
+	}
+	if (key == '[') {
+		double thress = model->getDouble("threshold");
+		if( thress >= 250 )
+			thress -= 250;
+		model->set("threshold", thress);
+		cout << "Model thress: " << thress << endl;
+	}
+
 }
 
 //--------------------------------------------------------------

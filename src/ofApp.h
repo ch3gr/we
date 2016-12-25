@@ -25,18 +25,19 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 
 
-		ofxCv::ObjectFinder finder;
 
 		vector<cv::Rect> objects;
 		CascadeClassifier classifier;
 		Ptr<FaceRecognizer> model;
+
+		
 
 		int match[10];
 		double confidence[10];
 
 		int mousePic;
 
-		ofImage graySmall;
+		
 
 		vector<cv::Mat> images, faces;
 		vector<ofImage> ofFaces;
@@ -53,4 +54,7 @@ class ofApp : public ofBaseApp{
 		ofImage frameCompute;				// reduced frame for computation
 
 		ofImage mouseFace;
+		ofImage unknownFace;
+
+		ofFbo personCanvas;
 };
