@@ -5,6 +5,9 @@ using namespace ofxCv;
 using namespace cv;
 
 //--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 void ofApp::setup(){
 
 	camW = 640;
@@ -111,6 +114,9 @@ void ofApp::setup(){
 
 
 	personCanvas.allocate(512, 512, GL_RGBA);
+	personCanvas.begin();
+	ofClear(255, 255, 255, 0);
+	personCanvas.end();
 }
 
 
@@ -128,6 +134,9 @@ void ofApp::setup(){
 
 
 //--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 void ofApp::update(){
 
 	
@@ -142,9 +151,9 @@ void ofApp::update(){
 		else
 			mouseFace = unknownFace;
 
-		mouseFace.resize(200, 200);
+		/*mouseFace.resize(200, 200);
 		mouseFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
-		frame.update();
+		frame.update();*/
 
 		// prep frameCompute and run the classifiers
 		frameCompute.clone(frame);
@@ -171,8 +180,24 @@ void ofApp::update(){
 
 
 			if (i == 0) {
+
+				ofImage face;
+				face.clone(frame);
+
+				ofRectangle crop = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height);
+				// adjust found area to original resolution
+				crop.x /= camProxySize;
+				crop.y /= camProxySize;
+				crop.scale(1 / camProxySize);
+				// adjust
+				//crop.translateY(-50);
+				crop.setFromCenter( crop.getCenter(), 200,250);
+				face.crop(crop.x, crop.y, crop.width, crop.height);
+				
 				personCanvas.begin();
-				ofClear(255, 255, 255, 1);
+				ofClear(200, 255, 255, 255);
+				//face.draw(face.getWidth()/2, face.getHeight()/2);
+				face.draw(0,0);
 				personCanvas.end();
 			}
 		}
@@ -202,6 +227,9 @@ void ofApp::update(){
 
 
 
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::draw(){
 	ofSetColor(255, 255, 255);
@@ -251,7 +279,7 @@ void ofApp::draw(){
 
 	
 	
-	personCanvas.draw(camW + 100, 0);
+	personCanvas.draw(camW + 150, 0);
 }
 
 
@@ -263,6 +291,9 @@ void ofApp::draw(){
 
 
 
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
