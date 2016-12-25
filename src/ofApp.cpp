@@ -26,92 +26,114 @@ void ofApp::setup(){
 
 	// load images from data directory
 	
-	ofDirectory dir;
-	int num = dir.listDir("faces1");
-	for (int i = 0; i<num; i++) {
-		// load into OF
-		ofImage img;
-		img.loadImage(dir.getPath(i));
+	//ofDirectory dir;
+	//int num = dir.listDir("faces1");
+	//for (int i = 0; i<num; i++) {
+	//	// load into OF
+	//	ofImage img;
+	//	img.loadImage(dir.getPath(i));
 
-		// convert into openCV, grayscale
+	//	// convert into openCV, grayscale
 
-		Mat color = ofxCv::toCv(img);
-		Mat grey;
-		cvtColor(color, grey, CV_RGB2GRAY);
+	//	Mat color = ofxCv::toCv(img);
+	//	Mat grey;
+	//	cvtColor(color, grey, CV_RGB2GRAY);
 
-		images.push_back(grey);
+	//	images.push_back(grey);
 
-		// labels == who you are
-		labels.push_back(i);
-	}
+	//	// labels == who you are
+	//	labels.push_back(i);
+	//}
 
-	num = dir.listDir("faces2");
-	for (int i = 0; i < num; i++) {
-		// load into OF
-		ofImage img;
-		img.loadImage(dir.getPath(i));
-		// convert into openCV, grayscale
-		Mat color = ofxCv::toCv(img);
-		Mat grey;
-		cvtColor(color, grey, CV_RGB2GRAY);
-		images.push_back(grey);
-		// labels == who you are
-		labels.push_back(5);
-	}
-	
+	//num = dir.listDir("faces2");
+	//for (int i = 0; i < num; i++) {
+	//	// load into OF
+	//	ofImage img;
+	//	img.loadImage(dir.getPath(i));
+	//	// convert into openCV, grayscale
+	//	Mat color = ofxCv::toCv(img);
+	//	Mat grey;
+	//	cvtColor(color, grey, CV_RGB2GRAY);
+	//	images.push_back(grey);
+	//	// labels == who you are
+	//	labels.push_back(5);
+	//}
+	//
 
 
-	std::string trainPath = "toTrain";
+
+	string trainPath = "toTrain";
 	cout << "training directory: " << trainPath << endl;
-	ofDirectory trainDir;
-
-	int faceDirNum = trainDir.listDir(trainPath);
-	for (int f = 0; f < faceDirNum; f++) {
-		//std::string personDir = trainDir.append("/");
-		//personDir.append(f);
-		cout << "Face dir: " << trainDir[f] << endl;
-
-		//int snapshotNum = trainDir.listDir("toTrain" );
 	
+	ofDirectory trainDir;
+	int personNum = trainDir.listDir(trainPath);
+	for (int p = 0; p < personNum; p++) {
+		string personDirPath = trainDir.getPath(p);
+		cout << "Person dir: " << personDirPath << endl;
 
-	}
+		ofDirectory personDir;
+		int sampleNum = personDir.listDir(personDirPath);;
+		for (int s = 0; s < sampleNum; s++) {
+			string samplePath = personDir.getPath(s);
+			cout << "Sample: " << samplePath << endl;
 
 
+			// load photo into OF
+			ofImage img;
+			img.loadImage(samplePath);
+			// Load one sample per person
+			if( s==0 )
+				ofFaces.push_back(img);
 
+			// convert into openCV, grayscale
+			Mat color = ofxCv::toCv(img);
+			Mat grey;
+			cvtColor(color, grey, CV_RGB2GRAY);
+			images.push_back(grey);
+			// labels == who you are
+			labels.push_back(p);
 
-
-
-
-	//mouseFace.loadImage("testFace.jpg");
-	mouseFace.loadImage("toTrain/s4/1.jpg");
-	mouseFace.resize(mouseFace.getWidth()*2, mouseFace.getWidth()*2);
-
-
-	// use haar classifier to detect faces
-	for (int i = 0; i<images.size(); i++) {
-
-		// detect faces in image
-		classifier.detectMultiScale(images[i], objects, 1.06, 1, 0);
-
-		// if there are some faces
-		if (objects.size() > 0) {
-			// crops image to face rect
-			Mat roi(images[i], objects[0]);
-
-			// get everybody to the same size
-			Mat smallMat;
-			smallMat.create(100, 100, ofxCv::getCvImageType(roi));
-			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
-			faces.push_back(smallMat);
-			ofImage toSave;
-			ofxCv::toOf(smallMat, toSave);
-			toSave.update();
-
-			ofFaces.push_back(toSave);
 		}
-
-		objects.clear();
 	}
+
+	cout << " ___ Loaded ____" << endl;
+	cout << "images : " << images.size() << endl;
+	cout << "labels : " << labels.size() << endl;
+	cout << "ofImages : " << ofFaces.size() << endl;
+
+
+	mousePic = 0;
+
+
+	/*mouseFace.loadImage("testFace.jpg");
+	mouseFace.resize(mouseFace.getWidth()*2, mouseFace.getWidth()*2);*/
+
+
+	//// use haar classifier to detect faces
+	//for (int i = 0; i<images.size(); i++) {
+
+	//	// detect faces in image
+	//	classifier.detectMultiScale(images[i], objects, 1.06, 1, 0);
+
+	//	// if there are some faces
+	//	if (objects.size() > 0) {
+	//		// crops image to face rect
+	//		Mat roi(images[i], objects[0]);
+
+	//		// get everybody to the same size
+	//		Mat smallMat;
+	//		smallMat.create(100, 100, ofxCv::getCvImageType(roi));
+	//		resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
+	//		faces.push_back(smallMat);
+	//		ofImage toSave;
+	//		ofxCv::toOf(smallMat, toSave);
+	//		toSave.update();
+
+	//		ofFaces.push_back(toSave);
+	//	}
+
+	//	objects.clear();
+	//}
 
 
 
@@ -120,10 +142,9 @@ void ofApp::setup(){
 	// The following lines create an Eigenfaces model for
 	// face recognition and train it with the images and labels
 	model = createEigenFaceRecognizer();
-	model->train(faces, labels);
+	model->train(images, labels);
 
-	currentTest = 0;
-	currentResult = -1;
+	
 
 }
 
@@ -151,7 +172,8 @@ void ofApp::update(){
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
 		frame = cam.getPixels();
 		
-
+		mouseFace = ofFaces[mousePic];
+		mouseFace.resize(200, 200);
 		mouseFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
 		frame.update();
 
@@ -181,7 +203,7 @@ void ofApp::update(){
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
 
 			model->predict(smallMat, match[i], confidence[i]);
-			currentResult = match[0];
+			
 		}
 	}
 	//currentResult = model->predict(faces[currentTest]);
@@ -250,18 +272,18 @@ void ofApp::draw(){
 		crop.y /= camProxySize;
 		crop.scale(1 / camProxySize);
 
-		face.crop(crop.x, crop.y, crop.width, crop.height);
-		face.resize(100, 100);
-		face.draw(i*100, camH);
-
 		ofSetColor(0, 0, 0);
-		ofDrawBitmapString(match[i], i * 100+1, camH+10+1);
-		ofDrawBitmapString(confidence[i], i * 100+1, camH + 30+1);
+		ofDrawBitmapString(match[i], i * 100+1, camH+20+1);
+		ofDrawBitmapString(confidence[i], i * 100+1, camH + 40+1);
 
 		ofSetColor(255, 0, 0);
-		ofDrawBitmapString(match[i], i * 100, camH + 10);
-		ofDrawBitmapString(confidence[i], i * 100, camH + 30);
+		ofDrawBitmapString(match[i], i * 100, camH + 20);
+		ofDrawBitmapString(confidence[i], i * 100, camH + 40);
 		ofSetColor(255, 255, 255);
+
+		face.crop(crop.x, crop.y, crop.width, crop.height);
+		face.resize(100, 100);
+		face.draw(i*100, camH+50);
 
 		ofNoFill();
 		ofSetColor(0, 0, 255);
@@ -271,32 +293,11 @@ void ofApp::draw(){
 	ofSetLineWidth(1);
 
 
-	int x = 0;
 	for (int i = 0; i<ofFaces.size(); i++) {
-		if (currentResult == i) {
-			ofSetColor(150, 0, 0);
-		}
-		else {
-			ofSetColor(255);
-		}
-		ofFaces[i].draw(x, camH + 100);
-		ofDrawBitmapString(labels[i], x, camH + 120);
-
-		if (currentTest == i) {
-			ofSetColor(255, 0, 0);
-			ofDrawBitmapString("Test", x, camH+200);
-		}
-		//x += ofFaces[i].width;
-		x += 120;
+		ofFaces[i].draw(i*100, camH + 150);
+		ofDrawBitmapString(i, i*100, camH + 170);
 	}
 
-
-
-
-
-	ofDrawBitmapString("Testing image " + ofToString(currentTest + 1) + ", which I, the computer, think is image " + ofToString(currentResult + 1), 20, camH + 230);
-
-	//ofDrawBitmapString("result: "+ ofToString(result), 20,220);
 
 
 	
@@ -314,26 +315,22 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
 
-
-
-
+	if (key == 'd') {
+		for (int i = 0; i < labels.size(); ++i) {
+			cout << labels[i] << endl;
+		}
+	}
 
 	if (key == '+') {
-		currentTest++;
-		if (currentTest >= faces.size()) {
-			currentTest = 0;
-		}
+		mousePic++;
+		if (mousePic >= ofFaces.size())
+			mousePic = ofFaces.size()-1;
 	}
-	else if (key == '-') {
-		currentTest--;
-		if (currentTest < 0) {
-			currentTest = faces.size() - 1;
-		}
+	if (key == '-') {
+		mousePic--;
+		if (mousePic < 0)
+			mousePic = 0;
 	}
-
-
-
-
 }
 
 //--------------------------------------------------------------

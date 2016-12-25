@@ -34,7 +34,7 @@ class ofApp : public ofBaseApp{
 		int match[10];
 		double confidence[10];
 
-
+		int mousePic;
 
 		ofImage graySmall;
 
@@ -42,9 +42,8 @@ class ofApp : public ofBaseApp{
 		vector<ofImage> ofFaces;
 		vector<int> labels;
 
-		int currentTest, currentResult;
 
-		int result;
+		
 
 		int 				camW;
 		int 				camH;
