@@ -25,6 +25,7 @@ void ofApp::setup(){
 	cam.initGrabber(camW, camH);
 
 	// load images from data directory
+	
 	ofDirectory dir;
 	int num = dir.listDir("faces1");
 	for (int i = 0; i<num; i++) {
@@ -55,11 +56,35 @@ void ofApp::setup(){
 		cvtColor(color, grey, CV_RGB2GRAY);
 		images.push_back(grey);
 		// labels == who you are
-		labels.push_back(6);
+		labels.push_back(5);
+	}
+	
+
+
+	std::string trainPath = "toTrain";
+	cout << "training directory: " << trainPath << endl;
+	ofDirectory trainDir;
+
+	int faceDirNum = trainDir.listDir(trainPath);
+	for (int f = 0; f < faceDirNum; f++) {
+		//std::string personDir = trainDir.append("/");
+		//personDir.append(f);
+		cout << "Face dir: " << trainDir[f] << endl;
+
+		//int snapshotNum = trainDir.listDir("toTrain" );
+	
+
 	}
 
-	testFace.loadImage("testFace.jpg");
-	testFace.resize(testFace.getWidth()*2, testFace.getWidth()*2);
+
+
+
+
+
+
+	//mouseFace.loadImage("testFace.jpg");
+	mouseFace.loadImage("toTrain/s4/1.jpg");
+	mouseFace.resize(mouseFace.getWidth()*2, mouseFace.getWidth()*2);
 
 
 	// use haar classifier to detect faces
@@ -123,34 +148,40 @@ void ofApp::update(){
 	cam.update();
 	if (cam.isFrameNew()) {
 
-		//ofxCv::convertColor(cam, gray, CV_RGB2GRAY);
+		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
 		frame = cam.getPixels();
+		
 
-		testFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
+		mouseFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
 		frame.update();
 
 		// prep frameCompute and run the classifiers
 		frameCompute.clone(frame);
 		frameCompute.resize(camW*camProxySize, camH*camProxySize);
+		//frameCompute.setImageType(OF_IMAGE_GRAYSCALE);		
 
+		// DISABLED
+		//finder.update(frameCompute);
 
-		finder.update(frameCompute);
 
 		Mat color = ofxCv::toCv(frameCompute);
 		Mat grey;
 		cvtColor(color, grey, CV_RGB2GRAY);
 
-		classifier.detectMultiScale(grey, objects, 1.06, 1, 0);
+		classifier.detectMultiScale(grey, objects, 1.16, 1, 0);
 
-		if (objects.size() > 0) {
+		//if (objects.size() > 0) {
+		for(int i = 0; i < objects.size(); ++i ){
 			// crops image to face rect
-			Mat roi(grey, objects[0]);
+			Mat roi(grey, objects[i]);
 
 			// get everybody to the same size
 			Mat smallMat;
 			smallMat.create(100, 100, ofxCv::getCvImageType(roi));
 			resize(roi, smallMat, smallMat.size(), 0, 0, INTER_LINEAR);
-			currentResult = model->predict(smallMat);
+
+			model->predict(smallMat, match[i], confidence[i]);
+			currentResult = match[0];
 		}
 	}
 	//currentResult = model->predict(faces[currentTest]);
@@ -180,8 +211,8 @@ void ofApp::update(){
 void ofApp::draw(){
 	ofSetColor(255, 255, 255);
 	ofSetLineWidth(3);
-	cam.draw(0, 0);
-	ofDrawBitmapString("Camera feed", 0,10);
+	frame.draw(0, 0);
+	ofDrawBitmapString("Frame comped", 0,10);
 
 	frameCompute.draw(camW, camH-frameCompute.getHeight());
 	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight()+10);
@@ -222,7 +253,15 @@ void ofApp::draw(){
 		face.crop(crop.x, crop.y, crop.width, crop.height);
 		face.resize(100, 100);
 		face.draw(i*100, camH);
-		ofDrawBitmapString("classifier", i * 100, camH+10);
+
+		ofSetColor(0, 0, 0);
+		ofDrawBitmapString(match[i], i * 100+1, camH+10+1);
+		ofDrawBitmapString(confidence[i], i * 100+1, camH + 30+1);
+
+		ofSetColor(255, 0, 0);
+		ofDrawBitmapString(match[i], i * 100, camH + 10);
+		ofDrawBitmapString(confidence[i], i * 100, camH + 30);
+		ofSetColor(255, 255, 255);
 
 		ofNoFill();
 		ofSetColor(0, 0, 255);
@@ -241,7 +280,8 @@ void ofApp::draw(){
 			ofSetColor(255);
 		}
 		ofFaces[i].draw(x, camH + 100);
-		ofDrawBitmapString(i, x, camH + 120);
+		ofDrawBitmapString(labels[i], x, camH + 120);
+
 		if (currentTest == i) {
 			ofSetColor(255, 0, 0);
 			ofDrawBitmapString("Test", x, camH+200);

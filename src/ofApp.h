@@ -31,6 +31,11 @@ class ofApp : public ofBaseApp{
 		CascadeClassifier classifier;
 		Ptr<FaceRecognizer> model;
 
+		int match[10];
+		double confidence[10];
+
+
+
 		ofImage graySmall;
 
 		vector<cv::Mat> images, faces;
@@ -48,5 +53,5 @@ class ofApp : public ofBaseApp{
 		ofImage frame;						// cam + comps
 		ofImage frameCompute;				// reduced frame for computation
 
-		ofImage testFace;
+		ofImage mouseFace;
 };

@@ -27,6 +27,13 @@ http://docs.opencv.org/2.4/modules/contrib/doc/facerec/facerec_tutorial.html
 image types:
 http://stackoverflow.com/questions/35379256/type-difference-on-image-processing-on-openframeworks
 
+
+
+toCheck
+https://github.com/antimodular/ofxFaceRecognizer/tree/master/src
+https://github.com/kylemcdonald/ofxCv#project-setup
+https://github.com/kylemcdonald/SharingFaces
+
 */
 
 
