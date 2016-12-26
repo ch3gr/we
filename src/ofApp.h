@@ -26,25 +26,14 @@ class ofApp : public ofBaseApp{
 
 
 
-		vector<cv::Rect> objects;
-		CascadeClassifier classifier;
-		Ptr<FaceRecognizer> model;
+		void ofApp::faceDetectSetup();
+		void ofApp::faceDetectUpdate();
+		void ofApp::faceDetectDraw();
 
-		
-
-		int match[10];
-		double confidence[10];
-
-		int mousePic;
-
-		
-
-		vector<cv::Mat> images, faces;
-		vector<ofImage> ofFaces;
-		vector<int> labels;
+		void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 
-		
+
 
 		int 				camW;
 		int 				camH;
@@ -53,8 +42,39 @@ class ofApp : public ofBaseApp{
 		ofImage frame;						// cam + comps
 		ofImage frameCompute;				// reduced frame for computation
 
+		ofFbo personCanvas;					// extracted face
+
+
+
+		//	face detection and recognition
+		vector<cv::Rect> objects;
+		CascadeClassifier classifier;
+		Ptr<FaceRecognizer> model;
+
+		vector<cv::Mat> images, faces;
+		vector<ofImage> ofFaces;
+		vector<int> labels;
+		
 		ofImage mouseFace;
 		ofImage unknownFace;
 
-		ofFbo personCanvas;
+		int match[10];
+		double confidence[10];
+
+		int mousePic;
+
+
+
+		// Contour detection
+		ofxCvColorImage cvImgColor;
+		ofxCvGrayscaleImage cvImgGrayscale;
+		ofxCvContourFinder contourFinder;
+		vector<ofPolyline> polylines, smoothed, resampled;
+		vector<ofPath> paths;
+		vector<ofRectangle> boundingBoxes;
+		int threshold;
+		int smooth;
+		
+
+
 };

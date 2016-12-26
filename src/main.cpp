@@ -34,6 +34,10 @@ https://github.com/antimodular/ofxFaceRecognizer/tree/master/src
 https://github.com/kylemcdonald/ofxCv#project-setup
 https://github.com/kylemcdonald/SharingFaces
 
+
+
+of/examples/graphics/polylineBlobsExample
+
 */
 
 
