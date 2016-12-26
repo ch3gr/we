@@ -66,7 +66,7 @@ class ofApp : public ofBaseApp{
 
 
 		// Contour detection
-		ofxCvColorImage cvImgColor;
+		ofxCvColorImage cvImgColor, cvImgColor2;
 		ofxCvGrayscaleImage cvImgGrayscale;
 		ofxCvContourFinder contourFinder;
 		vector<ofPolyline> polylines, smoothed, resampled;
@@ -74,6 +74,8 @@ class ofApp : public ofBaseApp{
 		vector<ofRectangle> boundingBoxes;
 		int threshold;
 		int smooth;
+
+		ofImage img1;
 		
 
 

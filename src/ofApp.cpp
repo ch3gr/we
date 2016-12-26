@@ -32,10 +32,8 @@ void ofApp::setup(){
 
 
 
-	personCanvas.allocate(512, 512, GL_RGBA);
-	personCanvas.begin();
-	ofClear(150, 150, 150, 0);
-	personCanvas.end();
+	personCanvas.allocate(camW, camH, GL_RGBA);
+	img1.allocate(camW, camH, OF_IMAGE_COLOR);
 }
 
 
@@ -91,7 +89,7 @@ void ofApp::update(){
 		{
 			cvImgGrayscale.blur(5);
 		}
-		cvImgGrayscale.threshold(threshold, 1);
+		cvImgGrayscale.threshold(threshold, true);
 		//cvImgGrayscale.adaptiveThreshold(64, threshold, 0);
 		if (ofGetKeyPressed('a'))
 		{
@@ -104,6 +102,15 @@ void ofApp::update(){
 			cvImgGrayscale.erode_3x3();
 		}
 		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 2, false, true);
+
+
+
+
+		
+
+
+
+
 
 		polylines.clear();
 		smoothed.clear();
@@ -142,6 +149,54 @@ void ofApp::update(){
 
 			paths.push_back(newPath);
 		}
+
+
+
+		// update personCanvas
+
+		personCanvas.begin();
+		ofClear(0);
+
+		ofSetColor(ofColor::black);
+		for (unsigned int i = 0; i < paths.size(); i++) {
+			paths[i].setColor(ofColor(0, 100, 0, 255));
+			paths[i].setFillColor(ofColor(0, 0, 100, 255));
+			paths[i].draw();
+		}
+		
+		//ofSetColor(ofColor::red);
+		//ofFill();
+		//for (unsigned int i = 0; i < polylines.size(); i++) {
+		//	polylines[i].draw();
+		//}
+		
+		
+		personCanvas.end();
+		
+		
+
+//		super slow
+//		ofPixels personCanvasPxl;
+//		personCanvas.readToPixels(personCanvasPxl,0);
+//		for (int p = 0; p < personCanvasPxl.size(); ++p) {
+//			ofColor pixel = personCanvasPxl.getColor(p);
+////			pixel.invert();
+////			personCanvasPxl.setColor(p, pixel);
+//		}
+
+
+		
+		//ofImage bridge;
+		//personCanvas.readToPixels(bridge.getPixelsRef());
+		
+		//personCanvas.readToPixels(img1.getPixelsRef());
+		//cvImgColor2.setFromPixels( bridge.getPixels() );
+		//cvImgColor2.setFromPixels(cam.getPixels());
+
+		//cvImgTmp.setFromPixels(cvImgColor.getPixels());
+		//cvImgTmp.setFromPixels( personCanvas.)
+		//cvImgColor *= cvImgColor2;
+		
 	}
 	
 
@@ -165,7 +220,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
 	//ofClear(150, 150, 150, 0);
-	ofSetColor(255, 255, 255);
+	ofSetColor(ofColor::white);
 	ofSetLineWidth(3);
 	if (frame.isAllocated())
 	{
@@ -188,16 +243,16 @@ void ofApp::draw(){
 
 
 	// move to the right
-	glPushMatrix();
+	ofPushMatrix();
 	ofTranslate(camW, 0);
-	ofSetColor(255);
+	ofSetColor(ofColor::darkGreen);
 	cvImgGrayscale.draw(0, 0);
 //	contourFinder.draw();
 
 	for (unsigned int i = 0; i < polylines.size(); i++) {
 		ofNoFill();
 
-		ofSetColor(255, 0, 0);
+		ofSetColor(255, 255, 255, 255);
 		polylines[i].draw();
 		/*drawWithNormals(polylines[i]);
 
@@ -212,18 +267,16 @@ void ofApp::draw(){
 
 	}
 	
-	glPopMatrix();
-	glPushMatrix();
-	ofTranslate(0, camH);
-	for (unsigned int i = 0; i < polylines.size(); i++) {
-		ofFill();
-		ofSetColor(50, 50, 250);
-		//polylines[i].draw();
-	}
-	for (unsigned int i = 0; i < paths.size(); i++) {
-		paths[i].draw();
-	}
+	ofPopMatrix();
+	//personCanvas.draw(0,camH);
 
+
+	// draw CV image
+	ofPushMatrix();
+	//ofTranslate(camW, camH);
+	cvImgColor.draw(camW, camH);
+	//cvImgColor2.draw(0, camH);
+	//img1.draw(0, camW * 2);
 
 
 
@@ -578,7 +631,7 @@ void ofApp::drawWithNormals(const ofPolyline& polyline) {
 		if (repeatNext) {
 			ofSetColor(255, 0, 255);
 		}
-		glPushMatrix();
+		ofPushMatrix();
 		glTranslatef(cur.x, cur.y, 0);
 		ofRotate(angle);
 		ofDrawLine(0, 0, 0, distance);
