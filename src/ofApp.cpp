@@ -22,7 +22,7 @@ void ofApp::setup(){
 	camProxySize = 0.25;
 	cam.initGrabber(camW, camH);
 
-	threshold = 35;
+	threshold = 90;
 	cvImgColor.allocate(camW, camH);
 	cvImgGrayscale.allocate(camW, camH);
 	
@@ -85,22 +85,14 @@ void ofApp::update(){
 		// contours
 		cvImgColor.setFromPixels(cam.getPixels().getData(), camW, camH);
 		cvImgGrayscale.setFromColorImage(cvImgColor);
-		if (ofGetKeyPressed('b'))
-		{
-			cvImgGrayscale.blur(5);
-		}
+		cvImgGrayscale.blur(11);
+
 		cvImgGrayscale.threshold(threshold, true);
 		//cvImgGrayscale.adaptiveThreshold(64, threshold, 0);
-		if (ofGetKeyPressed('a'))
-		{
-			cvImgGrayscale.dilate();
-			cvImgGrayscale.erode();
-		}
-		if (ofGetKeyPressed('s'))
-		{
-			cvImgGrayscale.dilate_3x3();
-			cvImgGrayscale.erode_3x3();
-		}
+		cvImgGrayscale.dilate();
+		cvImgGrayscale.erode();
+
+
 		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 2, false, true);
 
 
@@ -268,7 +260,7 @@ void ofApp::draw(){
 	}
 	
 	ofPopMatrix();
-	//personCanvas.draw(0,camH);
+	personCanvas.draw(0,camH);
 
 
 	// draw CV image
