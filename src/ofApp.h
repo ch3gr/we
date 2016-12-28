@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 using namespace cv;
@@ -33,7 +34,7 @@ class ofApp : public ofBaseApp{
 		void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 
-
+		
 
 		int 				camW;
 		int 				camH;

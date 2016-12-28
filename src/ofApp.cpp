@@ -1,6 +1,9 @@
 #include "ofApp.h"
 
 
+
+
+
 using namespace ofxCv;
 using namespace cv;
 
@@ -306,6 +309,8 @@ void ofApp::draw(){
 	ofPopMatrix();
 	
 
+
+//	person someone = person();
 
 
 
