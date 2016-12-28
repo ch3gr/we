@@ -53,6 +53,9 @@ void ofApp::setup(){
 	img2.loadImage("testFace2.jpg");
 	img1.resize(camW, camH);
 	img2.resize(camW, camH);
+
+
+	//person someone = person();
 }
 
 
@@ -310,10 +313,13 @@ void ofApp::draw(){
 	
 
 
-//	person someone = person();
+	person someone = person();
+	someone.draw();
 
-
-
+/*
+	for (int p = 0; p < we.size(); ++p) {
+		we[p].draw();
+	}*/
 
 
 	//	Framerate
@@ -408,6 +414,9 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
+
+	/*person someoneNew = person(mouseX, mouseY);
+	we.push_back(someoneNew);*/
 
 }
 

@@ -3,8 +3,13 @@
 
 
 person::person() {
-	x = 10;
-	y = 10;
+	x = 100;
+	y = 100;
+}
+
+person::person(int _x, int _y) {
+	x = _x;
+	y = _y;
 }
 
 

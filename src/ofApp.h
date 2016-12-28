@@ -1,14 +1,16 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include "person.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+
 using namespace cv;
 
 class ofApp : public ofBaseApp{
 
 	public:
+
 		void setup();
 		void update();
 		void draw();
@@ -48,11 +50,11 @@ class ofApp : public ofBaseApp{
 
 
 		//	face detection and recognition
-		vector<cv::Rect> objects;
+		vector<Rect> objects;
 		CascadeClassifier classifier;
 		Ptr<FaceRecognizer> model;
 
-		vector<cv::Mat> images, faces;
+		vector<Mat> images, faces;
 		vector<ofImage> ofFaces;
 		vector<int> labels;
 		
@@ -82,4 +84,9 @@ class ofApp : public ofBaseApp{
 		ofShader shader;
 		ofImage img1;
 		ofImage img2;
+
+		// why this doesn't work?
+		//vector<person> we;
+//		person bob;
+		
 };
