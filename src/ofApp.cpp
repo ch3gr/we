@@ -15,6 +15,17 @@ using namespace cv;
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::setup(){
+	#ifdef TARGET_OPENGLES
+		shader.load("shadersES2/shader");
+	#else
+		if (ofIsGLProgrammableRenderer()) {
+			shader.load("shadersGL3/shader");
+		}
+		else {
+			shader.load("shadersGL2/shader");
+		}
+	#endif
+
 
 	camW = 640;
 	camH = 480;
@@ -34,6 +45,11 @@ void ofApp::setup(){
 
 	personCanvas.allocate(camW, camH, GL_RGBA);
 	img1.allocate(camW, camH, OF_IMAGE_COLOR);
+
+	img1.loadImage("testFace1.jpg");
+	img2.loadImage("testFace2.jpg");
+	img1.resize(camW, camH);
+	img2.resize(camW, camH);
 }
 
 
@@ -151,8 +167,8 @@ void ofApp::update(){
 
 		ofSetColor(ofColor::black);
 		for (unsigned int i = 0; i < paths.size(); i++) {
-			paths[i].setColor(ofColor(0, 100, 0, 255));
-			paths[i].setFillColor(ofColor(0, 0, 100, 255));
+			//paths[i].setColor(ofColor(0, 100, 0, 255));
+			paths[i].setFillColor(ofColor(255));
 			paths[i].draw();
 		}
 		
@@ -260,15 +276,38 @@ void ofApp::draw(){
 	}
 	
 	ofPopMatrix();
-	personCanvas.draw(0,camH);
 
-
+	//personCanvas.draw(0,camH);
 	// draw CV image
-	ofPushMatrix();
+	//ofPushMatrix();
 	//ofTranslate(camW, camH);
-	cvImgColor.draw(camW, camH);
+	//cvImgColor.draw(camW, camH);
 	//cvImgColor2.draw(0, camH);
 	//img1.draw(0, camW * 2);
+
+
+	
+
+
+	ofSetColor(255);
+	ofFill();
+	ofPushMatrix();
+	ofScale(2,2);
+	shader.begin();
+	// use as a tex0 the same image you are drawing below
+	shader.setUniformTexture("tex0", personCanvas.getTexture(), 0);
+	shader.setUniformTexture("tex1", cam.getTexture(), 1);
+	shader.setUniformTexture("tex2", img2.getTexture(), 2);
+	
+	personCanvas.draw(0, 0);
+	
+	
+	shader.end();
+	ofPopMatrix();
+	
+
+
+
 
 
 
@@ -276,6 +315,7 @@ void ofApp::draw(){
 	std::stringstream strm;
 	strm << "fps: " << ofGetFrameRate();
 	ofSetWindowTitle(strm.str());
+
 }
 
 

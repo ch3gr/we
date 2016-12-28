@@ -75,8 +75,10 @@ class ofApp : public ofBaseApp{
 		int threshold;
 		int smooth;
 
-		ofImage img1;
+		
 		
 
-
+		ofShader shader;
+		ofImage img1;
+		ofImage img2;
 };
