@@ -4,9 +4,14 @@
 
 class person
 {
+
+	int x;
+	int y;
+
 public:
 	person();
+	person(int _x, int _y);
 
-	void person::draw(int x, int y);
+	void person::draw();
 };
 

@@ -86,7 +86,6 @@ public:
 	ofImage img2;
 
 	// why this doesn't work?
-	//vector<person> we;
-	person bob;
+	vector<person> we;
 
 };

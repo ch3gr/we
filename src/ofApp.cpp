@@ -313,13 +313,10 @@ void ofApp::draw() {
 
 
 
-	person someone = person();
-	someone.draw(10,100);
-
-	/*
+	
 	for (int p = 0; p < we.size(); ++p) {
-	we[p].draw();
-	}*/
+		we[p].draw();
+	}
 
 
 	//	Framerate
@@ -415,8 +412,8 @@ void ofApp::mouseDragged(int x, int y, int button) {
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
 
-	/*person someoneNew = person(mouseX, mouseY);
-	we.push_back(someoneNew);*/
+	person someoneNew = person(mouseX, mouseY);
+	we.push_back(someoneNew);
 
 }
 
