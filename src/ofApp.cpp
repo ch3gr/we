@@ -17,17 +17,17 @@ using namespace cv;
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-void ofApp::setup(){
-	#ifdef TARGET_OPENGLES
-		shader.load("shadersES2/shader");
-	#else
-		if (ofIsGLProgrammableRenderer()) {
-			shader.load("shadersGL3/shader");
-		}
-		else {
-			shader.load("shadersGL2/shader");
-		}
-	#endif
+void ofApp::setup() {
+#ifdef TARGET_OPENGLES
+	shader.load("shadersES2/shader");
+#else
+	if (ofIsGLProgrammableRenderer()) {
+		shader.load("shadersGL3/shader");
+	}
+	else {
+		shader.load("shadersGL2/shader");
+	}
+#endif
 
 
 	camW = 640;
@@ -39,7 +39,7 @@ void ofApp::setup(){
 	threshold = 90;
 	cvImgColor.allocate(camW, camH);
 	cvImgGrayscale.allocate(camW, camH);
-	
+
 	smooth = 2;
 
 	//faceDetectSetup();
@@ -76,27 +76,27 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update() {
 
-	
+
 	cam.update();
 	if (cam.isFrameNew()) {
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
 		frame = cam.getPixels();
-		
+
 		/*
 		if (mousePic < ofFaces.size())
-			mouseFace = ofFaces[mousePic];
+		mouseFace = ofFaces[mousePic];
 		else
-			mouseFace = unknownFace;
+		mouseFace = unknownFace;
 
 		mouseFace.resize(200, 200);
 		mouseFace.getPixels().pasteInto(frame.getPixelsRef(), ofGetAppPtr()->mouseX, ofGetAppPtr()->mouseY);
 		frame.update();
 		*/
 
-		
+
 		//frameCompute.clone(frame);
 		//frameCompute.resize(camW*camProxySize, camH*camProxySize);
 
@@ -120,7 +120,7 @@ void ofApp::update(){
 
 
 
-		
+
 
 
 
@@ -138,7 +138,7 @@ void ofApp::update(){
 			cur.addVertices(contourFinder.blobs[i].pts);
 			cur.setClosed(true);
 			cur = cur.getSmoothed(smooth);
-			
+
 			// add the cur polyline to all these vector<ofPolyline>
 			polylines.push_back(cur);
 			//smoothed.push_back(cur.getSmoothed(8));
@@ -177,32 +177,32 @@ void ofApp::update(){
 			paths[i].setFillColor(ofColor(255));
 			paths[i].draw();
 		}
-		
+
 		//ofSetColor(ofColor::red);
 		//ofFill();
 		//for (unsigned int i = 0; i < polylines.size(); i++) {
 		//	polylines[i].draw();
 		//}
-		
-		
+
+
 		personCanvas.end();
-		
-		
-
-//		super slow
-//		ofPixels personCanvasPxl;
-//		personCanvas.readToPixels(personCanvasPxl,0);
-//		for (int p = 0; p < personCanvasPxl.size(); ++p) {
-//			ofColor pixel = personCanvasPxl.getColor(p);
-////			pixel.invert();
-////			personCanvasPxl.setColor(p, pixel);
-//		}
 
 
-		
+
+		//		super slow
+		//		ofPixels personCanvasPxl;
+		//		personCanvas.readToPixels(personCanvasPxl,0);
+		//		for (int p = 0; p < personCanvasPxl.size(); ++p) {
+		//			ofColor pixel = personCanvasPxl.getColor(p);
+		////			pixel.invert();
+		////			personCanvasPxl.setColor(p, pixel);
+		//		}
+
+
+
 		//ofImage bridge;
 		//personCanvas.readToPixels(bridge.getPixelsRef());
-		
+
 		//personCanvas.readToPixels(img1.getPixelsRef());
 		//cvImgColor2.setFromPixels( bridge.getPixels() );
 		//cvImgColor2.setFromPixels(cam.getPixels());
@@ -210,12 +210,12 @@ void ofApp::update(){
 		//cvImgTmp.setFromPixels(cvImgColor.getPixels());
 		//cvImgTmp.setFromPixels( personCanvas.)
 		//cvImgColor *= cvImgColor2;
-		
+
 	}
-	
 
 
-	
+
+
 }
 
 
@@ -232,7 +232,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-void ofApp::draw(){
+void ofApp::draw() {
 	//ofClear(150, 150, 150, 0);
 	ofSetColor(ofColor::white);
 	ofSetLineWidth(3);
@@ -250,8 +250,8 @@ void ofApp::draw(){
 
 
 	//faceDetectDraw();
-	
-	
+
+
 	//personCanvas.draw(camW + 150, 0);
 
 
@@ -261,7 +261,7 @@ void ofApp::draw(){
 	ofTranslate(camW, 0);
 	ofSetColor(ofColor::darkGreen);
 	cvImgGrayscale.draw(0, 0);
-//	contourFinder.draw();
+	//	contourFinder.draw();
 
 	for (unsigned int i = 0; i < polylines.size(); i++) {
 		ofNoFill();
@@ -280,7 +280,7 @@ void ofApp::draw(){
 		ofDrawRectangle(boundingBoxes[i]);*/
 
 	}
-	
+
 	ofPopMatrix();
 
 	//personCanvas.draw(0,camH);
@@ -292,33 +292,33 @@ void ofApp::draw(){
 	//img1.draw(0, camW * 2);
 
 
-	
+
 
 
 	ofSetColor(255);
 	ofFill();
 	ofPushMatrix();
-	ofScale(2,2);
+	ofScale(2, 2);
 	shader.begin();
 	// use as a tex0 the same image you are drawing below
 	shader.setUniformTexture("tex0", personCanvas.getTexture(), 0);
 	shader.setUniformTexture("tex1", cam.getTexture(), 1);
 	shader.setUniformTexture("tex2", img2.getTexture(), 2);
-	
+
 	personCanvas.draw(0, 0);
-	
-	
+
+
 	shader.end();
 	ofPopMatrix();
-	
+
 
 
 	person someone = person();
-	someone.draw();
+	someone.draw(10,100);
 
-/*
+	/*
 	for (int p = 0; p < we.size(); ++p) {
-		we[p].draw();
+	we[p].draw();
 	}*/
 
 
@@ -343,17 +343,17 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::keyPressed(int key) {
 
 	if (key == 'd') {
-//		cout << model->getAlgorithm() << endl;
+		//		cout << model->getAlgorithm() << endl;
 	}
 
 	if (key == '+') {
 		mousePic++;
 		// include the unknown face
 		if (mousePic > ofFaces.size())
-			mousePic = ofFaces.size()-0;
+			mousePic = ofFaces.size() - 0;
 	}
 	if (key == '-') {
 		mousePic--;
@@ -369,7 +369,7 @@ void ofApp::keyPressed(int key){
 	}
 	if (key == '[') {
 		double thress = model->getDouble("threshold");
-		if( thress >= 250 )
+		if (thress >= 250)
 			thress -= 250;
 		model->set("threshold", thress);
 		cout << "Model thress: " << thress << endl;
@@ -398,22 +398,22 @@ void ofApp::keyPressed(int key){
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
+void ofApp::keyReleased(int key) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
+void ofApp::mouseMoved(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+void ofApp::mousePressed(int x, int y, int button) {
 
 	/*person someoneNew = person(mouseX, mouseY);
 	we.push_back(someoneNew);*/
@@ -421,32 +421,32 @@ void ofApp::mousePressed(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
+void ofApp::mouseReleased(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
+void ofApp::mouseEntered(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMessage(ofMessage msg) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }
 

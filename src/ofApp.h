@@ -7,86 +7,86 @@
 
 using namespace cv;
 
-class ofApp : public ofBaseApp{
+class ofApp : public ofBaseApp {
 
-	public:
+public:
 
-		void setup();
-		void update();
-		void draw();
+	void setup();
+	void update();
+	void draw();
 
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void mouseEntered(int x, int y);
-		void mouseExited(int x, int y);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
-
-
-
-		void ofApp::faceDetectSetup();
-		void ofApp::faceDetectUpdate();
-		void ofApp::faceDetectDraw();
-
-		void ofApp::drawWithNormals(const ofPolyline& polyline);
-
-
-		
-
-		int 				camW;
-		int 				camH;
-		float				camProxySize;
-		ofVideoGrabber		cam;
-		ofImage frame;						// cam + comps
-		ofImage frameCompute;				// reduced frame for computation
-
-		ofFbo personCanvas;					// extracted face
+	void keyPressed(int key);
+	void keyReleased(int key);
+	void mouseMoved(int x, int y);
+	void mouseDragged(int x, int y, int button);
+	void mousePressed(int x, int y, int button);
+	void mouseReleased(int x, int y, int button);
+	void mouseEntered(int x, int y);
+	void mouseExited(int x, int y);
+	void windowResized(int w, int h);
+	void dragEvent(ofDragInfo dragInfo);
+	void gotMessage(ofMessage msg);
 
 
 
-		//	face detection and recognition
-		vector<Rect> objects;
-		CascadeClassifier classifier;
-		Ptr<FaceRecognizer> model;
+	void ofApp::faceDetectSetup();
+	void ofApp::faceDetectUpdate();
+	void ofApp::faceDetectDraw();
 
-		vector<Mat> images, faces;
-		vector<ofImage> ofFaces;
-		vector<int> labels;
-		
-		ofImage mouseFace;
-		ofImage unknownFace;
-
-		int match[10];
-		double confidence[10];
-
-		int mousePic;
+	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 
 
-		// Contour detection
-		ofxCvColorImage cvImgColor, cvImgColor2;
-		ofxCvGrayscaleImage cvImgGrayscale;
-		ofxCvContourFinder contourFinder;
-		vector<ofPolyline> polylines, smoothed, resampled;
-		vector<ofPath> paths;
-		vector<ofRectangle> boundingBoxes;
-		int threshold;
-		int smooth;
 
-		
-		
+	int 				camW;
+	int 				camH;
+	float				camProxySize;
+	ofVideoGrabber		cam;
+	ofImage frame;						// cam + comps
+	ofImage frameCompute;				// reduced frame for computation
 
-		ofShader shader;
-		ofImage img1;
-		ofImage img2;
+	ofFbo personCanvas;					// extracted face
 
-		// why this doesn't work?
-		//vector<person> we;
-//		person bob;
-		
+
+
+										//	face detection and recognition
+	vector<Rect> objects;
+	CascadeClassifier classifier;
+	Ptr<FaceRecognizer> model;
+
+	vector<Mat> images, faces;
+	vector<ofImage> ofFaces;
+	vector<int> labels;
+
+	ofImage mouseFace;
+	ofImage unknownFace;
+
+	int match[10];
+	double confidence[10];
+
+	int mousePic;
+
+
+
+	// Contour detection
+	ofxCvColorImage cvImgColor, cvImgColor2;
+	ofxCvGrayscaleImage cvImgGrayscale;
+	ofxCvContourFinder contourFinder;
+	vector<ofPolyline> polylines, smoothed, resampled;
+	vector<ofPath> paths;
+	vector<ofRectangle> boundingBoxes;
+	int threshold;
+	int smooth;
+
+
+
+
+	ofShader shader;
+	ofImage img1;
+	ofImage img2;
+
+	// why this doesn't work?
+	//vector<person> we;
+	person bob;
+
 };

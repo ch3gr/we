@@ -3,21 +3,9 @@
 
 
 person::person() {
-	x = 100;
-	y = 100;
-}
-
-person::person(int _x, int _y) {
-	x = _x;
-	y = _y;
 }
 
 
-void person::draw() {
-
+void person::draw(int x, int y) {
 	ofDrawBitmapString("I am a person", x, y);
-
-}
-
-person::~person() {
 }

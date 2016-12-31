@@ -1,20 +1,12 @@
 #pragma once
-#include "ofApp.h"
-
+#include "ofMain.h"
 
 
 class person
 {
-
-	int x;
-	int y;
-	ofImage a;
-
 public:
 	person();
-	person(int _x, int _y);
-	~person();
 
-	void person::draw();
+	void person::draw(int x, int y);
 };
 
