@@ -19,16 +19,20 @@ using namespace cv;
 //--------------------------------------------------------------
 void ofApp::setup() {
 #ifdef TARGET_OPENGLES
-	shader.load("shadersES2/shader");
+	shdPrep.load("shadersES2/prep");
+	shdComp.load("shadersES2/comp");
 #else
 	if (ofIsGLProgrammableRenderer()) {
-		shader.load("shadersGL3/shader");
+		shdPrep.load("shadersGL3/prep");
+		shdComp.load("shadersGL3/comp");
 	}
 	else {
-		shader.load("shadersGL2/shader");
+		shdPrep.load("shadersGL2/prep");
+		shdComp.load("shadersGL2/comp");
 	}
 #endif
 
+	shdPrepThress = 0.1;
 
 	camW = 640;
 	camH = 480;
@@ -37,6 +41,9 @@ void ofApp::setup() {
 	cam.initGrabber(camW, camH);
 
 	threshold = 90;
+
+	
+
 	cvImgColor.allocate(camW, camH);
 	cvImgGrayscale.allocate(camW, camH);
 
@@ -45,8 +52,12 @@ void ofApp::setup() {
 	//faceDetectSetup();
 
 
-
+	faceMask.allocate(camW, camH, GL_RGBA);
 	contourMask.allocate(camW, camH, GL_RGBA);
+	prep.allocate(camW, camH, GL_RGBA);
+	comp.allocate(camW, camH, GL_RGBA);
+
+
 	img1.allocate(camW, camH, OF_IMAGE_COLOR);
 
 	img1.loadImage("testFace1.jpg");
@@ -82,6 +93,65 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
+
+		if( !background.isAllocated() )
+			background.setFromPixels(cam.getPixels());
+
+
+
+		// Temp Draw face mask - will be replace with faceTracker
+
+		faceMask.begin();
+		ofClear(0);
+		ofSetColor(ofColor::white);
+		ofDrawCircle(mouseX, mouseY, 70);
+		faceMask.end();
+
+
+
+		// Prep Render
+		
+		prep.begin();
+		shdPrep.begin();
+		// use as a tex0 the same image you are drawing below
+		shdPrep.setUniformTexture("tex0", cam.getTexture(), 0);
+		if( background.isAllocated())
+			shdPrep.setUniformTexture("tex1", background.getTexture(), 1);
+		shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
+
+		shdPrep.setUniform1f("thress", shdPrepThress);
+
+		cam.draw(0, 0);
+		shdPrep.end();
+		prep.end();
+
+
+
+		// contours
+		// Pass Preped buffer to cvImage and detect contours
+		
+		ofPixels prepedPixels;
+		prep.readToPixels(prepedPixels, 0);
+		cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
+
+		/*cvImgGrayscale.blur(11);
+		cvImgGrayscale.threshold(threshold, true);
+		*/
+		cvImgGrayscale.dilate();
+		cvImgGrayscale.erode();
+
+
+		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
+
+
+
+
+
+
+
+
+
+
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
 		frame = cam.getPixels();
 
@@ -104,18 +174,7 @@ void ofApp::update() {
 
 
 
-		// contours
-		cvImgColor.setFromPixels(cam.getPixels().getData(), camW, camH);
-		cvImgGrayscale.setFromColorImage(cvImgColor);
-		cvImgGrayscale.blur(11);
 
-		cvImgGrayscale.threshold(threshold, true);
-		//cvImgGrayscale.adaptiveThreshold(64, threshold, 0);
-		cvImgGrayscale.dilate();
-		cvImgGrayscale.erode();
-
-
-		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
 
 
 
@@ -161,7 +220,7 @@ void ofApp::update() {
 
 
 
-		// update personCanvas
+		// update countourMask
 
 		contourMask.begin();
 		ofClear(0);
@@ -228,6 +287,10 @@ void ofApp::update() {
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::draw() {
+
+
+
+
 	//ofClear(150, 150, 150, 0);
 	ofSetColor(ofColor::white);
 	ofSetLineWidth(3);
@@ -250,10 +313,26 @@ void ofApp::draw() {
 	//personCanvas.draw(camW + 150, 0);
 
 
+	//// preped image for controur detection
+	//if (prepedPixels.isAllocated())
+	//{
+	//	ofPushMatrix();
+	//	ofTranslate(0, camH);
+	//	//cvImgColor.draw(0, 0);
+	//	ofImage prepedImg;
+	//	prepedImg.setFromPixels(prepedPixels);
+	//	prepedImg.draw(0, 0);
 
-	// move to the right
+	//	ofDrawBitmapString("Preped Image for controur detection", 0, 30);
+	//	ofPopMatrix();
+	//}
+
+
+
+
+	// contours with green mask
 	ofPushMatrix();
-	ofTranslate(camW, 0);
+	ofTranslate(camW, camH);
 	ofSetColor(ofColor::darkGreen);
 	cvImgGrayscale.draw(0, 0);
 	//	contourFinder.draw();
@@ -290,10 +369,18 @@ void ofApp::draw() {
 
 
 
+	// faceMask
+	ofPushMatrix();
+	ofTranslate(0, 0);
+	faceMask.draw(0, 0);
+	ofDrawBitmapString("faceMask", 0, 60);
+	ofPopMatrix();
+
+
 	// background
 	if (background.isAllocated()) {
 		ofPushMatrix();
-		ofTranslate(0, camH);
+		ofTranslate(camW, 0);
 		background.draw(0, 0);
 		ofDrawBitmapString("Background", 0, 30 );
 		ofPopMatrix();
@@ -302,30 +389,35 @@ void ofApp::draw() {
 
 
 
+	// prep
+	if (prep.isAllocated())
+	{
+		ofPushMatrix();
+		ofTranslate(camW * 2, 0);
+		prep.draw(0, 0);
+		ofDrawBitmapString("prep", 0, 30);
+		ofPopMatrix();
+	}
+	
+
+	
 	// Composite
 	ofSetColor(255);
 	ofFill();
 	ofPushMatrix();
-	
-	ofTranslate(camW*2, 0);
-	shader.begin();
+
+	ofTranslate(camW * 2, camH);
+	shdComp.begin();
 	// use as a tex0 the same image you are drawing below
-	shader.setUniformTexture("tex0", contourMask.getTexture(), 0);
-	shader.setUniformTexture("tex1", cam.getTexture(), 1);
-	shader.setUniformTexture("tex2", img2.getTexture(), 2);
+	shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
+	shdComp.setUniformTexture("tex1", cam.getTexture(), 1);
+	shdComp.setUniformTexture("tex2", img2.getTexture(), 2);
 
 	contourMask.draw(0, 0);
-	shader.end();
+	shdComp.end();
 
 	ofDrawBitmapString("Comp", 0, 30);
 	ofPopMatrix();
-
-
-
-	
-
-
-
 
 
 
@@ -339,6 +431,22 @@ void ofApp::draw() {
 	ofSetWindowTitle(strm.str());
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -385,6 +493,18 @@ void ofApp::keyPressed(int key) {
 		model->set("threshold", thress);
 		cout << "Model thress: " << thress << endl;
 	}
+
+	//		shdPrepThress
+	if (key == ','){
+		shdPrepThress = ofClamp(shdPrepThress -0.01, 0, 1);
+		cout << "shdPrepThress : " << shdPrepThress << endl;
+	}
+	if (key == '.') {
+		shdPrepThress = ofClamp(shdPrepThress + 0.01, 0, 1);
+		cout << "shdPrepThress : " << shdPrepThress << endl;
+	}
+
+
 
 	if (key == 'w')
 	{

@@ -48,6 +48,17 @@ public:
 	ofImage background;
 	ofFbo faceMask;						// face mask from faceTrack
 	ofFbo contourMask;					// calculated contours
+	
+	ofFbo prep;							// buffer for image before contour detection
+	ofFbo comp;							// buffer for final person layer
+
+
+	ofShader shdPrep, shdComp;
+	ofImage img1;
+	ofImage img2;
+
+	float shdPrepThress;
+
 
 
 
@@ -85,9 +96,7 @@ public:
 
 
 
-	ofShader shader;
-	ofImage img1;
-	ofImage img2;
+	
 
 	// why this doesn't work?
 	vector<person> we;
