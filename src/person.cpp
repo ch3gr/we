@@ -12,6 +12,11 @@ person::person(int _x, int _y) {
 	y = _y;
 }
 
+
+void person::snap() {
+
+}
+
 void person::draw() {
 	ofDrawBitmapString("I am a person", x, y);
 }

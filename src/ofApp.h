@@ -45,7 +45,9 @@ public:
 	ofImage frame;						// cam + comps
 	ofImage frameCompute;				// reduced frame for computation
 
-	ofFbo personCanvas;					// extracted face
+	ofImage background;
+	ofFbo faceMask;						// face mask from faceTrack
+	ofFbo contourMask;					// calculated contours
 
 
 
@@ -67,6 +69,8 @@ public:
 	int mousePic;
 
 
+
+	
 
 	// Contour detection
 	ofxCvColorImage cvImgColor, cvImgColor2;

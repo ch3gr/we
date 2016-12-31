@@ -46,7 +46,7 @@ void ofApp::setup() {
 
 
 
-	personCanvas.allocate(camW, camH, GL_RGBA);
+	contourMask.allocate(camW, camH, GL_RGBA);
 	img1.allocate(camW, camH, OF_IMAGE_COLOR);
 
 	img1.loadImage("testFace1.jpg");
@@ -115,12 +115,7 @@ void ofApp::update() {
 		cvImgGrayscale.erode();
 
 
-		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 2, false, true);
-
-
-
-
-
+		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
 
 
 
@@ -168,7 +163,7 @@ void ofApp::update() {
 
 		// update personCanvas
 
-		personCanvas.begin();
+		contourMask.begin();
 		ofClear(0);
 
 		ofSetColor(ofColor::black);
@@ -185,7 +180,7 @@ void ofApp::update() {
 		//}
 
 
-		personCanvas.end();
+		contourMask.end();
 
 
 
@@ -239,7 +234,7 @@ void ofApp::draw() {
 	if (frame.isAllocated())
 	{
 		frame.draw(0, 0);
-		ofDrawBitmapString("Frame comped", 0, 10);
+		ofDrawBitmapString("Camera", 0, 10);
 	}
 
 	if (frameCompute.isAllocated())
@@ -281,6 +276,7 @@ void ofApp::draw() {
 
 	}
 
+	ofDrawBitmapString("Contours", 0, 30);
 	ofPopMatrix();
 
 	//personCanvas.draw(0,camH);
@@ -294,31 +290,49 @@ void ofApp::draw() {
 
 
 
+	// background
+	if (background.isAllocated()) {
+		ofPushMatrix();
+		ofTranslate(0, camH);
+		background.draw(0, 0);
+		ofDrawBitmapString("Background", 0, 30 );
+		ofPopMatrix();
+	}
 
+
+
+
+	// Composite
 	ofSetColor(255);
 	ofFill();
 	ofPushMatrix();
-	ofScale(2, 2);
+	
+	ofTranslate(camW*2, 0);
 	shader.begin();
 	// use as a tex0 the same image you are drawing below
-	shader.setUniformTexture("tex0", personCanvas.getTexture(), 0);
+	shader.setUniformTexture("tex0", contourMask.getTexture(), 0);
 	shader.setUniformTexture("tex1", cam.getTexture(), 1);
 	shader.setUniformTexture("tex2", img2.getTexture(), 2);
 
-	personCanvas.draw(0, 0);
-
-
+	contourMask.draw(0, 0);
 	shader.end();
+
+	ofDrawBitmapString("Comp", 0, 30);
 	ofPopMatrix();
 
 
 
 	
+
+
+
+
+
+
+
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
 	}
-
-
 	//	Framerate
 	std::stringstream strm;
 	strm << "fps: " << ofGetFrameRate();
@@ -391,6 +405,11 @@ void ofApp::keyPressed(int key) {
 	{
 		smooth = ofClamp(smooth - 1, 0, 50);
 		cout << "Smooth : " << smooth << endl;
+	}
+
+	if (key == 'b')
+	{
+		background.setFromPixels(cam.getPixels());
 	}
 }
 
@@ -603,11 +622,11 @@ void ofApp::faceDetectUpdate() {
 			crop.setFromCenter(crop.getCenter(), 200, 250);
 			face.crop(crop.x, crop.y, crop.width, crop.height);
 
-			personCanvas.begin();
+			contourMask.begin();
 			ofClear(200, 255, 255, 255);
 			//face.draw(face.getWidth()/2, face.getHeight()/2);
 			face.draw(0, 0);
-			personCanvas.end();
+			contourMask.end();
 		}
 	}
 }
