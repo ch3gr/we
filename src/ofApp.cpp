@@ -54,9 +54,12 @@ void ofApp::setup() {
 
 
 	faceMask.allocate(camW, camH, GL_RGBA);
+	faceDetectMask.allocate(camW, camH, GL_RGBA);
 	contourMask.allocate(camW, camH, GL_RGBA);
 	prep.allocate(camW, camH, GL_RGBA);
 	comp.allocate(camW, camH, GL_RGBA);
+	debugView.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	debugMode = true;
 
 
 	img1.allocate(camW, camH, OF_IMAGE_COLOR);
@@ -95,7 +98,7 @@ void ofApp::update() {
 	if (cam.isFrameNew()) {
 
 
-		if( !background.isAllocated() )
+		if (!background.isAllocated())
 			background.setFromPixels(cam.getPixels());
 
 
@@ -110,14 +113,43 @@ void ofApp::update() {
 
 
 
+
+
+		//////////////////////
+		// Face detection
+		Mat color = ofxCv::toCv(cam.getPixels());
+		Mat grey;
+		cvtColor(color, grey, CV_RGB2GRAY);
+
+		classifier.detectMultiScale(grey, objects, 1.16, 1, 0);
+
+		// Draw squares for each face tracked
+		faceDetectMask.begin();
+		for (int i = 0; i < objects.size(); ++i) {
+			ofRectangle faceRect = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height);
+			// adjust found area to original resolution
+			faceRect.x /= camProxySize;
+			faceRect.y /= camProxySize;
+			faceRect.scale(1 / camProxySize);
+			// adjust
+			//crop.translateY(-50);
+			faceRect.setFromCenter(faceRect.getCenter(), 200, 250);
+			ofDrawRectangle(faceRect.x, faceRect.y, faceRect.width, faceRect.height);
+		}
+		faceDetectMask.end();
+
+
+
+
+
 		//////////////////////
 		// Prep Render
-		
+
 		prep.begin();
 		shdPrep.begin();
 		// use as a tex0 the same image you are drawing below
 		shdPrep.setUniformTexture("tex0", cam.getTexture(), 0);
-		if( background.isAllocated())
+		if (background.isAllocated())
 			shdPrep.setUniformTexture("tex1", background.getTexture(), 1);
 		shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
 
@@ -132,7 +164,7 @@ void ofApp::update() {
 		//////////////////////
 		// prep contours
 		// Pass Preped buffer to cvImage and detect contours
-		
+
 		ofPixels prepedPixels;
 		prep.readToPixels(prepedPixels, 0);
 		cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
@@ -145,7 +177,7 @@ void ofApp::update() {
 		// calc contours
 		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
 
-		
+
 		// populate arrays of contours
 		controurSurfaces.clear();
 		for (unsigned int i = 0; i < contourFinder.blobs.size(); i++) {
@@ -201,8 +233,108 @@ void ofApp::update() {
 
 
 
+
+
+
+
 		//////////////////////
 		//////////////////////
+		// Draw all info on the debugView buffer
+
+		if( debugMode )
+		{
+			debugView.begin();
+
+			ofClear(0);
+			ofSetColor(ofColor::white);
+			ofSetLineWidth(3);
+
+			cam.draw(0, 0);
+			ofDrawBitmapString("Camera", 0, 10);
+
+
+			//if (frameCompute.isAllocated())
+			//{
+			//	frameCompute.draw(0, camH );
+			//	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight() + 10);
+			//}
+
+
+			//faceDetectDraw();
+
+			
+			// contours with green mask
+			ofPushMatrix();
+			ofTranslate(camW, camH);
+			ofSetColor(ofColor::darkGreen);
+			cvImgGrayscale.draw(0, 0);
+			//	contourFinder.draw();
+
+
+			ofSetColor(ofColor::red);
+			for (int i = 0; i < controurSurfaces.size(); i++) {
+				vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
+				for (int i = 0; i < outlines.size(); i++)
+					outlines[i].draw();
+			}
+			ofSetColor(ofColor::white);
+			ofDrawBitmapString("Contours", 0, 30);
+			ofPopMatrix();
+
+
+
+
+
+			// faceMask
+			ofPushMatrix();
+			ofTranslate(0, 0);
+			faceMask.draw(0, 0);
+			ofDrawBitmapString("faceMask", 0, 60);
+			ofPopMatrix();
+
+
+			// background
+			if (background.isAllocated()) {
+				ofPushMatrix();
+				ofTranslate(camW, 0);
+				background.draw(0, 0);
+				ofDrawBitmapString("Background", 0, 30);
+				ofPopMatrix();
+			}
+
+			// faceDetectMask
+			if (faceDetectMask.isAllocated()) {
+				ofPushMatrix();
+				ofTranslate(0, camH);
+				faceDetectMask.draw(0,0);
+				ofDrawBitmapString("faces detected mask", 0, 30);
+				ofPopMatrix();
+			}
+			
+
+
+			// prep
+			if (prep.isAllocated())
+			{
+				ofPushMatrix();
+				ofTranslate(camW * 2, 0);
+				prep.draw(0, 0);
+				ofDrawBitmapString("prep", 0, 30);
+				ofPopMatrix();
+			}
+
+
+
+			// Comp
+			ofPushMatrix();
+			ofTranslate(camW * 2, camH);
+			comp.draw(0, 0);
+			ofDrawBitmapString("Comp", 0, 30);
+			ofPopMatrix();
+
+			debugView.end();
+		}
+
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
@@ -262,91 +394,37 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
+	ofClear(ofColor::grey);
 
+	if (debugMode)
+		debugView.draw(0, 0);
 
-
-	//ofClear(150, 150, 150, 0);
-	ofSetColor(ofColor::white);
-	ofSetLineWidth(3);
-
-	cam.draw(0, 0);
-	ofDrawBitmapString("Camera", 0, 10);
+	//cam.draw(0,0);
+	//ofImage cameraFrame ;
+	//cameraFrame.setFromPixels(cam.getPixels());
+	//cameraFrame.draw(400, 400);
 	
 
-	//if (frameCompute.isAllocated())
-	//{
-	//	frameCompute.draw(0, camH );
-	//	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight() + 10);
-	//}
+	//Mat colorMat = ofxCv::toCv(cameraFrame.getPixelsRef());
+	//Mat colorMat = ofxCv::toCv(cam.getPixels().getData(), camW, camH);
+	//Mat colorMat;
+	//colorMat.setFromPixels(cam.getPixels().getData(), camW, camH);
 
-
-	//faceDetectDraw();
-
-
-
-
-
-
-	// contours with green mask
-	ofPushMatrix();
-	ofTranslate(camW, camH);
-	ofSetColor(ofColor::darkGreen);
-	cvImgGrayscale.draw(0, 0);
-	//	contourFinder.draw();
-
-
-	ofSetColor(ofColor::red);
-	for (int i = 0; i < controurSurfaces.size(); i++) {
-		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
-		for (int i = 0; i < outlines.size(); i++)
-			outlines[i].draw();
-	}
-	ofSetColor(ofColor::white);
-	ofDrawBitmapString("Contours", 0, 30);
-	ofPopMatrix();
-
+	//Mat colorMat = ofxCv::toCv(cam.getPixelsRef());
+	//ofImage colorOf;
+	//toOf(colorMat, colorOf);
+	//colorOf.draw(600, 100);
 	
+	//ofImage bridge;
+	//personCanvas.readToPixels(bridge.getPixelsRef());
 
+	//personCanvas.readToPixels(img1.getPixelsRef());
+	//cvImgColor2.setFromPixels( bridge.getPixels() );
+	//cvImgColor2.setFromPixels(cam.getPixels());
 
-
-	// faceMask
-	ofPushMatrix();
-	ofTranslate(0, 0);
-	faceMask.draw(0, 0);
-	ofDrawBitmapString("faceMask", 0, 60);
-	ofPopMatrix();
-
-
-	// background
-	if (background.isAllocated()) {
-		ofPushMatrix();
-		ofTranslate(camW, 0);
-		background.draw(0, 0);
-		ofDrawBitmapString("Background", 0, 30 );
-		ofPopMatrix();
-	}
-
-
-
-
-	// prep
-	if (prep.isAllocated())
-	{
-		ofPushMatrix();
-		ofTranslate(camW * 2, 0);
-		prep.draw(0, 0);
-		ofDrawBitmapString("prep", 0, 30);
-		ofPopMatrix();
-	}
-	
-
-	
-	// Comp
-	ofPushMatrix();
-	ofTranslate(camW * 2, camH);
-	comp.draw(0, 0);
-	ofDrawBitmapString("Comp", 0, 30);
-	ofPopMatrix();
+	//cvImgTmp.setFromPixels(cvImgColor.getPixels());
+	//cvImgTmp.setFromPixels( personCanvas.)
+	//cvImgColor *= cvImgColor2;
 
 
 
@@ -354,6 +432,7 @@ void ofApp::draw() {
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
 	}
+
 	//	Framerate
 	std::stringstream strm;
 	strm << "fps: " << ofGetFrameRate();
@@ -523,7 +602,10 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 
 
-
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -532,6 +614,16 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 
 
+
+
+
+
+
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 
 
 

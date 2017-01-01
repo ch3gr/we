@@ -35,8 +35,8 @@ public:
 
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
-
-
+	bool debugMode;
+	ofFbo debugView;
 
 	int 				camW;
 	int 				camH;
@@ -49,6 +49,7 @@ public:
 	ofFbo faceMask;						// face mask from faceTrack
 	ofFbo contourMask;					// calculated contours
 	
+	ofFbo faceDetectMask;				// buffer for face detection square masks
 	ofFbo prep;							// buffer for image before contour detection
 	ofFbo comp;							// buffer for final person layer
 
@@ -59,6 +60,14 @@ public:
 
 	float shdPrepThress;
 
+	// Contour detection
+	ofxCvColorImage cvImgColor, cvImgColor2;
+	ofxCvGrayscaleImage cvImgGrayscale;
+	ofxCvContourFinder contourFinder;
+	vector<ofPath> controurSurfaces;
+
+	int threshold;
+	int smooth;
 
 
 
@@ -83,14 +92,7 @@ public:
 
 	
 
-	// Contour detection
-	ofxCvColorImage cvImgColor, cvImgColor2;
-	ofxCvGrayscaleImage cvImgGrayscale;
-	ofxCvContourFinder contourFinder;
-	vector<ofPath> controurSurfaces;
-	
-	int threshold;
-	int smooth;
+
 
 
 
