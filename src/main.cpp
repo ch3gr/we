@@ -21,6 +21,11 @@ int main( ){
 
 
 /*
+
+// post compile event
+xcopy "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders" /E /e
+
+
 links
 
 http://docs.opencv.org/trunk/dd/d65/classcv_1_1face_1_1FaceRecognizer.html
@@ -44,6 +49,11 @@ https://github.com/kylemcdonald/SharingFaces
 
 
 of/examples/graphics/polylineBlobsExample
+
+
+
+Check how you can compile with static linking so it doesn't complain about missing :
+msvcp140.dll
 
 */
 

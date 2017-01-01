@@ -87,9 +87,8 @@ public:
 	ofxCvColorImage cvImgColor, cvImgColor2;
 	ofxCvGrayscaleImage cvImgGrayscale;
 	ofxCvContourFinder contourFinder;
-	vector<ofPolyline> polylines, smoothed, resampled;
-	vector<ofPath> paths;
-	vector<ofRectangle> boundingBoxes;
+	vector<ofPath> controurSurfaces;
+	
 	int threshold;
 	int smooth;
 

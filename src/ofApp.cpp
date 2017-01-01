@@ -19,18 +19,19 @@ using namespace cv;
 //--------------------------------------------------------------
 void ofApp::setup() {
 #ifdef TARGET_OPENGLES
-	shdPrep.load("shadersES2/prep");
-	shdComp.load("shadersES2/comp");
+	shdPrep.load("shaders/ES2/prep");
+	shdComp.load("shaders/ES2/comp");
 #else
 	if (ofIsGLProgrammableRenderer()) {
-		shdPrep.load("shadersGL3/prep");
-		shdComp.load("shadersGL3/comp");
+		shdPrep.load("shaders/GL3/prep");
+		shdComp.load("shaders/GL3/comp");
 	}
 	else {
-		shdPrep.load("shadersGL2/prep");
-		shdComp.load("shadersGL2/comp");
+		shdPrep.load("shaders/GL2/prep");
+		shdComp.load("shaders/GL2/comp");
 	}
 #endif
+
 
 	shdPrepThress = 0.1;
 
@@ -98,7 +99,7 @@ void ofApp::update() {
 			background.setFromPixels(cam.getPixels());
 
 
-
+		//////////////////////
 		// Temp Draw face mask - will be replace with faceTracker
 
 		faceMask.begin();
@@ -109,6 +110,7 @@ void ofApp::update() {
 
 
 
+		//////////////////////
 		// Prep Render
 		
 		prep.begin();
@@ -127,33 +129,84 @@ void ofApp::update() {
 
 
 
-		// contours
+		//////////////////////
+		// prep contours
 		// Pass Preped buffer to cvImage and detect contours
 		
 		ofPixels prepedPixels;
 		prep.readToPixels(prepedPixels, 0);
 		cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
 
-		/*cvImgGrayscale.blur(11);
-		cvImgGrayscale.threshold(threshold, true);
-		*/
+		cvImgGrayscale.dilate();
 		cvImgGrayscale.dilate();
 		cvImgGrayscale.erode();
+		cvImgGrayscale.erode();
 
-
+		// calc contours
 		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
 
+		
+		// populate arrays of contours
+		controurSurfaces.clear();
+		for (unsigned int i = 0; i < contourFinder.blobs.size(); i++) {
+			// add all the current vertices to a polyLine
+			ofPolyline outline;
+			outline.addVertices(contourFinder.blobs[i].pts);
+			outline.setClosed(true);
+			outline = outline.getSmoothed(smooth);
+
+			ofPath newPath;
+			for (int i = 0; i < outline.getVertices().size(); i++) {
+				if (i == 0) {
+					newPath.newSubPath();
+					newPath.moveTo(outline.getVertices()[i]);
+				}
+				else
+					newPath.lineTo(outline.getVertices()[i]);
+			}
+			newPath.close();
+			newPath.simplify();
+			controurSurfaces.push_back(newPath);
+		}
+
+
+		//////////////////////
+		// update countourMask
+		contourMask.begin();
+		ofClear(0);
+		ofSetColor(ofColor::black);
+		for (unsigned int i = 0; i < controurSurfaces.size(); i++) {
+			controurSurfaces[i].setFillColor(ofColor(255));
+			controurSurfaces[i].draw();
+		}
+		contourMask.end();
+
+
+
+
+		// Composite
+		comp.begin();
+		ofClear(0);
+		shdComp.begin();
+		// use as a tex0 the same image you are drawing below
+		shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
+		shdComp.setUniformTexture("tex1", cam.getTexture(), 1);
+		shdComp.setUniformTexture("tex2", img2.getTexture(), 2);
+
+		contourMask.draw(0, 0);
+		shdComp.end();
+		comp.end();
 
 
 
 
 
-
-
+		//////////////////////
+		//////////////////////
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
-		frame = cam.getPixels();
+		//frame = cam.getPixels();
 
 		/*
 		if (mousePic < ofFaces.size())
@@ -172,85 +225,6 @@ void ofApp::update() {
 
 		//faceDetectUpdate();
 
-
-
-
-
-
-
-
-
-		polylines.clear();
-		smoothed.clear();
-		resampled.clear();
-		boundingBoxes.clear();
-		paths.clear();
-
-		for (unsigned int i = 0; i < contourFinder.blobs.size(); i++) {
-			ofPolyline cur;
-			// add all the current vertices to cur polyline
-			cur.addVertices(contourFinder.blobs[i].pts);
-			cur.setClosed(true);
-			cur = cur.getSmoothed(smooth);
-
-			// add the cur polyline to all these vector<ofPolyline>
-			polylines.push_back(cur);
-			//smoothed.push_back(cur.getSmoothed(8));
-			//resampled.push_back(cur.getResampledByCount(100).getSmoothed(8));
-			//boundingBoxes.push_back(cur.getBoundingBox());
-
-
-			ofPath newPath;
-			for (int i = 0; i < cur.getVertices().size(); i++) {
-				if (i == 0) {
-					newPath.newSubPath();
-					newPath.moveTo(cur.getVertices()[i]);
-				}
-				else {
-					newPath.lineTo(cur.getVertices()[i]);
-				}
-			}
-
-			newPath.close();
-			newPath.simplify();
-			newPath.setFillColor(ofColor(0, 0, 100, 255));
-
-			paths.push_back(newPath);
-		}
-
-
-
-		// update countourMask
-
-		contourMask.begin();
-		ofClear(0);
-
-		ofSetColor(ofColor::black);
-		for (unsigned int i = 0; i < paths.size(); i++) {
-			//paths[i].setColor(ofColor(0, 100, 0, 255));
-			paths[i].setFillColor(ofColor(255));
-			paths[i].draw();
-		}
-
-		//ofSetColor(ofColor::red);
-		//ofFill();
-		//for (unsigned int i = 0; i < polylines.size(); i++) {
-		//	polylines[i].draw();
-		//}
-
-
-		contourMask.end();
-
-
-
-		//		super slow
-		//		ofPixels personCanvasPxl;
-		//		personCanvas.readToPixels(personCanvasPxl,0);
-		//		for (int p = 0; p < personCanvasPxl.size(); ++p) {
-		//			ofColor pixel = personCanvasPxl.getColor(p);
-		////			pixel.invert();
-		////			personCanvasPxl.setColor(p, pixel);
-		//		}
 
 
 
@@ -294,38 +268,21 @@ void ofApp::draw() {
 	//ofClear(150, 150, 150, 0);
 	ofSetColor(ofColor::white);
 	ofSetLineWidth(3);
-	if (frame.isAllocated())
-	{
-		frame.draw(0, 0);
-		ofDrawBitmapString("Camera", 0, 10);
-	}
 
-	if (frameCompute.isAllocated())
-	{
-		frameCompute.draw(camW, camH - frameCompute.getHeight());
-		ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight() + 10);
-	}
+	cam.draw(0, 0);
+	ofDrawBitmapString("Camera", 0, 10);
+	
+
+	//if (frameCompute.isAllocated())
+	//{
+	//	frameCompute.draw(0, camH );
+	//	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight() + 10);
+	//}
 
 
 	//faceDetectDraw();
 
 
-	//personCanvas.draw(camW + 150, 0);
-
-
-	//// preped image for controur detection
-	//if (prepedPixels.isAllocated())
-	//{
-	//	ofPushMatrix();
-	//	ofTranslate(0, camH);
-	//	//cvImgColor.draw(0, 0);
-	//	ofImage prepedImg;
-	//	prepedImg.setFromPixels(prepedPixels);
-	//	prepedImg.draw(0, 0);
-
-	//	ofDrawBitmapString("Preped Image for controur detection", 0, 30);
-	//	ofPopMatrix();
-	//}
 
 
 
@@ -337,35 +294,18 @@ void ofApp::draw() {
 	cvImgGrayscale.draw(0, 0);
 	//	contourFinder.draw();
 
-	for (unsigned int i = 0; i < polylines.size(); i++) {
-		ofNoFill();
 
-		ofSetColor(255, 255, 255, 255);
-		polylines[i].draw();
-		/*drawWithNormals(polylines[i]);
-
-		ofSetColor(0, 255, 0);
-		drawWithNormals(smoothed[i]);
-
-		ofSetColor(0, 0, 255);
-		drawWithNormals(resampled[i]);
-
-		ofSetColor(0, 255, 255);
-		ofDrawRectangle(boundingBoxes[i]);*/
-
+	ofSetColor(ofColor::red);
+	for (int i = 0; i < controurSurfaces.size(); i++) {
+		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
+		for (int i = 0; i < outlines.size(); i++)
+			outlines[i].draw();
 	}
-
+	ofSetColor(ofColor::white);
 	ofDrawBitmapString("Contours", 0, 30);
 	ofPopMatrix();
 
-	//personCanvas.draw(0,camH);
-	// draw CV image
-	//ofPushMatrix();
-	//ofTranslate(camW, camH);
-	//cvImgColor.draw(camW, camH);
-	//cvImgColor2.draw(0, camH);
-	//img1.draw(0, camW * 2);
-
+	
 
 
 
@@ -401,21 +341,10 @@ void ofApp::draw() {
 	
 
 	
-	// Composite
-	ofSetColor(255);
-	ofFill();
+	// Comp
 	ofPushMatrix();
-
 	ofTranslate(camW * 2, camH);
-	shdComp.begin();
-	// use as a tex0 the same image you are drawing below
-	shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
-	shdComp.setUniformTexture("tex1", cam.getTexture(), 1);
-	shdComp.setUniformTexture("tex2", img2.getTexture(), 2);
-
-	contourMask.draw(0, 0);
-	shdComp.end();
-
+	comp.draw(0, 0);
 	ofDrawBitmapString("Comp", 0, 30);
 	ofPopMatrix();
 
