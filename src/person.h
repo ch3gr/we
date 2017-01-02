@@ -18,7 +18,7 @@ public:
 	//void person::track();
 	//void person::train();
 
-	void person::snap();
+	void person::setFace( ofImage _face);
 	void person::update();
 	void person::draw();
 };

@@ -405,8 +405,12 @@ void ofApp::draw() {
 	ofClear(ofColor::grey);
 	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode && false)
+	if (debugMode){
+		ofPushMatrix();
+		ofScale(0.5, 0.5);
 		debugView.draw(0, 0);
+		ofPopMatrix();
+	}
 
 	//testFbo.draw(0, 0);
 
@@ -446,8 +450,8 @@ void ofApp::draw() {
 	}
 
 
+	// OF Time
 	ofDrawBitmapString(ofGetElapsedTimef(), 5, ofGetWindowHeight()-40);
-	
 
 	//	Framerate
 	std::stringstream strm;
@@ -503,7 +507,7 @@ void ofApp::keyPressed(int key) {
 
 
 	if (key == 'd') {
-		//		cout << model->getAlgorithm() << endl;
+		debugMode = !debugMode;
 	}
 
 	if (key == '+') {
@@ -593,10 +597,17 @@ void ofApp::mousePressed(int x, int y, int button) {
 		ofRectangle bbox = faceFinder.getObjectSmoothed(0);
 		bbox.scaleFromCenter(2, 2);
 		bbox.translateY(bbox.getHeight()*0.1);
+		if (bbox.getRight() > camW)
+			bbox.setWidth(camW-bbox.x);
+		if (bbox.getBottom() > camH)
+			bbox.setHeight(camH - bbox.y);
+
 		ofImage personFace;
 		ofPixels pixels;
 		comp.readToPixels(pixels);
 		personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
+
+		personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
 
 		person someoneNew = person( personIdCount++, personFace, mouseX, mouseY);
 		we.push_back(someoneNew);

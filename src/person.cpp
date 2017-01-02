@@ -25,8 +25,8 @@ person::person( int _id, ofImage _face, int _x, int _y) {
 }
 
 
-void person::snap() {
-
+void person::setFace( ofImage _face){
+	face = _face;
 }
 
 void person::update() {
