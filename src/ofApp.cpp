@@ -50,11 +50,11 @@ void ofApp::setup() {
 
 	threshold = 90;
 
-	faceFinder.setup("haarcascade_frontalface_default.xml");
-	faceFinder.setPreset(ObjectFinder::Fast);
+	faceFinder.setup("haarcascade_frontalface_default.xml"); //-
+	faceFinder.setPreset(ObjectFinder::Fast);//-
 
 
-	cvImgColor.allocate(camW, camH);
+	cvImgColor.allocate(camW, camH);			
 	cvImgGrayscale.allocate(camW, camH);
 
 	smooth = 2;
@@ -410,7 +410,7 @@ void ofApp::draw() {
 	ofClear(ofColor::grey);
 	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode) {
+	if (debugMode && false) {
 		ofPushMatrix();
 		ofScale(0.5, 0.5);
 		debugView.draw(0, 0);
@@ -418,6 +418,7 @@ void ofApp::draw() {
 	}
 
 	manage.draw();
+	manage.drawDebug();
 
 
 
@@ -619,6 +620,17 @@ void ofApp::mousePressed(int x, int y, int button) {
 		personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
 
 		personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
+
+
+		//ofImage portrait;
+		//portrait.setFromPixels(personFace.getPixels());
+		//portrait.resize(100, 100);
+
+
+
+		ofImage camFrame;
+		camFrame.setFromPixels(cam.getPixels());
+		manage.makePortrait(camFrame, background);
 
 		manage.addPerson(personFace, mouseX, mouseY);
 	}

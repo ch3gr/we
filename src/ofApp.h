@@ -74,7 +74,7 @@ public:
 	int smooth;
 
 
-	ofxCv::ObjectFinder faceFinder;
+	ofxCv::ObjectFinder faceFinder;//-
 
 	//	face detection and recognition
 	vector<Rect> objects;
