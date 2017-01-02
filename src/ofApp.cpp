@@ -43,6 +43,8 @@ void ofApp::setup() {
 
 	threshold = 90;
 
+	faceFinder.setup("haarcascade_frontalface_default.xml");
+	faceFinder.setPreset(ObjectFinder::Fast);
 	
 
 	cvImgColor.allocate(camW, camH);
@@ -52,7 +54,7 @@ void ofApp::setup() {
 
 	//faceDetectSetup();
 
-
+	testFbo.allocate(camW, camH, GL_RGBA);
 	faceMask.allocate(camW, camH, GL_RGBA);
 	faceDetectMask.allocate(camW, camH, GL_RGBA);
 	contourMask.allocate(camW, camH, GL_RGBA);
@@ -70,7 +72,7 @@ void ofApp::setup() {
 	img2.resize(camW, camH);
 
 
-	//person someone = person();
+	personIdCount = 0;
 }
 
 
@@ -97,6 +99,7 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
+		
 
 		if (!background.isAllocated())
 			background.setFromPixels(cam.getPixels());
@@ -117,26 +120,19 @@ void ofApp::update() {
 
 		//////////////////////
 		// Face detection
-		Mat color = ofxCv::toCv(cam.getPixels());
-		Mat grey;
-		cvtColor(color, grey, CV_RGB2GRAY);
-
-		classifier.detectMultiScale(grey, objects, 1.16, 1, 0);
-
+		faceFinder.update(cam);
 		// Draw squares for each face tracked
 		faceDetectMask.begin();
-		for (int i = 0; i < objects.size(); ++i) {
-			ofRectangle faceRect = ofRectangle(objects[i].x, objects[i].y, objects[i].width, objects[i].height);
-			// adjust found area to original resolution
-			faceRect.x /= camProxySize;
-			faceRect.y /= camProxySize;
-			faceRect.scale(1 / camProxySize);
-			// adjust
-			//crop.translateY(-50);
-			faceRect.setFromCenter(faceRect.getCenter(), 200, 250);
-			ofDrawRectangle(faceRect.x, faceRect.y, faceRect.width, faceRect.height);
+		ofClear(0);
+		ofSetColor(ofColor::white);
+		for (int i = 0; i < faceFinder.size(); i++) {
+			ofRectangle face = faceFinder.getObjectSmoothed(i);
+			face.scaleFromCenter(2, 2);
+			face.translateY(face.getHeight()*0.1);
+			ofDrawRectangle(face);
 		}
 		faceDetectMask.end();
+
 
 
 
@@ -152,6 +148,7 @@ void ofApp::update() {
 		if (background.isAllocated())
 			shdPrep.setUniformTexture("tex1", background.getTexture(), 1);
 		shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
+		shdPrep.setUniformTexture("tex3", faceDetectMask.getTexture(), 3);
 
 		shdPrep.setUniform1f("thress", shdPrepThress);
 
@@ -200,6 +197,7 @@ void ofApp::update() {
 			newPath.simplify();
 			controurSurfaces.push_back(newPath);
 		}
+
 
 
 		//////////////////////
@@ -307,7 +305,7 @@ void ofApp::update() {
 				ofPushMatrix();
 				ofTranslate(0, camH);
 				faceDetectMask.draw(0,0);
-				ofDrawBitmapString("faces detected mask", 0, 30);
+				ofDrawBitmapString("faces detected mask", 0, 150);
 				ofPopMatrix();
 			}
 			
@@ -331,6 +329,12 @@ void ofApp::update() {
 			comp.draw(0, 0);
 			ofDrawBitmapString("Comp", 0, 30);
 			ofPopMatrix();
+
+
+
+
+
+
 
 			debugView.end();
 		}
@@ -371,6 +375,10 @@ void ofApp::update() {
 		//cvImgTmp.setFromPixels( personCanvas.)
 		//cvImgColor *= cvImgColor2;
 
+
+		for (int p = 0; p < we.size(); ++p) {
+			we[p].update();
+		}
 	}
 
 
@@ -395,9 +403,13 @@ void ofApp::update() {
 void ofApp::draw() {
 
 	ofClear(ofColor::grey);
+	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode)
+	if (debugMode && false)
 		debugView.draw(0, 0);
+
+	//testFbo.draw(0, 0);
+
 
 	//cam.draw(0,0);
 	//ofImage cameraFrame ;
@@ -432,6 +444,10 @@ void ofApp::draw() {
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
 	}
+
+
+	ofDrawBitmapString(ofGetElapsedTimef(), 5, ofGetWindowHeight()-40);
+	
 
 	//	Framerate
 	std::stringstream strm;
@@ -471,6 +487,21 @@ void ofApp::draw() {
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
+
+	if (key == 'b')
+	{
+		background.setFromPixels(cam.getPixels());
+	}
+
+	if (key == 'c')
+	{
+		we.clear();
+	}
+
+
+
+	/////// temp keys
+
 
 	if (key == 'd') {
 		//		cout << model->getAlgorithm() << endl;
@@ -535,10 +566,9 @@ void ofApp::keyPressed(int key) {
 		cout << "Smooth : " << smooth << endl;
 	}
 
-	if (key == 'b')
-	{
-		background.setFromPixels(cam.getPixels());
-	}
+
+
+
 }
 
 //--------------------------------------------------------------
@@ -559,8 +589,26 @@ void ofApp::mouseDragged(int x, int y, int button) {
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
 
-	person someoneNew = person(mouseX, mouseY);
-	we.push_back(someoneNew);
+	if (faceFinder.size() > 0)
+	{
+		ofRectangle bbox = faceFinder.getObjectSmoothed(0);
+		bbox.scaleFromCenter(2, 2);
+		bbox.translateY(bbox.getHeight()*0.1);
+		ofImage personFace;
+		ofPixels pixels;
+		comp.readToPixels(pixels);
+		personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
+
+		person someoneNew = person( personIdCount++, personFace, mouseX, mouseY);
+		we.push_back(someoneNew);
+	}
+
+//	testFbo.begin();
+//	ofClear(0);
+////	comp.readToPixels(personFace.getPixelsRef());
+//	personFace.draw(mouseX, mouseY);
+//	testFbo.end();
+
 
 }
 

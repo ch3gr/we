@@ -52,6 +52,8 @@ public:
 	ofFbo faceDetectMask;				// buffer for face detection square masks
 	ofFbo prep;							// buffer for image before contour detection
 	ofFbo comp;							// buffer for final person layer
+	ofFbo testFbo;
+	
 
 
 	ofShader shdPrep, shdComp;
@@ -60,16 +62,17 @@ public:
 
 	float shdPrepThress;
 
-	// Contour detection
+	// Contour detection openCV
 	ofxCvColorImage cvImgColor, cvImgColor2;
 	ofxCvGrayscaleImage cvImgGrayscale;
 	ofxCvContourFinder contourFinder;
 	vector<ofPath> controurSurfaces;
-
+	
 	int threshold;
 	int smooth;
+	
 
-
+	ofxCv::ObjectFinder faceFinder;
 
 										//	face detection and recognition
 	vector<Rect> objects;
@@ -101,5 +104,5 @@ public:
 
 	// why this doesn't work?
 	vector<person> we;
-
+	int personIdCount;
 };

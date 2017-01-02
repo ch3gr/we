@@ -22,8 +22,8 @@ int main( ){
 
 /*
 
-// post compile event
-xcopy "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders" /E /e
+// post compile event to copy shaders from /src to /bin/data
+xcopy /e /y "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders\"
 
 
 links
@@ -49,6 +49,9 @@ https://github.com/kylemcdonald/SharingFaces
 
 
 of/examples/graphics/polylineBlobsExample
+
+faceMask
+\addons\ofxFaceTracker\example-advanced
 
 
 

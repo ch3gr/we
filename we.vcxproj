@@ -107,8 +107,7 @@
     </Link>
     <PostBuildEvent />
     <PreLinkEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /e /y "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders\"</Command>
     </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

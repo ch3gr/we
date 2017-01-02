@@ -1,9 +1,11 @@
 #version 120
 
-uniform sampler2DRect tex0;
-uniform sampler2DRect tex1;
-uniform sampler2DRect tex2;
+uniform sampler2DRect tex0;		// contour mask
+uniform sampler2DRect tex1;		// background
+uniform sampler2DRect tex2;		// face mask
+uniform sampler2DRect tex3;		// face Detect mask
 uniform float thress;
+
 
 void main()
 {
@@ -12,6 +14,7 @@ void main()
 	vec4 cam = texture2DRect(tex0, st);
     vec4 bg = texture2DRect(tex1, st);
 	vec4 faceMask = texture2DRect(tex2, st);
+	vec4 faceDetectMask = texture2DRect(tex3, st);
 	
 
 	// luminance rgb weights
@@ -20,13 +23,12 @@ void main()
 	float bgL = dot( vec3(bg), W );
 	float outL = abs(camL-bgL);
 	outL += faceMask.r;
-
+	//outL *= faceDetectMask.r;
 
 	if( outL > thress )
 		outL = 255;
 	else
 		outL = 0;
-
 	
 	// black out 2 pixel border for better controus
 	if( st.s<2 || st.s>638 || st.t<2 || st.t>478 )
@@ -38,6 +40,5 @@ void main()
 	gl_FragColor = cOut;
 
 
-	
-
+	//gl_FragColor = (c0+c1+c2)/3;
 }
