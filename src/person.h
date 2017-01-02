@@ -21,5 +21,6 @@ public:
 	void person::setFace( ofImage _face);
 	void person::update();
 	void person::draw();
+	void person::info();
 };
 

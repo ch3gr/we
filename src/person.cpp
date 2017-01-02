@@ -40,3 +40,8 @@ void person::draw() {
 		face.draw(x, y);
 	ofDrawBitmapString(id, x, y);
 }
+
+void person::info() {
+
+	cout << "I am person : " << id << endl;
+}

@@ -175,6 +175,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\manager.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="src\person.cpp" />
     <ClCompile Include="..\..\..\addons\ofxCv\libs\CLD\src\ETF.cpp" />
@@ -199,6 +200,7 @@
     <ClCompile Include="..\..\..\addons\ofxOpenCv\src\ofxCvShortImage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\manager.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\person.h" />
     <ClInclude Include="..\..\..\addons\ofxCv\src\ofxCv.h" />

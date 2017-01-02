@@ -3,7 +3,6 @@
 
 
 
-
 using namespace ofxCv;
 using namespace cv;
 
@@ -33,11 +32,19 @@ void ofApp::setup() {
 #endif
 
 
+
+
+
+
 	shdPrepThress = 0.1;
 
 	camW = 640;
 	camH = 480;
+
+	manage = manager(camW, camH);
+
 	//ofSetFrameRate(10);
+
 	camProxySize = 0.25;
 	cam.initGrabber(camW, camH);
 
@@ -45,7 +52,7 @@ void ofApp::setup() {
 
 	faceFinder.setup("haarcascade_frontalface_default.xml");
 	faceFinder.setPreset(ObjectFinder::Fast);
-	
+
 
 	cvImgColor.allocate(camW, camH);
 	cvImgGrayscale.allocate(camW, camH);
@@ -54,7 +61,7 @@ void ofApp::setup() {
 
 	//faceDetectSetup();
 
-	testFbo.allocate(camW, camH, GL_RGBA);
+
 	faceMask.allocate(camW, camH, GL_RGBA);
 	faceDetectMask.allocate(camW, camH, GL_RGBA);
 	contourMask.allocate(camW, camH, GL_RGBA);
@@ -72,7 +79,7 @@ void ofApp::setup() {
 	img2.resize(camW, camH);
 
 
-	personIdCount = 0;
+
 }
 
 
@@ -99,7 +106,7 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
-		
+
 
 		if (!background.isAllocated())
 			background.setFromPixels(cam.getPixels());
@@ -239,7 +246,7 @@ void ofApp::update() {
 		//////////////////////
 		// Draw all info on the debugView buffer
 
-		if( debugMode )
+		if (debugMode)
 		{
 			debugView.begin();
 
@@ -260,7 +267,7 @@ void ofApp::update() {
 
 			//faceDetectDraw();
 
-			
+
 			// contours with green mask
 			ofPushMatrix();
 			ofTranslate(camW, camH);
@@ -304,11 +311,11 @@ void ofApp::update() {
 			if (faceDetectMask.isAllocated()) {
 				ofPushMatrix();
 				ofTranslate(0, camH);
-				faceDetectMask.draw(0,0);
+				faceDetectMask.draw(0, 0);
 				ofDrawBitmapString("faces detected mask", 0, 150);
 				ofPopMatrix();
 			}
-			
+
 
 
 			// prep
@@ -376,9 +383,7 @@ void ofApp::update() {
 		//cvImgColor *= cvImgColor2;
 
 
-		for (int p = 0; p < we.size(); ++p) {
-			we[p].update();
-		}
+
 	}
 
 
@@ -405,21 +410,23 @@ void ofApp::draw() {
 	ofClear(ofColor::grey);
 	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode){
+	if (debugMode) {
 		ofPushMatrix();
 		ofScale(0.5, 0.5);
 		debugView.draw(0, 0);
 		ofPopMatrix();
 	}
 
-	//testFbo.draw(0, 0);
+	manage.draw();
+
+
 
 
 	//cam.draw(0,0);
 	//ofImage cameraFrame ;
 	//cameraFrame.setFromPixels(cam.getPixels());
 	//cameraFrame.draw(400, 400);
-	
+
 
 	//Mat colorMat = ofxCv::toCv(cameraFrame.getPixelsRef());
 	//Mat colorMat = ofxCv::toCv(cam.getPixels().getData(), camW, camH);
@@ -430,7 +437,7 @@ void ofApp::draw() {
 	//ofImage colorOf;
 	//toOf(colorMat, colorOf);
 	//colorOf.draw(600, 100);
-	
+
 	//ofImage bridge;
 	//personCanvas.readToPixels(bridge.getPixelsRef());
 
@@ -445,13 +452,11 @@ void ofApp::draw() {
 
 
 
-	for (int p = 0; p < we.size(); ++p) {
-		we[p].draw();
-	}
+
 
 
 	// OF Time
-	ofDrawBitmapString(ofGetElapsedTimef(), 5, ofGetWindowHeight()-40);
+	ofDrawBitmapString(ofGetElapsedTimef(), 5, ofGetWindowHeight() - 40);
 
 	//	Framerate
 	std::stringstream strm;
@@ -498,17 +503,23 @@ void ofApp::keyPressed(int key) {
 
 	if (key == 'c')
 	{
-		we.clear();
+		manage.clearPeople();
 	}
-
-
-
-	/////// temp keys
-
 
 	if (key == 'd') {
 		debugMode = !debugMode;
 	}
+
+	// info
+	if (key == 'i') {
+		manage.info();
+	}
+
+	/////// temp keys
+
+
+
+
 
 	if (key == '+') {
 		mousePic++;
@@ -537,8 +548,8 @@ void ofApp::keyPressed(int key) {
 	}
 
 	//		shdPrepThress
-	if (key == ','){
-		shdPrepThress = ofClamp(shdPrepThress -0.01, 0, 1);
+	if (key == ',') {
+		shdPrepThress = ofClamp(shdPrepThress - 0.01, 0, 1);
 		cout << "shdPrepThress : " << shdPrepThress << endl;
 	}
 	if (key == '.') {
@@ -598,7 +609,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		bbox.scaleFromCenter(2, 2);
 		bbox.translateY(bbox.getHeight()*0.1);
 		if (bbox.getRight() > camW)
-			bbox.setWidth(camW-bbox.x);
+			bbox.setWidth(camW - bbox.x);
 		if (bbox.getBottom() > camH)
 			bbox.setHeight(camH - bbox.y);
 
@@ -609,15 +620,10 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 		personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
 
-		person someoneNew = person( personIdCount++, personFace, mouseX, mouseY);
-		we.push_back(someoneNew);
+		manage.addPerson(personFace, mouseX, mouseY);
 	}
 
-//	testFbo.begin();
-//	ofClear(0);
-////	comp.readToPixels(personFace.getPixelsRef());
-//	personFace.draw(mouseX, mouseY);
-//	testFbo.end();
+
 
 
 }

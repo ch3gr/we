@@ -1,9 +1,11 @@
 #pragma once
 
 #include "ofMain.h"
+#include "manager.h"
 #include "person.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+
 
 using namespace cv;
 
@@ -38,8 +40,8 @@ public:
 	bool debugMode;
 	ofFbo debugView;
 
-	int 				camW;
-	int 				camH;
+
+	int camW, camH;
 	float				camProxySize;
 	ofVideoGrabber		cam;
 	ofImage frame;						// cam + comps
@@ -48,12 +50,12 @@ public:
 	ofImage background;
 	ofFbo faceMask;						// face mask from faceTrack
 	ofFbo contourMask;					// calculated contours
-	
+
 	ofFbo faceDetectMask;				// buffer for face detection square masks
 	ofFbo prep;							// buffer for image before contour detection
 	ofFbo comp;							// buffer for final person layer
-	ofFbo testFbo;
-	
+
+
 
 
 	ofShader shdPrep, shdComp;
@@ -67,14 +69,14 @@ public:
 	ofxCvGrayscaleImage cvImgGrayscale;
 	ofxCvContourFinder contourFinder;
 	vector<ofPath> controurSurfaces;
-	
+
 	int threshold;
 	int smooth;
-	
+
 
 	ofxCv::ObjectFinder faceFinder;
 
-										//	face detection and recognition
+	//	face detection and recognition
 	vector<Rect> objects;
 	CascadeClassifier classifier;
 	Ptr<FaceRecognizer> model;
@@ -93,16 +95,8 @@ public:
 
 
 
-	
+
+	manager manage;
 
 
-
-
-
-
-	
-
-	// why this doesn't work?
-	vector<person> we;
-	int personIdCount;
 };
