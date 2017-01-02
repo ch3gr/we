@@ -68,7 +68,7 @@ void ofApp::setup() {
 	prep.allocate(camW, camH, GL_RGBA);
 	comp.allocate(camW, camH, GL_RGBA);
 	debugView.allocate(ofGetWindowWidth(), ofGetWindowHeight());
-	debugMode = true;
+	debugMode = false;
 
 
 	img1.allocate(camW, camH, OF_IMAGE_COLOR);
@@ -410,7 +410,7 @@ void ofApp::draw() {
 	ofClear(ofColor::grey);
 	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode && false) {
+	if (debugMode ) {
 		ofPushMatrix();
 		ofScale(0.5, 0.5);
 		debugView.draw(0, 0);
@@ -451,8 +451,11 @@ void ofApp::draw() {
 	//cvImgColor *= cvImgColor2;
 
 
+	ofImage camFrame;
+	camFrame.setFromPixels(cam.getPixels());
 
-
+	// direct draw portrait
+	//manage.makePortrait(camFrame, background).draw(0,0);
 
 
 
@@ -630,9 +633,10 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
-		manage.makePortrait(camFrame, background);
 
-		manage.addPerson(personFace, mouseX, mouseY);
+		ofImage portraint = manage.makePortrait(camFrame, background);
+
+		manage.addPerson(portraint, mouseX, mouseY);
 	}
 
 

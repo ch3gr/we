@@ -2,6 +2,7 @@
 #include "ofMain.h"
 #include "person.h"
 #include "ofxCv.h"
+#include "ofxOpenCv.h"
 
 class manager
 {
@@ -18,7 +19,7 @@ public:
 	void manager::info();
 	void manager::clearPeople();
 
-	void manager::makePortrait(ofImage cam, ofImage bg);
+	ofImage manager::makePortrait(ofImage cam, ofImage bg);
 
 
 	int camW, camH;
