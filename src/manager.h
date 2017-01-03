@@ -13,17 +13,20 @@ public:
 
 
 	void manager::addPerson(ofImage _face, int _x, int _y);
+	void manager::setBg(ofImage _bg);
+	void manager::setBg(ofVideoGrabber _cam);
 	void manager::update();
 	void manager::draw();
 	void manager::drawDebug();
 	void manager::info();
 	void manager::clearPeople();
 
-	ofImage manager::makePortrait(ofImage cam, ofImage bg);
+
+	void manager::detectFaces(ofImage cam);
+	ofImage manager::makePortrait(ofImage cam, float shdThress);
 
 
 	int camW, camH;
-	bool debugMode;
 
 	vector<person> we;
 	int nextPersonId;
@@ -32,7 +35,10 @@ public:
 
 	ofShader shdPrep, shdComp;
 
-	ofxCv::ObjectFinder faceFinder;
+	ofxCv::ObjectFinder managerFFinder;
+
+private:
+	ofImage bg;
 
 };
 

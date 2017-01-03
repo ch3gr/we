@@ -26,13 +26,13 @@ manager::manager(int _camW, int _camH)
 	camW = _camW;
 	camH = _camH;
 	nextPersonId = 0;
-	debugMode = true;
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debug.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
-	faceFinder.setup("haarcascade_frontalface_default.xml");
-	faceFinder.setPreset(ObjectFinder::Fast);
+	managerFFinder.setup("haarcascade_frontalface_default.xml");
+	managerFFinder.setPreset(ObjectFinder::Fast);
 
+	
 }
 
 
@@ -40,6 +40,14 @@ manager::~manager()
 {
 }
 
+
+void manager::setBg(ofImage _bg) {
+	bg = _bg;
+}
+
+void manager::setBg(ofVideoGrabber _cam) {
+	bg.setFromPixels(_cam.getPixels());
+}
 
 
 void manager::addPerson(ofImage _face, int _x, int _y) {
@@ -72,7 +80,7 @@ void manager::draw() {
 
 void manager::drawDebug() {
 	ofPushMatrix();
-	ofTranslate(1000, 0);
+	//ofTranslate(1000, 0);
 	ofScale(0.4, 0.4);
 	debug.draw(0, 0);
 	ofPopMatrix();
@@ -90,14 +98,66 @@ void manager::clearPeople() {
 
 
 
-ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
+
+
+
+
+
+
+void manager::detectFaces(ofImage cam) {
+	//if (faceFinder.size() > 0)
+	//{
+	//	ofRectangle bbox = faceFinder.getObjectSmoothed(0);
+	//	bbox.scaleFromCenter(2, 2);
+	//	bbox.translateY(bbox.getHeight()*0.1);
+	//	if (bbox.getRight() > camW)
+	//		bbox.setWidth(camW - bbox.x);
+	//	if (bbox.getBottom() > camH)
+	//		bbox.setHeight(camH - bbox.y);
+
+	//	ofImage personFace;
+	//	ofPixels pixels;
+	//	comp.readToPixels(pixels);
+	//	personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
+
+	//	personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
+
+
+	//	//ofImage portrait;
+	//	//portrait.setFromPixels(personFace.getPixels());
+	//	//portrait.resize(100, 100);
+
+	//}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
+
+	if (!bg.isAllocated())
+		setBg(camFrame);
+
 	debug.begin();
 	ofClear(0);
 
 
 	//////////////////////
 	// debug Draw cam
-	cam.draw(0, 0);
+	camFrame.draw(0, 0);
 	// -----------------------
 
 	// debug Draw BG
@@ -123,15 +183,15 @@ ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
 
 	//////////////////////
 	// Face detection
-	faceFinder.update(cam);
+	managerFFinder.update(camFrame);
 	// Draw squares for each face tracked
 	ofFbo faceDetectMask;
 	faceDetectMask.allocate(camW, camH, GL_RGBA);
 	faceDetectMask.begin();
 	ofClear(0);
 	ofSetColor(ofColor::white);
-	for (int i = 0; i < faceFinder.size(); i++) {
-		ofRectangle face = faceFinder.getObjectSmoothed(i);
+	for (int i = 0; i < managerFFinder.size(); i++) {
+		ofRectangle face = managerFFinder.getObjectSmoothed(i);
 		face.scaleFromCenter(2, 2);
 		face.translateY(face.getHeight()*0.1);
 		ofDrawRectangle(face);
@@ -152,15 +212,15 @@ ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
 	prep.begin();
 	shdPrep.begin();
 	// use as a tex0 the same image you are drawing below
-	shdPrep.setUniformTexture("tex0", cam.getTexture(), 0);
+	shdPrep.setUniformTexture("tex0", camFrame.getTexture(), 0);
 	if (bg.isAllocated())
 		shdPrep.setUniformTexture("tex1", bg.getTexture(), 1);
 	shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
 	shdPrep.setUniformTexture("tex3", faceDetectMask.getTexture(), 3);
 
-	shdPrep.setUniform1f("thress", 0.1);	// toDo Set thresshold
+	shdPrep.setUniform1f("thress", shdPrepThress);
 
-	cam.draw(0, 0);
+	camFrame.draw(0, 0);
 	shdPrep.end();
 	prep.end();
 
@@ -236,6 +296,26 @@ ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
 	// -----------------------
 
 
+	// debug Draw countour lines
+	ofSetColor(ofColor::red);
+	ofSetLineWidth(3);
+	ofPushMatrix();
+	ofTranslate(camW , camH);
+	for (int i = 0; i < controurSurfaces.size(); i++) {
+		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
+		for (int i = 0; i < outlines.size(); i++)
+			outlines[i].draw();
+	}
+	ofPopMatrix();
+	// -----------------------
+
+
+
+
+
+
+
+
 
 	// Composite
 	ofFbo comp;
@@ -245,7 +325,7 @@ ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
 	shdComp.begin();
 	// use as a tex0 the same image you are drawing below
 	shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
-	shdComp.setUniformTexture("tex1", cam.getTexture(), 1);
+	shdComp.setUniformTexture("tex1", camFrame.getTexture(), 1);
 	//shdComp.setUniformTexture("tex2", cam.getTexture(), 2);
 
 	contourMask.draw(0, 0);
@@ -263,5 +343,5 @@ ofImage manager::makePortrait( ofImage cam, ofImage bg ) {
 	comp.readToPixels(out.getPixelsRef());
 	
 
-	return out ;
+	return out;
 }

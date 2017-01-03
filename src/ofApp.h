@@ -38,7 +38,6 @@ public:
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 	bool debugMode;
-	ofFbo debugView;
 
 
 	int camW, camH;
@@ -47,18 +46,13 @@ public:
 	ofImage frame;						// cam + comps
 	ofImage frameCompute;				// reduced frame for computation
 
-	ofImage background;
-	ofFbo faceMask;						// face mask from faceTrack
 	ofFbo contourMask;					// calculated contours
 
-	ofFbo faceDetectMask;				// buffer for face detection square masks
-	ofFbo prep;							// buffer for image before contour detection
-	ofFbo comp;							// buffer for final person layer
 
 
 
 
-	ofShader shdPrep, shdComp;
+
 	ofImage img1;
 	ofImage img2;
 
@@ -74,7 +68,7 @@ public:
 	int smooth;
 
 
-	ofxCv::ObjectFinder faceFinder;//-
+	
 
 	//	face detection and recognition
 	vector<Rect> objects;

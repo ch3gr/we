@@ -17,21 +17,6 @@ using namespace cv;
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::setup() {
-#ifdef TARGET_OPENGLES
-	shdPrep.load("shaders/ES2/prep");
-	shdComp.load("shaders/ES2/comp");
-#else
-	if (ofIsGLProgrammableRenderer()) {
-		shdPrep.load("shaders/GL3/prep");
-		shdComp.load("shaders/GL3/comp");
-	}
-	else {
-		shdPrep.load("shaders/GL2/prep");
-		shdComp.load("shaders/GL2/comp");
-	}
-#endif
-
-
 
 
 
@@ -50,9 +35,6 @@ void ofApp::setup() {
 
 	threshold = 90;
 
-	faceFinder.setup("haarcascade_frontalface_default.xml"); //-
-	faceFinder.setPreset(ObjectFinder::Fast);//-
-
 
 	cvImgColor.allocate(camW, camH);			
 	cvImgGrayscale.allocate(camW, camH);
@@ -62,12 +44,7 @@ void ofApp::setup() {
 	//faceDetectSetup();
 
 
-	faceMask.allocate(camW, camH, GL_RGBA);
-	faceDetectMask.allocate(camW, camH, GL_RGBA);
-	contourMask.allocate(camW, camH, GL_RGBA);
-	prep.allocate(camW, camH, GL_RGBA);
-	comp.allocate(camW, camH, GL_RGBA);
-	debugView.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+
 	debugMode = false;
 
 
@@ -79,7 +56,8 @@ void ofApp::setup() {
 	img2.resize(camW, camH);
 
 
-
+	// Doesn't grab anything, cam is still empty, kind of works
+	//manage.setBg(cam);
 }
 
 
@@ -105,246 +83,6 @@ void ofApp::update() {
 
 	cam.update();
 	if (cam.isFrameNew()) {
-
-
-
-		if (!background.isAllocated())
-			background.setFromPixels(cam.getPixels());
-
-
-		//////////////////////
-		// Temp Draw face mask - will be replace with faceTracker
-
-		faceMask.begin();
-		ofClear(0);
-		ofSetColor(ofColor::white);
-		ofDrawCircle(mouseX, mouseY, 70);
-		faceMask.end();
-
-
-
-
-
-		//////////////////////
-		// Face detection
-		faceFinder.update(cam);
-		// Draw squares for each face tracked
-		faceDetectMask.begin();
-		ofClear(0);
-		ofSetColor(ofColor::white);
-		for (int i = 0; i < faceFinder.size(); i++) {
-			ofRectangle face = faceFinder.getObjectSmoothed(i);
-			face.scaleFromCenter(2, 2);
-			face.translateY(face.getHeight()*0.1);
-			ofDrawRectangle(face);
-		}
-		faceDetectMask.end();
-
-
-
-
-
-
-		//////////////////////
-		// Prep Render
-
-		prep.begin();
-		shdPrep.begin();
-		// use as a tex0 the same image you are drawing below
-		shdPrep.setUniformTexture("tex0", cam.getTexture(), 0);
-		if (background.isAllocated())
-			shdPrep.setUniformTexture("tex1", background.getTexture(), 1);
-		shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
-		shdPrep.setUniformTexture("tex3", faceDetectMask.getTexture(), 3);
-
-		shdPrep.setUniform1f("thress", shdPrepThress);
-
-		cam.draw(0, 0);
-		shdPrep.end();
-		prep.end();
-
-
-
-		//////////////////////
-		// prep contours
-		// Pass Preped buffer to cvImage and detect contours
-
-		ofPixels prepedPixels;
-		prep.readToPixels(prepedPixels, 0);
-		cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
-
-		cvImgGrayscale.dilate();
-		cvImgGrayscale.dilate();
-		cvImgGrayscale.erode();
-		cvImgGrayscale.erode();
-
-		// calc contours
-		contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
-
-
-		// populate arrays of contours
-		controurSurfaces.clear();
-		for (unsigned int i = 0; i < contourFinder.blobs.size(); i++) {
-			// add all the current vertices to a polyLine
-			ofPolyline outline;
-			outline.addVertices(contourFinder.blobs[i].pts);
-			outline.setClosed(true);
-			outline = outline.getSmoothed(smooth);
-
-			ofPath newPath;
-			for (int i = 0; i < outline.getVertices().size(); i++) {
-				if (i == 0) {
-					newPath.newSubPath();
-					newPath.moveTo(outline.getVertices()[i]);
-				}
-				else
-					newPath.lineTo(outline.getVertices()[i]);
-			}
-			newPath.close();
-			newPath.simplify();
-			controurSurfaces.push_back(newPath);
-		}
-
-
-
-		//////////////////////
-		// update countourMask
-		contourMask.begin();
-		ofClear(0);
-		ofSetColor(ofColor::black);
-		for (unsigned int i = 0; i < controurSurfaces.size(); i++) {
-			controurSurfaces[i].setFillColor(ofColor(255));
-			controurSurfaces[i].draw();
-		}
-		contourMask.end();
-
-
-
-
-		// Composite
-		comp.begin();
-		ofClear(0);
-		shdComp.begin();
-		// use as a tex0 the same image you are drawing below
-		shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
-		shdComp.setUniformTexture("tex1", cam.getTexture(), 1);
-		shdComp.setUniformTexture("tex2", img2.getTexture(), 2);
-
-		contourMask.draw(0, 0);
-		shdComp.end();
-		comp.end();
-
-
-
-
-
-
-
-
-
-		//////////////////////
-		//////////////////////
-		// Draw all info on the debugView buffer
-
-		if (debugMode)
-		{
-			debugView.begin();
-
-			ofClear(0);
-			ofSetColor(ofColor::white);
-			ofSetLineWidth(3);
-
-			cam.draw(0, 0);
-			ofDrawBitmapString("Camera", 0, 10);
-
-
-			//if (frameCompute.isAllocated())
-			//{
-			//	frameCompute.draw(0, camH );
-			//	ofDrawBitmapString("Frame to compute", camW, camH - frameCompute.getHeight() + 10);
-			//}
-
-
-			//faceDetectDraw();
-
-
-			// contours with green mask
-			ofPushMatrix();
-			ofTranslate(camW, camH);
-			ofSetColor(ofColor::darkGreen);
-			cvImgGrayscale.draw(0, 0);
-			//	contourFinder.draw();
-
-
-			ofSetColor(ofColor::red);
-			for (int i = 0; i < controurSurfaces.size(); i++) {
-				vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
-				for (int i = 0; i < outlines.size(); i++)
-					outlines[i].draw();
-			}
-			ofSetColor(ofColor::white);
-			ofDrawBitmapString("Contours", 0, 30);
-			ofPopMatrix();
-
-
-
-
-
-			// faceMask
-			ofPushMatrix();
-			ofTranslate(0, 0);
-			faceMask.draw(0, 0);
-			ofDrawBitmapString("faceMask", 0, 60);
-			ofPopMatrix();
-
-
-			// background
-			if (background.isAllocated()) {
-				ofPushMatrix();
-				ofTranslate(camW, 0);
-				background.draw(0, 0);
-				ofDrawBitmapString("Background", 0, 30);
-				ofPopMatrix();
-			}
-
-			// faceDetectMask
-			if (faceDetectMask.isAllocated()) {
-				ofPushMatrix();
-				ofTranslate(0, camH);
-				faceDetectMask.draw(0, 0);
-				ofDrawBitmapString("faces detected mask", 0, 150);
-				ofPopMatrix();
-			}
-
-
-
-			// prep
-			if (prep.isAllocated())
-			{
-				ofPushMatrix();
-				ofTranslate(camW * 2, 0);
-				prep.draw(0, 0);
-				ofDrawBitmapString("prep", 0, 30);
-				ofPopMatrix();
-			}
-
-
-
-			// Comp
-			ofPushMatrix();
-			ofTranslate(camW * 2, camH);
-			comp.draw(0, 0);
-			ofDrawBitmapString("Comp", 0, 30);
-			ofPopMatrix();
-
-
-
-
-
-
-
-			debugView.end();
-		}
 
 
 
@@ -410,15 +148,17 @@ void ofApp::draw() {
 	ofClear(ofColor::grey);
 	ofDrawBitmapString("start draw", 0, 20);
 
-	if (debugMode ) {
-		ofPushMatrix();
-		ofScale(0.5, 0.5);
-		debugView.draw(0, 0);
-		ofPopMatrix();
-	}
 
+
+	if (debugMode)
+	{
+		manage.drawDebug();
+		// direct draw portrait
+		ofImage camFrame;
+		camFrame.setFromPixels(cam.getPixels());
+		manage.makePortrait(camFrame, shdPrepThress).draw(0,camH);
+	}
 	manage.draw();
-	manage.drawDebug();
 
 
 
@@ -454,8 +194,7 @@ void ofApp::draw() {
 	ofImage camFrame;
 	camFrame.setFromPixels(cam.getPixels());
 
-	// direct draw portrait
-	//manage.makePortrait(camFrame, background).draw(0,0);
+
 
 
 
@@ -502,7 +241,7 @@ void ofApp::keyPressed(int key) {
 
 	if (key == 'b')
 	{
-		background.setFromPixels(cam.getPixels());
+		manage.setBg(cam);
 	}
 
 	if (key == 'c')
@@ -607,39 +346,10 @@ void ofApp::mouseDragged(int x, int y, int button) {
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
 
-	if (faceFinder.size() > 0)
-	{
-		ofRectangle bbox = faceFinder.getObjectSmoothed(0);
-		bbox.scaleFromCenter(2, 2);
-		bbox.translateY(bbox.getHeight()*0.1);
-		if (bbox.getRight() > camW)
-			bbox.setWidth(camW - bbox.x);
-		if (bbox.getBottom() > camH)
-			bbox.setHeight(camH - bbox.y);
-
-		ofImage personFace;
-		ofPixels pixels;
-		comp.readToPixels(pixels);
-		personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
-
-		personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
-
-
-		//ofImage portrait;
-		//portrait.setFromPixels(personFace.getPixels());
-		//portrait.resize(100, 100);
-
-
-
-		ofImage camFrame;
-		camFrame.setFromPixels(cam.getPixels());
-
-		ofImage portraint = manage.makePortrait(camFrame, background);
-
-		manage.addPerson(portraint, mouseX, mouseY);
-	}
-
-
+	ofImage camFrame;
+	camFrame.setFromPixels(cam.getPixels());
+	ofImage portraint = manage.makePortrait(camFrame, shdPrepThress);
+	manage.addPerson(portraint, mouseX, mouseY);
 
 
 }
