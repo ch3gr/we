@@ -39,8 +39,6 @@ void ofApp::setup() {
 	cvImgColor.allocate(camW, camH);			
 	cvImgGrayscale.allocate(camW, camH);
 
-	smooth = 2;
-
 	//faceDetectSetup();
 
 
@@ -84,6 +82,7 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
+		manage.detectFaces(cam);
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
@@ -119,14 +118,7 @@ void ofApp::update() {
 		//cvImgTmp.setFromPixels(cvImgColor.getPixels());
 		//cvImgTmp.setFromPixels( personCanvas.)
 		//cvImgColor *= cvImgColor2;
-
-
-
 	}
-
-
-
-
 }
 
 
@@ -312,18 +304,6 @@ void ofApp::keyPressed(int key) {
 		threshold = ofClamp(threshold - 5, 0, 255);
 		cout << "Threshold : " << threshold << endl;
 	}
-	if (key == 'x')
-	{
-		smooth = ofClamp(smooth + 1, 0, 50);
-		cout << "Smooth : " << smooth << endl;
-	}
-	if (key == 'z')
-	{
-		smooth = ofClamp(smooth - 1, 0, 50);
-		cout << "Smooth : " << smooth << endl;
-	}
-
-
 
 
 }

@@ -65,7 +65,6 @@ public:
 	vector<ofPath> controurSurfaces;
 
 	int threshold;
-	int smooth;
 
 
 	

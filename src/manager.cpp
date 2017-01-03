@@ -68,10 +68,11 @@ void manager::draw() {
 	update();
 
 	canvas.begin();
-	ofClear(0);
+	//ofClear(0);
 
 	for (int p = 0; p < we.size(); ++p)
 		we[p].draw();
+
 
 	canvas.end();
 
@@ -99,15 +100,19 @@ void manager::clearPeople() {
 
 
 
-
-
-
-
-
 void manager::detectFaces(ofImage cam) {
-	//if (faceFinder.size() > 0)
+
+	managerFFinder.update(cam);
+
+	ofPushMatrix();
+	ofTranslate(camW, 0);
+	cam.draw(0, 0);
+	ofPopMatrix();
+
+
+	//if (managerFFinder.size() > 0 && false )
 	//{
-	//	ofRectangle bbox = faceFinder.getObjectSmoothed(0);
+	//	ofRectangle bbox = managerFFinder.getObjectSmoothed(0);
 	//	bbox.scaleFromCenter(2, 2);
 	//	bbox.translateY(bbox.getHeight()*0.1);
 	//	if (bbox.getRight() > camW)
@@ -117,17 +122,25 @@ void manager::detectFaces(ofImage cam) {
 
 	//	ofImage personFace;
 	//	ofPixels pixels;
-	//	comp.readToPixels(pixels);
-	//	personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
-
-	//	personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
 
 
-	//	//ofImage portrait;
-	//	//portrait.setFromPixels(personFace.getPixels());
-	//	//portrait.resize(100, 100);
+		//comp.readToPixels(pixels);
+		//personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
+
+		//personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
+
+
+		//ofImage portrait;
+		//portrait.setFromPixels(personFace.getPixels());
+		//portrait.resize(100, 100);
 
 	//}
+}
+
+void manager::detectFaces(ofVideoGrabber cam) {
+	ofImage camFrame;
+	camFrame.setFromPixels(cam.getPixels());
+	detectFaces(camFrame);
 }
 
 
@@ -169,11 +182,11 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	// Temp Draw face mask - will be replace with faceTracker
 	ofFbo faceMask;
 	faceMask.allocate(camW, camH, GL_RGBA);
-	faceMask.begin();
-	ofClear(0);
-	ofSetColor(ofColor::white);
-	ofDrawCircle(100, 100, 70);
-	faceMask.end();
+	//faceMask.begin();
+	//ofClear(0);
+	//ofSetColor(ofColor::white);
+	//ofDrawCircle(100, 100, 70);
+	//faceMask.end();
 
 	// debug Draw faceMask
 	faceMask.draw(camW*2, 0);
@@ -183,7 +196,7 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 
 	//////////////////////
 	// Face detection
-	managerFFinder.update(camFrame);
+	//detectFaces(camFrame);
 	// Draw squares for each face tracked
 	ofFbo faceDetectMask;
 	faceDetectMask.allocate(camW, camH, GL_RGBA);

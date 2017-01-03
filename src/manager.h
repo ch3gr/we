@@ -23,6 +23,7 @@ public:
 
 
 	void manager::detectFaces(ofImage cam);
+	void manager::detectFaces(ofVideoGrabber cam);
 	ofImage manager::makePortrait(ofImage cam, float shdThress);
 
 
@@ -32,6 +33,7 @@ public:
 	int nextPersonId;
 	ofFbo canvas;
 	ofFbo debug;
+	
 
 	ofShader shdPrep, shdComp;
 
