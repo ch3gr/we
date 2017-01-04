@@ -42,6 +42,7 @@ public:
 
 	int camW, camH;
 	float				camProxySize;
+	
 	ofVideoGrabber		cam;
 	ofImage frame;						// cam + comps
 	ofImage frameCompute;				// reduced frame for computation

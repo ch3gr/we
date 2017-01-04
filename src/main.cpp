@@ -8,11 +8,11 @@ int main( ){
 	ofGLWindowSettings settings;
 	settings.setGLVersion(3, 2);
 
-	ofSetupOpenGL(1920,1080, OF_WINDOW);			// <-------- setup the GL context
-	// this kicks off the running of my app
+	ofSetupOpenGL(1920,1080, OF_WINDOW);
+//	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
-	ofSetWindowPosition(1922, 20);
+	ofSetWindowPosition(0, 20);
 
 	//ofCreateWindow(settings);
 	ofRunApp(new ofApp());

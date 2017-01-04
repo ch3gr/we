@@ -28,6 +28,7 @@ public:
 
 
 	int camW, camH;
+	float previewScale;
 
 	vector<person> we;
 	int nextPersonId;

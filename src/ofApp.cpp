@@ -25,12 +25,18 @@ void ofApp::setup() {
 
 	camW = 640;
 	camH = 480;
+	//camW = 1280;
+	//camH = 720;
+	//camW = 1920;
+	//camH = 1080;
 
 	manage = manager(camW, camH);
 
 	//ofSetFrameRate(10);
 
 	camProxySize = 0.25;
+	
+
 	cam.initGrabber(camW, camH);
 
 	threshold = 90;
@@ -137,7 +143,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	ofClear(ofColor::grey);
+	ofClear(ofColor::darkRed);
 	ofDrawBitmapString("start draw", 0, 20);
 
 

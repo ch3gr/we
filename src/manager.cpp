@@ -25,6 +25,9 @@ manager::manager(int _camW, int _camH)
 
 	camW = _camW;
 	camH = _camH;
+	
+	previewScale = 0.5;
+
 	nextPersonId = 0;
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debug.allocate(ofGetWindowWidth(), ofGetWindowHeight());
@@ -68,7 +71,7 @@ void manager::draw() {
 	update();
 
 	canvas.begin();
-	//ofClear(0);
+	ofClear(0);
 
 	for (int p = 0; p < we.size(); ++p)
 		we[p].draw();
@@ -80,11 +83,7 @@ void manager::draw() {
 }
 
 void manager::drawDebug() {
-	ofPushMatrix();
-	//ofTranslate(1000, 0);
-	ofScale(0.4, 0.4);
 	debug.draw(0, 0);
-	ofPopMatrix();
 }
 
 void manager::info() {
@@ -170,11 +169,17 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 
 	//////////////////////
 	// debug Draw cam
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	camFrame.draw(0, 0);
+	ofPopMatrix();
 	// -----------------------
 
 	// debug Draw BG
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	bg.draw(camW, 0);		// to debug buffer
+	ofPopMatrix();
 	// -----------------------
 
 
@@ -189,7 +194,10 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	//faceMask.end();
 
 	// debug Draw faceMask
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	faceMask.draw(camW*2, 0);
+	ofPopMatrix();
 	// -----------------------
 
 
@@ -212,7 +220,10 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	faceDetectMask.end();
 
 	// debug Draw FaceDetectMask
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	faceDetectMask.draw(0,camH);
+	ofPopMatrix();
 	// -----------------------
 
 
@@ -238,7 +249,10 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	prep.end();
 
 	// debug Draw FaceDetectMask
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	prep.draw(camW, camH);
+	ofPopMatrix();
 	// -----------------------
 
 
@@ -305,7 +319,10 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	contourMask.end();
 
 	// debug Draw countourMask
-	contourMask.draw(camW*2, camH);
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
+	contourMask.draw(camW*2, 0);
+	ofPopMatrix();
 	// -----------------------
 
 
@@ -313,6 +330,7 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	ofSetColor(ofColor::red);
 	ofSetLineWidth(3);
 	ofPushMatrix();
+	ofScale(previewScale, previewScale);
 	ofTranslate(camW , camH);
 	for (int i = 0; i < controurSurfaces.size(); i++) {
 		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
@@ -320,6 +338,7 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 			outlines[i].draw();
 	}
 	ofPopMatrix();
+	ofSetColor(ofColor::white);
 	// -----------------------
 
 
@@ -346,7 +365,10 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	comp.end();
 
 	// debug Draw countourMask
-	//comp.draw(camW*2.5, camH);
+	ofPushMatrix();
+	ofScale(previewScale, previewScale);
+	comp.draw(camW * 2, camH);
+	ofPopMatrix();
 	// -----------------------
 
 
