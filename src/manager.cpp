@@ -41,6 +41,7 @@ manager::manager(int _camW, int _camH)
 	managerFFinder.setMinSizeScale(0.1);
 
 	
+	
 }
 
 
@@ -115,48 +116,74 @@ void manager::detectFaces(ofImage cam) {
 	
 	float timer = ofGetElapsedTimef();
 	managerFFinder.update(cam);
+	RectTracker tracker = managerFFinder.getTracker();
+	
+
+	const vector<unsigned int>& newLabels = tracker.getNewLabels();
+	for (int l = 0; l < newLabels.size(); l++) {
+		cout << "New Label : " << newLabels[l] << endl;
+	}
+	
 
 	ofPushMatrix();
 	debugTrackers.begin();
+	ofClear(0);
 	cam.draw(0, 0);
-	managerFFinder.draw();
+	//managerFFinder.draw();
+	
+	for (int i = 0; i < managerFFinder.size(); i++) {
+		ofRectangle face = managerFFinder.getObject(i);
+		int label = managerFFinder.getLabel(i);
+		float age = tracker.getAge(label);
 
+		cv::Vec2f vel = managerFFinder.getVelocity(i);
+
+		ofNoFill();
+		ofDrawRectangle(face);
+		ofDrawLine(face.getCenter(), face.getCenter() + ofPoint(vel[0],vel[1]));
+		ofFill();
+		ofDrawCircle(face.getCenter(), 2);
+
+		// adjust face
+		face.scaleFromCenter(2, 2);
+		face.translateY(face.getHeight()*0.1);
+
+		//if (face.getRight() > camW)
+		//	face.setWidth(camW - face.x);
+		//if (face.getBottom() > camH)
+		//	face.setHeight(camH - face.y);
+		face.setX( ofClamp(face.x, 0, camW) );
+		face.setY( ofClamp(face.y, 0, camH) );
+		face.setWidth( ofClamp(face.getWidth(), 0, camW - face.x) );
+		face.setHeight( ofClamp(face.getHeight(), 0, camH - face.y) );
+
+		ofImage portrait;
+		portrait.clone(cam);
+		portrait.crop(face.x, face.y, face.width, face.height);
+		portrait.resize(200, 200);
+		portrait.draw(200 * i, 600);
+		ofDrawBitmapString(label, 200 * i, 600 + 10);
+		ofDrawBitmapString(age, 200 * i, 600 + 40);
+
+
+
+		// If there is a new label, add a person
+		for (int l = 0; l < newLabels.size(); l++) {
+			if (label == newLabels[l]) {
+				ofImage portrait = makePortrait(cam, face, 0.1);
+				addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+			}
+		}
+	}
+	
 	ofDrawBitmapString(ofGetElapsedTimef()-timer, 0, 20);
-
-	//if (managerFFinder.size() > 0 && false)
-	//{
-	//	ofRectangle bbox = managerFFinder.getObjectSmoothed(0);
-	//}
-
+	
+	
 	debugTrackers.end();
 	ofPopMatrix();
 
-
-	//if (managerFFinder.size() > 0 && false )
-	//{
-	//	ofRectangle bbox = managerFFinder.getObjectSmoothed(0);
-	//	bbox.scaleFromCenter(2, 2);
-	//	bbox.translateY(bbox.getHeight()*0.1);
-	//	if (bbox.getRight() > camW)
-	//		bbox.setWidth(camW - bbox.x);
-	//	if (bbox.getBottom() > camH)
-	//		bbox.setHeight(camH - bbox.y);
-
-	//	ofImage personFace;
-	//	ofPixels pixels;
-
-
-		//comp.readToPixels(pixels);
-		//personFace.setFromPixels(pixels.getPixels(), camW, camH, OF_IMAGE_COLOR_ALPHA, true);
-
-		//personFace.crop(bbox.x, bbox.y, bbox.width, bbox.height);
-
-
-		//ofImage portrait;
-		//portrait.setFromPixels(personFace.getPixels());
-		//portrait.resize(100, 100);
-
-	//}
+	
+	
 }
 
 void manager::detectFaces(ofVideoGrabber cam) {
@@ -181,7 +208,7 @@ void manager::detectFaces(ofVideoGrabber cam) {
 
 
 
-ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
+ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrepThress) {
 
 	if (!bg.isAllocated())
 		setBg(camFrame);
@@ -400,6 +427,6 @@ ofImage manager::makePortrait( ofImage camFrame, float shdPrepThress) {
 	ofImage out;
 	comp.readToPixels(out.getPixelsRef());
 	
-
+	out.crop(crop.x, crop.y, crop.getWidth(), crop.getHeight());
 	return out;
 }

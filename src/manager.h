@@ -4,6 +4,8 @@
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
 
+using namespace ofxCv;
+
 class manager
 {
 public:
@@ -25,7 +27,7 @@ public:
 
 	void manager::detectFaces(ofImage cam);
 	void manager::detectFaces(ofVideoGrabber cam);
-	ofImage manager::makePortrait(ofImage cam, float shdThress);
+	ofImage manager::makePortrait(ofImage cam, ofRectangle crop, float shdThress);
 
 
 	int camW, camH;
@@ -40,7 +42,8 @@ public:
 
 	ofShader shdPrep, shdComp;
 
-	ofxCv::ObjectFinder managerFFinder;
+	ObjectFinder managerFFinder;
+
 
 private:
 	ofImage bg;

@@ -172,7 +172,8 @@ void ofApp::draw() {
 		// direct draw portrait
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
-		manage.makePortrait(camFrame, shdPrepThress).draw(0,camH);
+		ofRectangle crop = ofRectangle(0, 0, camW, camH);
+		manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
 	}
 
 	if (debugTrackers){
@@ -273,7 +274,9 @@ void ofApp::keyPressed(int key) {
 	if (key == 'd') {
 		debugMode = !debugMode;
 	}
-
+	if (key == 't') {
+		debugTrackers = !debugTrackers;
+	}
 	// info
 	if (key == 'i') {
 		manage.info();
@@ -365,11 +368,12 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 	
 
-	if (false) {
+	if (true) {
+		ofRectangle crop = ofRectangle(0, 0, camW, camH);
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
-		ofImage portraint = manage.makePortrait(camFrame, shdPrepThress);
-		manage.addPerson(portraint, mouseX, mouseY);
+		ofImage portrait = manage.makePortrait(camFrame, crop, shdPrepThress);
+		manage.addPerson(portrait, mouseX- portrait.getWidth()/2, mouseY- portrait.getHeight()/2);
 	}
 
 
