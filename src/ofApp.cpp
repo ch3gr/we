@@ -38,6 +38,7 @@ void ofApp::setup() {
 	
 
 	cam.initGrabber(camW, camH);
+	camHacked.allocate(camW, camH);
 
 	threshold = 90;
 
@@ -50,15 +51,14 @@ void ofApp::setup() {
 
 
 	debugMode = false;
+	debugTrackers = true;
+	gScale = 0.5;
 
 
-	img1.allocate(camW, camH, OF_IMAGE_COLOR);
-
-	img1.loadImage("testFace1.jpg");
-	img2.loadImage("testFace2.jpg");
-	img1.resize(camW, camH);
-	img2.resize(camW, camH);
-
+	//img1.allocate(camW, camH, OF_IMAGE_COLOR);
+	g1.loadImage("george_A_01.tif");
+	g2.loadImage("george_A_02.tif");
+	g3.loadImage("george_A_03.tif");
 
 	// Doesn't grab anything, cam is still empty, kind of works
 	//manage.setBg(cam);
@@ -88,7 +88,25 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
-		manage.detectFaces(cam);
+
+		camHacked.begin();
+		ofClear(0);
+		cam.draw(0, 0);
+		ofPushMatrix();
+		ofTranslate(mouseX, mouseY);
+		ofScale(gScale, gScale);
+		g1.draw(-g1.getWidth()*0.5, -g1.getHeight()*0.5);
+		//g1.draw( g1.getWidth()/3, 0);
+		//g2.draw(-g2.getWidth()/3, 0);
+		//g3.draw(0, g3.getHeight()*0.75);
+		ofPopMatrix();
+		camHacked.end();
+
+
+		ofImage bridge;
+		camHacked.readToPixels(bridge.getPixelsRef());
+		
+		manage.detectFaces(bridge);
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
@@ -156,6 +174,11 @@ void ofApp::draw() {
 		camFrame.setFromPixels(cam.getPixels());
 		manage.makePortrait(camFrame, shdPrepThress).draw(0,camH);
 	}
+
+	if (debugTrackers){
+		manage.drawDebugTrackers();
+	}
+
 	manage.draw();
 
 
@@ -256,6 +279,10 @@ void ofApp::keyPressed(int key) {
 		manage.info();
 	}
 
+	if (key == 's' || key == 'S') {
+		cam.videoSettings();
+	}
+
 	/////// temp keys
 
 
@@ -263,15 +290,19 @@ void ofApp::keyPressed(int key) {
 
 
 	if (key == '+') {
-		mousePic++;
-		// include the unknown face
-		if (mousePic > ofFaces.size())
-			mousePic = ofFaces.size() - 0;
+		gScale = ofClamp(gScale+0.1, 0, 2);
+		cout << "gScale :" << gScale << endl;
+		//mousePic++;
+		//// include the unknown face
+		//if (mousePic > ofFaces.size())
+		//	mousePic = ofFaces.size() - 0;
 	}
 	if (key == '-') {
-		mousePic--;
-		if (mousePic < 0)
-			mousePic = 0;
+		gScale = ofClamp(gScale-0.1, 0, 2);
+		cout << "gScale :" << gScale << endl;
+		//mousePic--;
+		//if (mousePic < 0)
+		//	mousePic = 0;
 	}
 
 	if (key == ']') {
@@ -332,10 +363,14 @@ void ofApp::mouseDragged(int x, int y, int button) {
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
 
-	ofImage camFrame;
-	camFrame.setFromPixels(cam.getPixels());
-	ofImage portraint = manage.makePortrait(camFrame, shdPrepThress);
-	manage.addPerson(portraint, mouseX, mouseY);
+	
+
+	if (false) {
+		ofImage camFrame;
+		camFrame.setFromPixels(cam.getPixels());
+		ofImage portraint = manage.makePortrait(camFrame, shdPrepThress);
+		manage.addPerson(portraint, mouseX, mouseY);
+	}
 
 
 }

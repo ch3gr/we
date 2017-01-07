@@ -18,6 +18,7 @@ public:
 	void manager::update();
 	void manager::draw();
 	void manager::drawDebug();
+	void manager::drawDebugTrackers();
 	void manager::info();
 	void manager::clearPeople();
 
@@ -34,6 +35,7 @@ public:
 	int nextPersonId;
 	ofFbo canvas;
 	ofFbo debug;
+	ofFbo debugTrackers;
 	
 
 	ofShader shdPrep, shdComp;

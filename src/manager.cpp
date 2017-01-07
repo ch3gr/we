@@ -31,9 +31,14 @@ manager::manager(int _camW, int _camH)
 	nextPersonId = 0;
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debug.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
 	managerFFinder.setup("haarcascade_frontalface_default.xml");
 	managerFFinder.setPreset(ObjectFinder::Fast);
+	//managerFFinder.setPreset(ObjectFinder::Accurate);
+	//managerFFinder.setPreset(ObjectFinder::Sensitive);
+	managerFFinder.setRescale(0.25);
+	managerFFinder.setMinSizeScale(0.1);
 
 	
 }
@@ -86,6 +91,10 @@ void manager::drawDebug() {
 	debug.draw(0, 0);
 }
 
+void manager::drawDebugTrackers(){
+	debugTrackers.draw(0, 0);
+}
+
 void manager::info() {
 	cout << "I am a manager and these are my people :" << endl;
 	for (int p = 0; p < we.size(); ++p)
@@ -101,11 +110,25 @@ void manager::clearPeople() {
 
 void manager::detectFaces(ofImage cam) {
 
+	float s = 1;
+	cam.resize(cam.getWidth()*s, cam.getHeight()*s);
+	
+	float timer = ofGetElapsedTimef();
 	managerFFinder.update(cam);
 
 	ofPushMatrix();
-	ofTranslate(camW, 0);
+	debugTrackers.begin();
 	cam.draw(0, 0);
+	managerFFinder.draw();
+
+	ofDrawBitmapString(ofGetElapsedTimef()-timer, 0, 20);
+
+	//if (managerFFinder.size() > 0 && false)
+	//{
+	//	ofRectangle bbox = managerFFinder.getObjectSmoothed(0);
+	//}
+
+	debugTrackers.end();
 	ofPopMatrix();
 
 

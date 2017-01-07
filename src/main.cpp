@@ -12,7 +12,7 @@ int main( ){
 //	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
-	ofSetWindowPosition(0, 20);
+	ofSetWindowPosition(1920, 20);
 
 	//ofCreateWindow(settings);
 	ofRunApp(new ofApp());
@@ -40,4 +40,10 @@ faceMask
 \addons\ofxFaceTracker\example-advanced
 Check how you can compile with static linking so it doesn't complain about missing :
 msvcp140.dll
+
+
+Checkare auto gia high FPS
+https://github.com/arturoc/ofxGStreamer
+
+tracker.h sto ofxCv
 */

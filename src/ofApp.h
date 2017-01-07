@@ -38,6 +38,7 @@ public:
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 	bool debugMode;
+	bool debugTrackers;
 
 
 	int camW, camH;
@@ -48,14 +49,17 @@ public:
 	ofImage frameCompute;				// reduced frame for computation
 
 	ofFbo contourMask;					// calculated contours
+	
+	
+	ofFbo camHacked;
 
 
 
 
 
 
-	ofImage img1;
-	ofImage img2;
+	ofImage g1, g2, g3;
+	float gScale;
 
 	float shdPrepThress;
 
