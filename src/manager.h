@@ -37,7 +37,7 @@ public:
 	vector<person> we;
 	int nextPersonId;
 	ofFbo canvas;
-	ofFbo debug;
+	ofFbo debugPortrait;
 	ofFbo debugTrackers;
 	
 

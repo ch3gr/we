@@ -26,11 +26,11 @@ manager::manager(int _camW, int _camH)
 	camW = _camW;
 	camH = _camH;
 	
-	previewScale = 0.5;
+	previewScale = 0.333;
 
 	nextPersonId = 0;
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
-	debug.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
 	managerFFinder.setup("haarcascade_frontalface_default.xml");
@@ -68,11 +68,22 @@ void manager::addPerson(ofImage _face, int _x, int _y) {
 
 void manager::curate() {
 	int size = we.size();
+
+	// spread them at the bottom of the half window
 	for (int p = 0; p < size; ++p) {
-		int x = (float(p) / float(size)) * ofGetWidth();
-		int y = ofGetHeight()*0.5;
+		int x = (1-(float(p) / float(size))) * ofGetWidth();
+		int yMax = ofGetHeight()*0.5;
+		int yMin = ofGetHeight() - we[p].face.getHeight();
+
+		ofSeedRandom(we[p].id);
+		float wave = cos(ofGetElapsedTimef() + ofRandom(1000))*0.5 +0.5;
+		int y = ofLerp(yMin, yMax, wave);
 
 		we[p].setPos(x, y);
+		
+		// debug some values
+		//if (p == 0)
+		//	cout << we[p].id << endl;
 	}
 		
 }
@@ -102,7 +113,8 @@ void manager::draw() {
 }
 
 void manager::drawDebug() {
-	debug.draw(0, 0);
+	debugPortrait.draw(ofGetWidth()-camW, 0);
+	
 }
 
 void manager::drawDebugTrackers(){
@@ -227,27 +239,27 @@ void manager::detectFaces(ofVideoGrabber cam) {
 
 
 
-ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrepThress) {
+ofImage manager::makePortrait( ofImage camFrame, ofRectangle framing, float shdPrepThress) {
 
 	if (!bg.isAllocated())
 		setBg(camFrame);
 
-	debug.begin();
+	debugPortrait.begin();
 	ofClear(0);
 
 
 	//////////////////////
-	// debug Draw cam
+	// debugPortrait Draw cam
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	camFrame.draw(0, 0);
 	ofPopMatrix();
 	// -----------------------
 
-	// debug Draw BG
+	// debugPortrait Draw BG
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
-	bg.draw(camW, 0);		// to debug buffer
+	bg.draw(camW, 0);		// to debugPortrait buffer
 	ofPopMatrix();
 	// -----------------------
 
@@ -262,7 +274,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	//ofDrawCircle(100, 100, 70);
 	//faceMask.end();
 
-	// debug Draw faceMask
+	// debugPortrait Draw faceMask
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	faceMask.draw(camW*2, 0);
@@ -270,30 +282,26 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	// -----------------------
 
 
-
 	//////////////////////
 	// Face detection
 	//detectFaces(camFrame);
-	// Draw squares for each face tracked
-	ofFbo faceDetectMask;
-	faceDetectMask.allocate(camW, camH, GL_RGBA);
-	faceDetectMask.begin();
+	// Draw a white square that covers the bounding box of the face
+	ofFbo faceBoundsFBO;
+	faceBoundsFBO.allocate(camW, camH, GL_RGBA);
+	faceBoundsFBO.begin();
 	ofClear(0);
 	ofSetColor(ofColor::white);
-	for (int i = 0; i < managerFFinder.size(); i++) {
-		ofRectangle face = managerFFinder.getObjectSmoothed(i);
-		face.scaleFromCenter(2, 2);
-		face.translateY(face.getHeight()*0.1);
-		ofDrawRectangle(face);
-	}
-	faceDetectMask.end();
+	ofDrawRectangle(framing);
+	//ofDrawRectangle(faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight());
+	faceBoundsFBO.end();
 
-	// debug Draw FaceDetectMask
+	// debugPortrait Draw FaceDetectMask
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
-	faceDetectMask.draw(0,camH);
+	faceBoundsFBO.draw(0, camH);
 	ofPopMatrix();
 	// -----------------------
+
 
 
 
@@ -308,16 +316,19 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	shdPrep.setUniformTexture("tex0", camFrame.getTexture(), 0);
 	if (bg.isAllocated())
 		shdPrep.setUniformTexture("tex1", bg.getTexture(), 1);
-	shdPrep.setUniformTexture("tex2", faceMask.getTexture(), 2);
-	shdPrep.setUniformTexture("tex3", faceDetectMask.getTexture(), 3);
+	shdPrep.setUniformTexture("tex2", faceBoundsFBO.getTexture(), 2);
+	//shdPrep.setUniformTexture("tex3", faceMask.getTexture(), 3);
+
 
 	shdPrep.setUniform1f("thress", shdPrepThress);
 
+	// Render Prep
 	camFrame.draw(0, 0);
+
 	shdPrep.end();
 	prep.end();
 
-	// debug Draw FaceDetectMask
+	// debugPortrait Draw FaceDetectMask
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	prep.draw(camW, camH);
@@ -329,16 +340,21 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 
 	
 
-
+	//////////////////////
+	// Find contrours on the binary image
 	//////////////////////
 	// prep contours
 	// Pass Preped buffer to cvImage and detect contours
 
 	ofPixels prepedPixels;
 	prep.readToPixels(prepedPixels, 0);
+	//prepedPixels.crop( faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight() );
 	ofxCvGrayscaleImage cvImgGrayscale;
-	cvImgGrayscale.allocate(camW, camH);
+	cvImgGrayscale.allocate(prepedPixels.getWidth(), prepedPixels.getHeight());
 	cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
+
+	//cvSetImageROI(cvImgGrayscale.getCvImage(), cvRect(faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight()));
+	
 
 	cvImgGrayscale.dilate();
 	cvImgGrayscale.dilate();
@@ -387,7 +403,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	}
 	contourMask.end();
 
-	// debug Draw countourMask
+	// debugPortrait Draw countourMask
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	contourMask.draw(camW*2, 0);
@@ -395,7 +411,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	// -----------------------
 
 
-	// debug Draw countour lines
+	// debugPortrait Draw countour lines
 	ofSetColor(ofColor::red);
 	ofSetLineWidth(3);
 	ofPushMatrix();
@@ -433,7 +449,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	shdComp.end();
 	comp.end();
 
-	// debug Draw countourMask
+	// debugPortrait Draw countourMask
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	comp.draw(camW * 2, camH);
@@ -441,14 +457,14 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 	// -----------------------
 
 
-	debug.end();
+	debugPortrait.end();
 
 	ofImage fboImage;
 	comp.readToPixels(fboImage.getPixelsRef());
 	ofImage out;
 	out.clone(fboImage);
 	
-	cout << crop.x << " " << crop.y << " " << crop.getWidth() << " " << crop.getHeight() << endl;
-	out.crop(crop.x, crop.y, crop.getWidth(), crop.getHeight());
+	//cout << framing.x << " " << framing.y << " " << framing.getWidth() << " " << framing.getHeight() << endl;
+	out.crop(framing.x, framing.y, framing.getWidth(), framing.getHeight());
 	return out;
 }

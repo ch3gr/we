@@ -2,8 +2,8 @@
 
 uniform sampler2DRect tex0;		// contour mask
 uniform sampler2DRect tex1;		// background
-uniform sampler2DRect tex2;		// face mask
-uniform sampler2DRect tex3;		// face Detect mask
+uniform sampler2DRect tex2;		// face bounds
+uniform sampler2DRect tex3;		// face mask
 uniform float thress;
 
 
@@ -13,17 +13,18 @@ void main()
 
 	vec4 cam = texture2DRect(tex0, st);
     vec4 bg = texture2DRect(tex1, st);
-	vec4 faceMask = texture2DRect(tex2, st);
-	vec4 faceDetectMask = texture2DRect(tex3, st);
+	vec4 faceBounds = texture2DRect(tex2, st);
+	vec4 faceMask = texture2DRect(tex3, st);
 	
 
 	// luminance rgb weights
 	const vec3 W = vec3(0.2125, 0.7154, 0.0721);
 	float camL = dot( vec3(cam), W );
 	float bgL = dot( vec3(bg), W );
+	
 	float outL = abs(camL-bgL);
-	outL += faceMask.r;
-	//outL *= faceDetectMask.r;
+	//outL += faceMask.r;
+	outL *= faceBounds.r;
 
 	if( outL > thress )
 		outL = 255;

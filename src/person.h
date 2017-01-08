@@ -4,12 +4,12 @@
 
 class person
 {
+public:
 	int id;
 	int x;
 	int y;
 	ofImage face;
 
-public:
 	person();
 	person(int _id, int _x, int _y);
 	person(int _id, ofImage _face, int _x, int _y);

@@ -50,7 +50,7 @@ void ofApp::setup() {
 
 
 
-	debugMode = false;
+	debugMode = true;
 	debugTrackers = true;
 	gScale = 0.5;
 
@@ -170,11 +170,12 @@ void ofApp::draw() {
 	if (debugMode)
 	{
 		manage.drawDebug();
+
 		// direct draw portrait
-		ofImage camFrame;
-		camFrame.setFromPixels(cam.getPixels());
-		ofRectangle crop = ofRectangle(0, 0, camW, camH);
-		manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
+		//ofImage camFrame;
+		//camFrame.setFromPixels(cam.getPixels());
+		//ofRectangle crop = ofRectangle(0, 0, camW, camH);
+		//manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
 	}
 
 	if (debugTrackers){
@@ -289,6 +290,11 @@ void ofApp::keyPressed(int key) {
 
 	if (key == 's' || key == 'S') {
 		cam.videoSettings();
+	}
+
+	// 
+	if (key == ' ') {
+		
 	}
 
 	/////// temp keys
