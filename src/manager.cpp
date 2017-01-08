@@ -34,6 +34,7 @@ manager::manager(int _camW, int _camH)
 	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
 	managerFFinder.setup("haarcascade_frontalface_default.xml");
+//	managerFFinder.setup("haarcascade_eye.xml");
 	managerFFinder.setPreset(ObjectFinder::Fast);
 	//managerFFinder.setPreset(ObjectFinder::Accurate);
 	//managerFFinder.setPreset(ObjectFinder::Sensitive);
@@ -65,8 +66,20 @@ void manager::addPerson(ofImage _face, int _x, int _y) {
 }
 
 
+void manager::curate() {
+	int size = we.size();
+	for (int p = 0; p < size; ++p) {
+		int x = (float(p) / float(size)) * ofGetWidth();
+		int y = ofGetHeight()*0.5;
+
+		we[p].setPos(x, y);
+	}
+		
+}
+
 
 void manager::update() {
+	curate();
 	for (int p = 0; p < we.size(); ++p)
 		we[p].update();
 }
@@ -109,6 +122,8 @@ void manager::clearPeople() {
 
 
 
+
+
 void manager::detectFaces(ofImage cam) {
 
 	float s = 1;
@@ -132,45 +147,49 @@ void manager::detectFaces(ofImage cam) {
 	//managerFFinder.draw();
 	
 	for (int i = 0; i < managerFFinder.size(); i++) {
-		ofRectangle face = managerFFinder.getObject(i);
+		ofRectangle faceRect = managerFFinder.getObject(i);
 		int label = managerFFinder.getLabel(i);
 		float age = tracker.getAge(label);
 
 		cv::Vec2f vel = managerFFinder.getVelocity(i);
 
 		ofNoFill();
-		ofDrawRectangle(face);
-		ofDrawLine(face.getCenter(), face.getCenter() + ofPoint(vel[0],vel[1]));
+		ofDrawRectangle(faceRect);
+		ofDrawLine(faceRect.getCenter(), faceRect.getCenter() + ofPoint(vel[0],vel[1]));
 		ofFill();
-		ofDrawCircle(face.getCenter(), 2);
+		ofDrawCircle(faceRect.getCenter(), 2);
 
 		// adjust face
-		face.scaleFromCenter(2, 2);
-		face.translateY(face.getHeight()*0.1);
+		faceRect.scaleFromCenter(2, 2);
+		faceRect.translateY(faceRect.getHeight()*0.1);
 
-		//if (face.getRight() > camW)
-		//	face.setWidth(camW - face.x);
-		//if (face.getBottom() > camH)
-		//	face.setHeight(camH - face.y);
-		face.setX( ofClamp(face.x, 0, camW) );
-		face.setY( ofClamp(face.y, 0, camH) );
-		face.setWidth( ofClamp(face.getWidth(), 0, camW - face.x) );
-		face.setHeight( ofClamp(face.getHeight(), 0, camH - face.y) );
+		//if (faceRect.getRight() > camW)
+		//	faceRect.setWidth(camW - faceRect.x);
+		//if (faceRect.getBottom() > camH)
+		//	faceRect.setHeight(camH - faceRect.y);
+		faceRect.setX( ofClamp(faceRect.x, 0, camW) );
+		faceRect.setY( ofClamp(faceRect.y, 0, camH) );
+		faceRect.setWidth( ofClamp(faceRect.getWidth(), 0, camW - faceRect.x) );
+		faceRect.setHeight( ofClamp(faceRect.getHeight(), 0, camH - faceRect.y) );
 
+		// Draw captured face
 		ofImage portrait;
 		portrait.clone(cam);
-		portrait.crop(face.x, face.y, face.width, face.height);
+		portrait.crop(faceRect.x, faceRect.y, faceRect.width, faceRect.height);
 		portrait.resize(200, 200);
-		portrait.draw(200 * i, 600);
-		ofDrawBitmapString(label, 200 * i, 600 + 10);
-		ofDrawBitmapString(age, 200 * i, 600 + 40);
+		ofPushMatrix();
+		ofTranslate(cam.getWidth()*s, 0);
+		portrait.draw(200 * i, 0);
+		ofDrawBitmapString(label, 200 * i, 10);
+		ofDrawBitmapString(age, 200 * i, 40);
+		ofPopMatrix();
 
 
 
 		// If there is a new label, add a person
 		for (int l = 0; l < newLabels.size(); l++) {
 			if (label == newLabels[l]) {
-				ofImage portrait = makePortrait(cam, face, 0.1);
+				ofImage portrait = makePortrait(cam, faceRect, 0.1);
 				addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
 			}
 		}
@@ -424,9 +443,12 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle crop, float shdPrep
 
 	debug.end();
 
+	ofImage fboImage;
+	comp.readToPixels(fboImage.getPixelsRef());
 	ofImage out;
-	comp.readToPixels(out.getPixelsRef());
+	out.clone(fboImage);
 	
+	cout << crop.x << " " << crop.y << " " << crop.getWidth() << " " << crop.getHeight() << endl;
 	out.crop(crop.x, crop.y, crop.getWidth(), crop.getHeight());
 	return out;
 }

@@ -23,6 +23,7 @@ public:
 	void manager::drawDebugTrackers();
 	void manager::info();
 	void manager::clearPeople();
+	void manager::curate();
 
 
 	void manager::detectFaces(ofImage cam);

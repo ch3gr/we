@@ -161,7 +161,8 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	ofClear(ofColor::darkRed);
+	ofClear(ofColor::lightBlue);
+
 	ofDrawBitmapString("start draw", 0, 20);
 
 
@@ -264,18 +265,22 @@ void ofApp::keyPressed(int key) {
 	if (key == 'b')
 	{
 		manage.setBg(cam);
+		cout << "Background Set" << endl;
 	}
 
 	if (key == 'c')
 	{
 		manage.clearPeople();
+		cout << "People cleared" << endl;
 	}
 
 	if (key == 'd') {
 		debugMode = !debugMode;
+		cout << "Debug Mode" << debugMode << endl;
 	}
 	if (key == 't') {
 		debugTrackers = !debugTrackers;
+		cout << "Debug tracking :" << debugTrackers << endl;
 	}
 	// info
 	if (key == 'i') {

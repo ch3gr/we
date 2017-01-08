@@ -29,16 +29,26 @@ void person::setFace( ofImage _face){
 	face = _face;
 }
 
+void person::setPos(int _x, int _y) {
+	x = _x;
+	y = _y;
+}
+
+
 void person::update() {
-	ofSeedRandom(id);
-	x += sin((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
-	y += cos((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
+	//ofSeedRandom(id);
+	//x += sin((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
+	//y += cos((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
 }
 
 void person::draw() {
+	ofNoFill();
+	ofSetColor(ofColor::blue);
+	ofDrawRectangle(x, y, face.getWidth(), face.getHeight());
+	ofSetColor(ofColor::white);
 	if (face.isAllocated())
 		face.draw(x, y);
-	ofDrawBitmapString(id, x, y);
+	ofDrawBitmapString(id, x, y+20);
 }
 
 void person::info() {
