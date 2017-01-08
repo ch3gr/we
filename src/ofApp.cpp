@@ -161,7 +161,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	ofClear(ofColor::lightBlue);
+	ofClear(ofColor::lightGrey);
 
 	ofDrawBitmapString("start draw", 0, 20);
 

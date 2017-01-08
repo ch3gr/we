@@ -71,7 +71,7 @@ void manager::curate() {
 
 	// spread them at the bottom of the half window
 	for (int p = 0; p < size; ++p) {
-		int x = (1-(float(p) / float(size))) * ofGetWidth();
+		int x = (1-(float(p) / float(size-1))) * ofGetWidth();
 		int yMax = ofGetHeight()*0.5;
 		int yMin = ofGetHeight() - we[p].face.getHeight();
 
@@ -125,11 +125,27 @@ void manager::info() {
 	cout << "I am a manager and these are my people :" << endl;
 	for (int p = 0; p < we.size(); ++p)
 		we[p].info();
+
+
+	// print more info
+	RectTracker tracker = managerFFinder.getTracker();
+	const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
+	for (int l = 0; l < deadLabels.size(); l++) {
+		cout << "DeadLabel : " << deadLabels[l] << endl;
+	}
+	
 }
+
 
 void manager::clearPeople() {
 	we.clear();
 }
+
+
+
+
+
+
 
 
 
@@ -143,7 +159,12 @@ void manager::detectFaces(ofImage cam) {
 	
 	float timer = ofGetElapsedTimef();
 	managerFFinder.update(cam);
+
+	// Get the tracer
 	RectTracker tracker = managerFFinder.getTracker();
+	//tracker.setMaximumDistance(100);
+	//tracker.setPersistence(30);
+
 	
 
 	const vector<unsigned int>& newLabels = tracker.getNewLabels();
