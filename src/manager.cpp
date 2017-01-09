@@ -33,13 +33,13 @@ manager::manager(int _camW, int _camH)
 	debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
-	managerFFinder.setup("haarcascade_frontalface_default.xml");
-//	managerFFinder.setup("haarcascade_eye.xml");
-	managerFFinder.setPreset(ObjectFinder::Fast);
-	//managerFFinder.setPreset(ObjectFinder::Accurate);
-	//managerFFinder.setPreset(ObjectFinder::Sensitive);
-	managerFFinder.setRescale(0.25);
-	managerFFinder.setMinSizeScale(0.1);
+	scout.setup("haarcascade_frontalface_default.xml");
+//	scout.setup("haarcascade_eye.xml");
+	scout.setPreset(ObjectFinder::Fast);
+	//scout.setPreset(ObjectFinder::Accurate);
+	//scout.setPreset(ObjectFinder::Sensitive);
+	scout.setRescale(0.25);
+	scout.setMinSizeScale(0.1);
 
 	
 	
@@ -85,7 +85,9 @@ void manager::curate() {
 		//if (p == 0)
 		//	cout << we[p].id << endl;
 	}
-		
+	
+	
+	
 }
 
 
@@ -128,7 +130,7 @@ void manager::info() {
 
 
 	// print more info
-	RectTracker tracker = managerFFinder.getTracker();
+	RectTracker tracker = scout.getTracker();
 	const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
 	for (int l = 0; l < deadLabels.size(); l++) {
 		cout << "DeadLabel : " << deadLabels[l] << endl;
@@ -158,13 +160,18 @@ void manager::detectFaces(ofImage cam) {
 	cam.resize(cam.getWidth()*s, cam.getHeight()*s);
 	
 	float timer = ofGetElapsedTimef();
-	managerFFinder.update(cam);
 
-	// Get the tracer
-	RectTracker tracker = managerFFinder.getTracker();
+	scout.update(cam);
+
+
+	// Get the tracker
+	RectTracker tracker = scout.getTracker();
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
-
+	
+	//candidates.track(scout.getLabel());
+	// HERE
+	//////////////////////////////////////////////////////
 	
 
 	const vector<unsigned int>& newLabels = tracker.getNewLabels();
@@ -177,17 +184,17 @@ void manager::detectFaces(ofImage cam) {
 	debugTrackers.begin();
 	ofClear(0);
 	cam.draw(0, 0);
-	//managerFFinder.draw();
+	scout.draw();
 	
-	for (int i = 0; i < managerFFinder.size(); i++) {
-		ofRectangle faceRect = managerFFinder.getObject(i);
-		int label = managerFFinder.getLabel(i);
+	for (int i = 0; i < scout.size(); i++) {
+		ofRectangle faceRect = scout.getObject(i);
+		int label = scout.getLabel(i);
 		float age = tracker.getAge(label);
 
-		cv::Vec2f vel = managerFFinder.getVelocity(i);
+		cv::Vec2f vel = scout.getVelocity(i);
 
 		ofNoFill();
-		ofDrawRectangle(faceRect);
+		//ofDrawRectangle(faceRect);
 		ofDrawLine(faceRect.getCenter(), faceRect.getCenter() + ofPoint(vel[0],vel[1]));
 		ofFill();
 		ofDrawCircle(faceRect.getCenter(), 2);

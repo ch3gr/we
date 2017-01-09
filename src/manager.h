@@ -1,8 +1,10 @@
 #pragma once
 #include "ofMain.h"
+#include "candidate.h"
 #include "person.h"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
+
 
 using namespace ofxCv;
 
@@ -43,9 +45,11 @@ public:
 
 	ofShader shdPrep, shdComp;
 
-	ObjectFinder managerFFinder;
+	ObjectFinder scout;
+	RectTrackerFollower<candidate> candidates;
+	
 
-
+	
 private:
 	ofImage bg;
 
