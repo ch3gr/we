@@ -4,43 +4,59 @@ using namespace ofxCv;
 using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
-	color.set(ofColor::orange);
-	dyingTime = 1;
+	rememberPeriod = 2;
+	evaluatePeriod = 2;
+	birthTime = ofGetElapsedTimef();
+	trigger = false;
+	captured = false;
 	faceBounds = toOf(track);
+	cout << "New Label : " << label << endl;
 }
 
 void candidate::update(const cv::Rect& track) {
 	faceBounds = toOf(track);
+	lostTime = -1;
+
+	if (trigger) {
+		trigger = false;
+		captured = true;
+	}
+	else if (!captured && ofGetElapsedTimef() > birthTime + evaluatePeriod)
+		trigger = true;
+	
 }
 
 void candidate::kill() {
-	cout << "Die" << endl;
-
-	float curTime = ofGetElapsedTimef();
-	if (startedDying == 0) {
-		startedDying = curTime;
-	}
-	else if (curTime - startedDying > dyingTime) {
+	if (lostTime == -1)
+		lostTime = ofGetElapsedTimef();
+	else if (ofGetElapsedTimef() - lostTime > rememberPeriod)
 		dead = true;
-	}
-
 }
 
 void candidate::draw() {
 	ofPushStyle();
 	ofColor c = ofColor::blue;
-	float fade = 0;
-	if (startedDying) {
-		fade = ofMap(ofGetElapsedTimef() - startedDying, 0, dyingTime, 0, 1, true);
-		ofColor a = ofColor::green;
-		ofColor b = ofColor::red;
-		c = a*(1-fade) + b*(fade);
+	if (captured)
+		c = ofColor::green;
+	
 
+	float fade = 0;
+	if (lostTime != -1) {
+		fade = ofMap(ofGetElapsedTimef(), lostTime, lostTime+rememberPeriod, 1, 0, true);
+		c.a = fade * 255;
 	}
-	ofSetColor(c);
-	ofNoFill();
-	faceBounds.scaleFromCenter(0.9, 0.9);
+	if (trigger) {
+		ofFill();
+		ofSetColor(ofColor::white);
+	}
+	else {
+		ofSetColor(c);
+		ofNoFill();
+		ofSetLineWidth(2);
+	}
 	ofDrawRectangle(faceBounds);
+	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
+	
 	ofPopStyle();
 }
 
@@ -59,3 +75,4 @@ candidate::~candidate()
 void candidate::info() {
 	cout << "I am a candidate" << endl;
 }
+

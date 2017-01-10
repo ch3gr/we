@@ -6,11 +6,16 @@
 class candidate : public ofxCv::RectFollower
 {
 public:
-	ofColor color;
 	ofRectangle faceBounds;
-	float startedDying;
-	float dyingTime;
+	
+	float rememberPeriod ;
+	float evaluatePeriod ;
 
+	float birthTime;
+	float lostTime;
+
+	bool trigger;
+	bool captured;
 
 	candidate();
 	~candidate();

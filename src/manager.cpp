@@ -109,10 +109,24 @@ void manager::draw() {
 		we[p].draw();
 
 
+	vector<candidate> & followers = candidates.getFollowers();
+	for (int i = 0; i < followers.size(); i++) {
+		followers[i].draw();
+	}
+	
+
 	canvas.end();
 
 	canvas.draw(0, 0);
 }
+
+
+
+
+
+
+
+
 
 void manager::drawDebug() {
 	debugPortrait.draw(ofGetWidth()-camW, 0);
@@ -169,23 +183,41 @@ void manager::detectFaces(ofImage cam) {
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
 	
-	//candidates.track(scout.getLabel());
+
 	// HERE
 	//////////////////////////////////////////////////////
+	//vector<cv::Rect> ;
+	//for (int i = 0; i < scout.size(); i++) {
+	//	ofRectangle ofr = scout.getObject(i);
+	//	cv::Rect obj = cv::Rect(ofr.x, ofr.y, ofr.getWidth(), ofr.getHeight());
+	//	facesBB.push_back(obj);
+	//}
+
 	
 
-	const vector<unsigned int>& newLabels = tracker.getNewLabels();
-	for (int l = 0; l < newLabels.size(); l++) {
-		cout << "New Label : " << newLabels[l] << endl;
+	candidates.track(scout.getObjects());
+
+	vector <candidate> candidatesList = candidates.getFollowers();
+	for (int c = 0; c < candidatesList.size(); c++) {
+		if (candidatesList[c].trigger) {
+			ofImage portrait = makePortrait(cam, candidatesList[c].faceBounds, 0.1);
+			addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+		}
 	}
+
+	//const vector<unsigned int>& newLabels = tracker.getNewLabels();
+	//for (int l = 0; l < newLabels.size(); l++) {
+	//	cout << "New Label : " << newLabels[l] << endl;
+	//}
 	
 
 	ofPushMatrix();
 	debugTrackers.begin();
 	ofClear(0);
 	cam.draw(0, 0);
-	scout.draw();
-	
+	//scout.draw();
+
+	// needs a bit of cleanUp
 	for (int i = 0; i < scout.size(); i++) {
 		ofRectangle faceRect = scout.getObject(i);
 		int label = scout.getLabel(i);
@@ -227,12 +259,12 @@ void manager::detectFaces(ofImage cam) {
 
 
 		// If there is a new label, add a person
-		for (int l = 0; l < newLabels.size(); l++) {
-			if (label == newLabels[l]) {
-				ofImage portrait = makePortrait(cam, faceRect, 0.1);
-				addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
-			}
-		}
+		//for (int l = 0; l < newLabels.size(); l++) {
+		//	if (label == newLabels[l]) {
+		//		ofImage portrait = makePortrait(cam, faceRect, 0.1);
+		//		addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+		//	}
+		//}
 	}
 	
 	ofDrawBitmapString(ofGetElapsedTimef()-timer, 0, 20);
