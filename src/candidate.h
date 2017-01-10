@@ -22,6 +22,7 @@ public:
 
 	void candidate::info();
 
+
 	void setup(const cv::Rect& track);
 	void update(const cv::Rect& track);
 	void kill();

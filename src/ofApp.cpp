@@ -292,10 +292,8 @@ void ofApp::keyPressed(int key) {
 		cam.videoSettings();
 	}
 
-	// 
-	if (key == ' ') {
-		
-	}
+
+
 
 	/////// temp keys
 

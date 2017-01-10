@@ -53,5 +53,5 @@ void person::draw() {
 
 void person::info() {
 
-	cout << "I am person : " << id << endl;
+	cout << "I am person : " << id << "X: " << x << endl;
 }

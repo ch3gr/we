@@ -42,7 +42,7 @@ manager::manager(int _camW, int _camH)
 	scout.setMinSizeScale(0.1);
 
 	
-	
+
 }
 
 
@@ -71,7 +71,8 @@ void manager::curate() {
 
 	// spread them at the bottom of the half window
 	for (int p = 0; p < size; ++p) {
-		int x = (1-(float(p) / float(size-1))) * ofGetWidth();
+		int x = (1-(float(p+1) / float(size))) * ofGetWidth();
+		
 		int yMax = ofGetHeight()*0.5;
 		int yMin = ofGetHeight() - we[p].face.getHeight();
 
@@ -108,16 +109,9 @@ void manager::draw() {
 	for (int p = 0; p < we.size(); ++p)
 		we[p].draw();
 
-
-	vector<candidate> & followers = candidates.getFollowers();
-	for (int i = 0; i < followers.size(); i++) {
-		followers[i].draw();
-	}
-	
-
 	canvas.end();
-
 	canvas.draw(0, 0);
+
 }
 
 
@@ -170,6 +164,10 @@ void manager::clearPeople() {
 
 void manager::detectFaces(ofImage cam) {
 
+	if (!bg.isAllocated())
+		setBg(cam);
+
+
 	float s = 1;
 	cam.resize(cam.getWidth()*s, cam.getHeight()*s);
 	
@@ -183,18 +181,6 @@ void manager::detectFaces(ofImage cam) {
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
 	
-
-	// HERE
-	//////////////////////////////////////////////////////
-	//vector<cv::Rect> ;
-	//for (int i = 0; i < scout.size(); i++) {
-	//	ofRectangle ofr = scout.getObject(i);
-	//	cv::Rect obj = cv::Rect(ofr.x, ofr.y, ofr.getWidth(), ofr.getHeight());
-	//	facesBB.push_back(obj);
-	//}
-
-	
-
 	candidates.track(scout.getObjects());
 
 	vector <candidate> candidatesList = candidates.getFollowers();
@@ -205,49 +191,44 @@ void manager::detectFaces(ofImage cam) {
 		}
 	}
 
-	//const vector<unsigned int>& newLabels = tracker.getNewLabels();
-	//for (int l = 0; l < newLabels.size(); l++) {
-	//	cout << "New Label : " << newLabels[l] << endl;
-	//}
 	
 
 	ofPushMatrix();
 	debugTrackers.begin();
 	ofClear(0);
 	cam.draw(0, 0);
-	//scout.draw();
 
-	// needs a bit of cleanUp
+	// Draw the face trackers
+	//scout.draw();
+	vector<candidate> & followers = candidates.getFollowers();
+	for (int i = 0; i < followers.size(); i++) {
+		followers[i].draw();
+	}
+
+
+
+	// Only needed for debuging
 	for (int i = 0; i < scout.size(); i++) {
-		ofRectangle faceRect = scout.getObject(i);
+		ofRectangle faceBounds = scout.getObject(i);
 		int label = scout.getLabel(i);
 		float age = tracker.getAge(label);
 
 		cv::Vec2f vel = scout.getVelocity(i);
 
 		ofNoFill();
-		//ofDrawRectangle(faceRect);
-		ofDrawLine(faceRect.getCenter(), faceRect.getCenter() + ofPoint(vel[0],vel[1]));
+		//ofDrawRectangle(faceBounds);
+		ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + ofPoint(vel[0],vel[1]));
 		ofFill();
-		ofDrawCircle(faceRect.getCenter(), 2);
+		ofDrawCircle(faceBounds.getCenter(), 2);
 
 		// adjust face
-		faceRect.scaleFromCenter(2, 2);
-		faceRect.translateY(faceRect.getHeight()*0.1);
+		faceBounds = adjustFaceBounds(faceBounds, camW, camH);
 
-		//if (faceRect.getRight() > camW)
-		//	faceRect.setWidth(camW - faceRect.x);
-		//if (faceRect.getBottom() > camH)
-		//	faceRect.setHeight(camH - faceRect.y);
-		faceRect.setX( ofClamp(faceRect.x, 0, camW) );
-		faceRect.setY( ofClamp(faceRect.y, 0, camH) );
-		faceRect.setWidth( ofClamp(faceRect.getWidth(), 0, camW - faceRect.x) );
-		faceRect.setHeight( ofClamp(faceRect.getHeight(), 0, camH - faceRect.y) );
 
 		// Draw captured face
 		ofImage portrait;
 		portrait.clone(cam);
-		portrait.crop(faceRect.x, faceRect.y, faceRect.width, faceRect.height);
+		portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
 		portrait.resize(200, 200);
 		ofPushMatrix();
 		ofTranslate(cam.getWidth()*s, 0);
@@ -257,14 +238,6 @@ void manager::detectFaces(ofImage cam) {
 		ofPopMatrix();
 
 
-
-		// If there is a new label, add a person
-		//for (int l = 0; l < newLabels.size(); l++) {
-		//	if (label == newLabels[l]) {
-		//		ofImage portrait = makePortrait(cam, faceRect, 0.1);
-		//		addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
-		//	}
-		//}
 	}
 	
 	ofDrawBitmapString(ofGetElapsedTimef()-timer, 0, 20);
@@ -299,10 +272,11 @@ void manager::detectFaces(ofVideoGrabber cam) {
 
 
 
-ofImage manager::makePortrait( ofImage camFrame, ofRectangle framing, float shdPrepThress) {
+ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float shdPrepThress) {
 
-	if (!bg.isAllocated())
-		setBg(camFrame);
+
+
+	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
 
 	debugPortrait.begin();
 	ofClear(0);
@@ -351,7 +325,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle framing, float shdP
 	faceBoundsFBO.begin();
 	ofClear(0);
 	ofSetColor(ofColor::white);
-	ofDrawRectangle(framing);
+	ofDrawRectangle(faceBounds);
 	//ofDrawRectangle(faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight());
 	faceBoundsFBO.end();
 
@@ -524,7 +498,25 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle framing, float shdP
 	ofImage out;
 	out.clone(fboImage);
 	
-	//cout << framing.x << " " << framing.y << " " << framing.getWidth() << " " << framing.getHeight() << endl;
-	out.crop(framing.x, framing.y, framing.getWidth(), framing.getHeight());
+	//cout << faceBounds.x << " " << faceBounds.y << " " << faceBounds.getWidth() << " " << faceBounds.getHeight() << endl;
+	out.crop(faceBounds.x, faceBounds.y, faceBounds.getWidth(), faceBounds.getHeight());
 	return out;
+}
+
+
+
+
+// Make the faceBounds bigger for better cropping
+ofRectangle adjustFaceBounds(ofRectangle faceBounds, int camW, int camH) {
+	
+	faceBounds.scaleFromCenter(2, 2);
+	faceBounds.translateY(faceBounds.getHeight()*0.1);
+
+	// make sure the new bounds are not getting outside the camera image
+	faceBounds.setX(ofClamp(faceBounds.x, 0, camW));
+	faceBounds.setY(ofClamp(faceBounds.y, 0, camH));
+	faceBounds.setWidth(ofClamp(faceBounds.getWidth(), 0, camW - faceBounds.x));
+	faceBounds.setHeight(ofClamp(faceBounds.getHeight(), 0, camH - faceBounds.y));
+
+	return faceBounds;
 }

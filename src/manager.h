@@ -55,3 +55,5 @@ private:
 
 };
 
+
+ofRectangle adjustFaceBounds(ofRectangle _faceBounds, int camW, int camH);
