@@ -106,7 +106,9 @@ void ofApp::update() {
 		ofImage bridge;
 		camHacked.readToPixels(bridge.getPixelsRef());
 		
+		
 		manage.detectFaces(bridge);
+		
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);

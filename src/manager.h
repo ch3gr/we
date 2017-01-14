@@ -34,6 +34,8 @@ public:
 
 
 	int camW, camH;
+	int fDetectW;
+	int cDetectW;
 	float previewScale;
 
 	vector<person> we;
@@ -41,6 +43,7 @@ public:
 	ofFbo canvas;
 	ofFbo debugPortrait;
 	ofFbo debugTrackers;
+	ofFbo debugTimers;
 	
 
 	ofShader shdPrep, shdComp;

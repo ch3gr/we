@@ -25,6 +25,8 @@ manager::manager(int _camW, int _camH)
 
 	camW = _camW;
 	camH = _camH;
+	fDetectW = 128;
+	cDetectW = 128;
 	
 	previewScale = 0.333;
 
@@ -32,13 +34,14 @@ manager::manager(int _camW, int _camH)
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	debugTimers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
 	scout.setup("haarcascade_frontalface_default.xml");
 //	scout.setup("haarcascade_eye.xml");
 	scout.setPreset(ObjectFinder::Fast);
 	//scout.setPreset(ObjectFinder::Accurate);
 	//scout.setPreset(ObjectFinder::Sensitive);
-	scout.setRescale(0.25);
+	scout.setRescale( fDetectW/float(camW) );
 	scout.setMinSizeScale(0.1);
 
 	
@@ -112,6 +115,8 @@ void manager::draw() {
 	canvas.end();
 	canvas.draw(0, 0);
 
+	debugTimers.draw(0, 0);
+
 }
 
 
@@ -170,17 +175,27 @@ void manager::clearPeople() {
 
 
 void manager::detectFaces(ofImage cam) {
+	
+	// Timer
+	std::stringstream ss;
+	ss << "detectFaces" << endl;
+	float timerDetectFaces = ofGetElapsedTimef();
 
 	if (!bg.isAllocated())
 		setBg(cam);
 
 
-	float s = 1;
-	cam.resize(cam.getWidth()*s, cam.getHeight()*s);
-	
-	float timer = ofGetElapsedTimef();
+	cam.resize(cam.getWidth(), cam.getHeight());
+
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " start" << endl;
+
 
 	scout.update(cam);
+
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " update" << endl;
+
 
 
 	// Get the tracker
@@ -198,7 +213,10 @@ void manager::detectFaces(ofImage cam) {
 		}
 	}
 
-	
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " get candidates" << endl;
+
+
 
 	ofPushMatrix();
 	debugTrackers.begin();
@@ -212,6 +230,8 @@ void manager::detectFaces(ofImage cam) {
 		followers[i].draw();
 	}
 
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " draw more shit" << endl;
 
 
 
@@ -239,7 +259,7 @@ void manager::detectFaces(ofImage cam) {
 		portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
 		portrait.resize(200, 200);
 		ofPushMatrix();
-		ofTranslate(cam.getWidth()*s, 0);
+		ofTranslate(cam.getWidth(), 0);
 		portrait.draw(200 * i, 0);
 		ofDrawBitmapString(label, 200 * i, 10);
 		ofDrawBitmapString(age, 200 * i, 40);
@@ -248,14 +268,21 @@ void manager::detectFaces(ofImage cam) {
 
 	}
 	
-	ofDrawBitmapString(ofGetElapsedTimef()-timer, 0, 20);
 	
 	
+
 	debugTrackers.end();
 	ofPopMatrix();
 
 	
-	
+	// timer
+	debugTimers.begin();
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " end";
+	ofDrawBitmapStringHighlight(ss.str(), 10, 20, ofColor::black, ofColor::red);
+	debugTimers.end();
+	////////
+
+
 }
 
 void manager::detectFaces(ofVideoGrabber cam) {
@@ -282,7 +309,13 @@ void manager::detectFaces(ofVideoGrabber cam) {
 
 ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float shdPrepThress) {
 
+	// Timer
+	std::stringstream ss;
+	ss << "MakePortrait" << endl;
+	float timerDetectFaces = ofGetElapsedTimef();
+	/////////
 
+	float cScale = cDetectW / float(camW);
 
 	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
 
@@ -306,6 +339,10 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	// -----------------------
 
 
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " draw cam and BG" << endl;
+
+
 	//////////////////////
 	// Temp Draw face mask - will be replace with faceTracker
 	ofFbo faceMask;
@@ -324,9 +361,12 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	// -----------------------
 
 
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " temp draw mask" << endl;
+
+
 	//////////////////////
 	// Face detection
-	//detectFaces(camFrame);
 	// Draw a white square that covers the bounding box of the face
 	ofFbo faceBoundsFBO;
 	faceBoundsFBO.allocate(camW, camH, GL_RGBA);
@@ -334,7 +374,6 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ofClear(0);
 	ofSetColor(ofColor::white);
 	ofDrawRectangle(faceBounds);
-	//ofDrawRectangle(faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight());
 	faceBoundsFBO.end();
 
 	// debugPortrait Draw FaceDetectMask
@@ -345,6 +384,8 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	// -----------------------
 
 
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " Face detection" << endl;
 
 
 	////////////////////
@@ -378,9 +419,12 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	// -----------------------
 
 
-
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " Prep render" << endl;
 
 	
+
+
 
 	//////////////////////
 	// Find contrours on the binary image
@@ -388,24 +432,52 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	// prep contours
 	// Pass Preped buffer to cvImage and detect contours
 
-	ofPixels prepedPixels;
-	prep.readToPixels(prepedPixels, 0);
-	//prepedPixels.crop( faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight() );
-	ofxCvGrayscaleImage cvImgGrayscale;
-	cvImgGrayscale.allocate(prepedPixels.getWidth(), prepedPixels.getHeight());
-	cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
+	//ofPixels prepedPixels;
+	//prep.readToPixels(prepedPixels, 0);
+	//prepedPixels.resize(camW*cScale, camH*cScale);
 
+	ofImage grabPrep;
+	prep.begin();
+	grabPrep.grabScreen(0,0,prep.getWidth(), prep.getHeight());
+	prep.end();
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " FBO grab image" << endl;
+	//grabPrep.resize(camW*cScale, camH*cScale);
+
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " FBO resize" << endl;
+
+
+	//ofxCvGrayscaleImage cvImgGrayscale;
+	//cvImgGrayscale.allocate(prepedPixels.getWidth(), prepedPixels.getHeight());
+	//cvImgGrayscale.setFromPixels(prepedPixels.getChannel(0));
+
+	ofxCvGrayscaleImage cvImgGrayscale;
+	cvImgGrayscale.allocate(grabPrep.getWidth(), grabPrep.getHeight());
+	ss << ((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " cvAlocate" << endl;
+	cvImgGrayscale.setFromPixels(grabPrep.getPixels().getChannel(0));
+	ss << ((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " cvGrey" << endl;
+	cvImgGrayscale.resize(camW*cScale, camH*cScale);
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " cvResize" << endl;
 	//cvSetImageROI(cvImgGrayscale.getCvImage(), cvRect(faceBounds.getX(), faceBounds.getY(), faceBounds.getWidth(), faceBounds.getHeight()));
 	
+	// timer
 
-	cvImgGrayscale.dilate();
-	cvImgGrayscale.dilate();
-	cvImgGrayscale.erode();
-	cvImgGrayscale.erode();
+	//cvImgGrayscale.dilate();
+	//cvImgGrayscale.dilate();
+	//cvImgGrayscale.erode();
+	//cvImgGrayscale.erode();
+
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " cvDilate" << endl;
 
 	// calc contours
 	ofxCvContourFinder contourFinder;
-	contourFinder.findContours(cvImgGrayscale, 64 * 64, camW * camH, 5, false, true);
+	contourFinder.findContours(cvImgGrayscale, ((camW*cScale*0.2)*(camH*cScale*0.2)), ((camW*cScale)*(camH*cScale)), 5, false, true);
+
+	
+
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " Find contours" << endl;
 
 
 	// populate arrays of contours
@@ -437,12 +509,15 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ofFbo contourMask;
 	contourMask.allocate(camW, camH, GL_RGBA);
 	contourMask.begin();
+	ofPushMatrix();
+	ofScale(1 / cScale, 1 /cScale);
 	ofClear(0);
 	ofSetColor(ofColor::black);
 	for (unsigned int i = 0; i < controurSurfaces.size(); i++) {
 		controurSurfaces[i].setFillColor(ofColor(255));
 		controurSurfaces[i].draw();
 	}
+	ofPopMatrix();
 	contourMask.end();
 
 	// debugPortrait Draw countourMask
@@ -459,6 +534,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	ofTranslate(camW*2 , 0);
+	ofScale(1 / cScale, 1 / cScale);
 	for (int i = 0; i < controurSurfaces.size(); i++) {
 		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
 		for (int i = 0; i < outlines.size(); i++)
@@ -470,7 +546,8 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 
 
 
-
+	// timer
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " Draw contour" << endl;
 
 
 
@@ -508,6 +585,21 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	
 	//cout << faceBounds.x << " " << faceBounds.y << " " << faceBounds.getWidth() << " " << faceBounds.getHeight() << endl;
 	out.crop(faceBounds.x, faceBounds.y, faceBounds.getWidth(), faceBounds.getHeight());
+
+
+
+
+
+	// timer
+	debugTimers.begin();
+	ss << roundf((ofGetElapsedTimef() - timerDetectFaces) * 1000) << " end";
+	ofDrawBitmapStringHighlight(ss.str(), 10, 250, ofColor::black, ofColor::red);
+	debugTimers.end();
+	////////
+
+
+
+
 	return out;
 }
 
