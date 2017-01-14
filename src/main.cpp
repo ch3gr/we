@@ -21,6 +21,24 @@ int main( ){
 
 
 /*
+
+toDo
+- Threading
+- Fix camera res & processing resolution
+- Face recognition !!!
+- write to disk all the faces and 10 snapshots etc
+- Webcame frame rate
+- Mipos to manage exei reference tou cam (h' camHacked) apo tin arxi ston constractor
+- fine tune tracker settings
+- control gia shader thresshold
+- curate
+
+
+
+
+
+
+
 // post compile event to copy shaders from /src to /bin/data
 xcopy /e /y "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders\"
 links

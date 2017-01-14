@@ -37,7 +37,7 @@ public:
 
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
-	bool debugMode;
+	bool debugPortrait;
 	bool debugTrackers;
 
 

@@ -122,9 +122,15 @@ void manager::draw() {
 
 
 
-void manager::drawDebug() {
+void manager::drawDebug(ofImage camFrame) {
+
+	vector<candidate> & followers = candidates.getFollowers();
+	if (followers.size() > 0) {
+		ofRectangle someone = followers[0].faceBounds;
+		makePortrait(camFrame, someone, 0.1);
+	}
+
 	debugPortrait.draw(ofGetWidth()-camW, 0);
-	
 }
 
 void manager::drawDebugTrackers(){
@@ -132,17 +138,18 @@ void manager::drawDebugTrackers(){
 }
 
 void manager::info() {
+	// print people
 	cout << "I am a manager and these are my people :" << endl;
 	for (int p = 0; p < we.size(); ++p)
 		we[p].info();
 
 
-	// print more info
-	RectTracker tracker = scout.getTracker();
-	const vector<unsigned int>& deadLabels = tracker.getDeadLabels();
-	for (int l = 0; l < deadLabels.size(); l++) {
-		cout << "DeadLabel : " << deadLabels[l] << endl;
+	// candidates
+	vector<candidate> & followers = candidates.getFollowers();
+	for (int i = 0; i < followers.size(); i++) {
+		cout << "I am follower : " << followers[i].getLabel()  << endl;
 	}
+
 	
 }
 
@@ -204,6 +211,7 @@ void manager::detectFaces(ofImage cam) {
 	for (int i = 0; i < followers.size(); i++) {
 		followers[i].draw();
 	}
+
 
 
 
@@ -450,7 +458,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ofSetLineWidth(3);
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
-	ofTranslate(camW , camH);
+	ofTranslate(camW*2 , 0);
 	for (int i = 0; i < controurSurfaces.size(); i++) {
 		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
 		for (int i = 0; i < outlines.size(); i++)

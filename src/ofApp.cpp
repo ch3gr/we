@@ -50,7 +50,7 @@ void ofApp::setup() {
 
 
 
-	debugMode = true;
+	debugPortrait = true;
 	debugTrackers = true;
 	gScale = 0.5;
 
@@ -165,11 +165,12 @@ void ofApp::draw() {
 
 	ofDrawBitmapString("start draw", 0, 20);
 
+	ofImage camFrame;
+	camFrame.setFromPixels(cam.getPixels());
 
-
-	if (debugMode)
+	if (debugPortrait)
 	{
-		manage.drawDebug();
+		manage.drawDebug(camFrame);
 
 		// direct draw portrait
 		//ofImage camFrame;
@@ -215,8 +216,7 @@ void ofApp::draw() {
 	//cvImgColor *= cvImgColor2;
 
 
-	ofImage camFrame;
-	camFrame.setFromPixels(cam.getPixels());
+
 
 
 
@@ -276,8 +276,8 @@ void ofApp::keyPressed(int key) {
 	}
 
 	if (key == 'd') {
-		debugMode = !debugMode;
-		cout << "Debug Mode" << debugMode << endl;
+		debugPortrait = !debugPortrait;
+		cout << "Debug Mode" << debugPortrait << endl;
 	}
 	if (key == 't') {
 		debugTrackers = !debugTrackers;
