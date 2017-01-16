@@ -30,7 +30,16 @@ void ofApp::setup() {
 	//camW = 1920;
 	//camH = 1080;
 
+
+	// Create Manager
 	manage = manager(camW, camH);
+	// Load background from disk if exists
+	if (ofFile::doesFileExist("background.jpg", true)) {
+		ofImage background;
+		background.loadImage("background.jpg");
+		manage.setBg(background);
+		cout << "Background loaded from disk" << endl;
+	}
 
 	//ofSetFrameRate(10);
 
@@ -52,13 +61,34 @@ void ofApp::setup() {
 
 	debugPortrait = true;
 	debugTrackers = true;
-	gScale = 0.5;
 
 
-	//img1.allocate(camW, camH, OF_IMAGE_COLOR);
-	g1.loadImage("george_A_01.tif");
-	g2.loadImage("george_A_02.tif");
-	g3.loadImage("george_A_03.tif");
+	//samplePeople
+	selectSamplePerson = -1;
+	uCount = 0;
+	fScale = 0.75;
+	ofDirectory sampleFaceDir("");
+	sampleFaceDir.listDir();
+	for (int i = 0; i < sampleFaceDir.size(); i++) {
+		string path = sampleFaceDir.getPath(i);
+		// Use only directories starting with f_
+		if (path.substr(0, 2).compare("f_") == 0) {
+			cout << "Loading sample images from : "<< path << endl;
+
+			vector<ofImage> onePerson;
+			ofDirectory dir(path);
+			//dir.allowExt("tif");
+			dir.listDir();
+			for (int p = 0; p < dir.size(); p++) {
+				ofImage newPhoto;
+				cout << "Loading sample image : " << dir.getPath(p) << endl;
+				newPhoto.loadImage(dir.getPath(p));
+				onePerson.push_back(newPhoto);
+			}
+			samplePeople.push_back(onePerson);
+		}
+	}
+
 
 	// Doesn't grab anything, cam is still empty, kind of works
 	//manage.setBg(cam);
@@ -92,15 +122,19 @@ void ofApp::update() {
 		camHacked.begin();
 		ofClear(0);
 		cam.draw(0, 0);
-		ofPushMatrix();
-		ofTranslate(mouseX, mouseY);
-		ofScale(gScale, gScale);
-		g1.draw(-g1.getWidth()*0.5, -g1.getHeight()*0.5);
-		//g1.draw( g1.getWidth()/3, 0);
-		//g2.draw(-g2.getWidth()/3, 0);
-		//g3.draw(0, g3.getHeight()*0.75);
-		ofPopMatrix();
+		
+		// Add a sample person on the mouse cursor
+		if (selectSamplePerson >= 0) {
+			ofImage extraFace = samplePeople[selectSamplePerson][uCount % samplePeople[selectSamplePerson].size()];
+			ofPushMatrix();
+			ofTranslate(mouseX, mouseY);
+			ofScale(fScale, fScale);
+			extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.5);
+
+			ofPopMatrix();
+		}
 		camHacked.end();
+
 
 
 		ofImage bridge;
@@ -144,6 +178,8 @@ void ofApp::update() {
 		//cvImgTmp.setFromPixels(cvImgColor.getPixels());
 		//cvImgTmp.setFromPixels( personCanvas.)
 		//cvImgColor *= cvImgColor2;
+
+		uCount++;
 	}
 }
 
@@ -268,13 +304,6 @@ void ofApp::keyPressed(int key) {
 	if (key == 'b')
 	{
 		ofImage background;
-		background.loadImage("background.jpg");
-		manage.setBg(background);
-		cout << "Background loaded from disk" << endl;
-	}
-	if (key == 'B')
-	{
-		ofImage background;
 		background.setFromPixels(cam.getPixels());
 		background.saveImage("background.jpg");
 		manage.setBg(background);
@@ -309,21 +338,27 @@ void ofApp::keyPressed(int key) {
 
 	/////// temp keys
 
-
-
+	if (key == OF_KEY_LEFT) {
+		selectSamplePerson = ofClamp(--selectSamplePerson, -1, samplePeople.size() - 1);
+		cout << "Select Sample Person : " << selectSamplePerson << endl;
+	}
+	if (key == OF_KEY_RIGHT) {
+		selectSamplePerson = ofClamp(++selectSamplePerson, -1, samplePeople.size() - 1);
+		cout << "Select Sample Person : " << selectSamplePerson << endl;
+	}
 
 
 	if (key == '+') {
-		gScale = ofClamp(gScale+0.1, 0, 2);
-		cout << "gScale :" << gScale << endl;
+		fScale = ofClamp(fScale+0.1, 0, 2);
+		cout << "fScale :" << fScale << endl;
 		//mousePic++;
 		//// include the unknown face
 		//if (mousePic > ofFaces.size())
 		//	mousePic = ofFaces.size() - 0;
 	}
 	if (key == '-') {
-		gScale = ofClamp(gScale-0.1, 0, 2);
-		cout << "gScale :" << gScale << endl;
+		fScale = ofClamp(fScale-0.1, 0, 2);
+		cout << "fScale :" << fScale << endl;
 		//mousePic--;
 		//if (mousePic < 0)
 		//	mousePic = 0;

@@ -27,7 +27,7 @@ manager::manager(int _camW, int _camH)
 	camW = _camW;
 	camH = _camH;
 	fDetectW = 128;
-	cDetectW = 128;
+	cDetectW = camW*0.5;
 	
 	previewScale = 0.333;
 
@@ -116,7 +116,7 @@ void manager::draw() {
 	canvas.end();
 	canvas.draw(0, 0);
 
-	debugTimers.draw(0, 0);
+	//debugTimers.draw(0, 0);
 
 }
 
@@ -389,11 +389,12 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ss << getTimeDiff(timerDetectFaces) << " Face detection" << endl;
 
 
+
 	////////////////////
 	// Prep Render
 
 	ofFbo prep;
-	prep.allocate(camW, camH, GL_RGBA);
+	prep.allocate(camW*cScale, camH*cScale, GL_RGBA);
 	prep.begin();
 	shdPrep.begin();
 	// use as a tex0 the same image you are drawing below
@@ -402,30 +403,32 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 		shdPrep.setUniformTexture("tex1", bg.getTexture(), 1);
 	shdPrep.setUniformTexture("tex2", faceBoundsFBO.getTexture(), 2);
 	//shdPrep.setUniformTexture("tex3", faceMask.getTexture(), 3);
-
-
 	shdPrep.setUniform1f("thress", shdPrepThress);
 
 	// Render Prep
+	ofPushMatrix();
+	ofScale(cScale, cScale);
 	camFrame.draw(0, 0);
+	ofPopMatrix();
 
 	shdPrep.end();
 	prep.end();
 
 	// debugPortrait Draw FaceDetectMask
 	ofPushMatrix();
+	//ofScale(1 / cScale, 1 / cScale);
 	ofScale(previewScale, previewScale);
+	//ofTranslate(camW, camH);
 	prep.draw(camW, camH);
 	ofPopMatrix();
 	// -----------------------
-
+	
 
 	// timer
 	ss << getTimeDiff(timerDetectFaces) << " Prep render" << endl;
 
 	
-
-
+	
 
 	//////////////////////
 	// Find contrours on the binary image
@@ -441,7 +444,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 
 		// timer
 		ss << getTimeDiff(timerDetectFaces) << " FBO grab image" << endl;
-	grabPrep.resize(camW*cScale, camH*cScale);
+	//grabPrep.resize(camW*cScale, camH*cScale);
 
 		// timer
 		ss << getTimeDiff(timerDetectFaces) << " FBO resize" << endl;
@@ -461,10 +464,10 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 		ss << getTimeDiff(timerDetectFaces) << " cvResize" << endl;
 	
 
-	cvImgGrayscale.dilate();
-	cvImgGrayscale.dilate();
-	cvImgGrayscale.erode();
-	cvImgGrayscale.erode();
+	//cvImgGrayscale.dilate();
+	//cvImgGrayscale.dilate();
+	//cvImgGrayscale.erode();
+	//cvImgGrayscale.erode();
 
 	// timer
 	ss << getTimeDiff(timerDetectFaces) << " cvDilate" << endl;
@@ -513,11 +516,6 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	contourMask.allocate(camW, camH, GL_RGBA);
 	contourMask.begin();
 	ofPushMatrix();
-	// flip to go from texture coord to ofPixels
-	//glScalef(1, -1, 1);
-	//glTranslatef(0, -camH, 0);
-	//
-	//ofScale(1 / cScale, 1 /cScale);
 	ofClear(0);
 	ofSetColor(ofColor::black);
 	for (unsigned int i = 0; i < controurSurfaces.size(); i++) {
@@ -541,11 +539,6 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 	ofPushMatrix();
 	ofScale(previewScale, previewScale);
 	ofTranslate(camW*2 , 0);
-	//ofScale(1 / cScale, 1 / cScale);
-	//// flip to go from texture coord to ofPixels
-	//glScalef(1, -1, 1);
-	//glTranslatef(0, -camH, 0);
-	//
 
 	for (int i = 0; i < controurSurfaces.size(); i++) {
 		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();

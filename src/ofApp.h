@@ -56,10 +56,11 @@ public:
 
 
 
-
-
-	ofImage g1, g2, g3;
-	float gScale;
+	// Sample people faces
+	int uCount;
+	vector< vector<ofImage> > samplePeople;
+	int selectSamplePerson;
+	float fScale;
 
 	float shdPrepThress;
 
