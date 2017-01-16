@@ -32,6 +32,8 @@ toDo
 - fine tune tracker settings
 - control gia shader thresshold
 - curate
+- don't capture when the person is moving
+- better timers - https://github.com/armadillu/ofxTimeMeasurements
 
 
 

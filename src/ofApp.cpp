@@ -267,8 +267,18 @@ void ofApp::keyPressed(int key) {
 
 	if (key == 'b')
 	{
-		manage.setBg(cam);
-		cout << "Background Set" << endl;
+		ofImage background;
+		background.loadImage("background.jpg");
+		manage.setBg(background);
+		cout << "Background loaded from disk" << endl;
+	}
+	if (key == 'B')
+	{
+		ofImage background;
+		background.setFromPixels(cam.getPixels());
+		background.saveImage("background.jpg");
+		manage.setBg(background);
+		cout << "Background Saved to disk" << endl;
 	}
 
 	if (key == 'c')

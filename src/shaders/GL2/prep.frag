@@ -24,7 +24,7 @@ void main()
 	
 	float outL = abs(camL-bgL);
 	//outL += faceMask.r;
-	outL *= faceBounds.r;
+	//outL *= faceBounds.r;
 
 	if( outL > thress )
 		outL = 255;
