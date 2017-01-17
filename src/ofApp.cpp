@@ -37,6 +37,7 @@ void ofApp::setup() {
 	if (ofFile::doesFileExist("background.jpg", true)) {
 		ofImage background;
 		background.loadImage("background.jpg");
+		background.resize(camW, camH);
 		manage.setBg(background);
 		cout << "Background loaded from disk" << endl;
 	}
@@ -129,7 +130,8 @@ void ofApp::update() {
 			ofPushMatrix();
 			ofTranslate(mouseX, mouseY);
 			ofScale(fScale, fScale);
-			extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.5);
+			extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
+			
 
 			ofPopMatrix();
 		}

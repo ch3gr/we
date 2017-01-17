@@ -26,7 +26,7 @@ manager::manager(int _camW, int _camH)
 
 	camW = _camW;
 	camH = _camH;
-	fDetectW = 128;
+	fDetectW = 256;
 	cDetectW = camW*0.5;
 	
 	previewScale = 0.333;
@@ -44,8 +44,10 @@ manager::manager(int _camW, int _camH)
 	//scout.setPreset(ObjectFinder::Sensitive);
 	scout.setRescale( fDetectW/float(camW) );
 	scout.setMinSizeScale(0.1);
+	scout.setMaxSizeScale(0.8);
 
-	
+	candidates.setMaximumDistance(camW / 5);
+	//candidates.setPersistence(10);
 
 }
 
@@ -203,7 +205,8 @@ void manager::detectFaces(ofImage cam) {
 	RectTracker tracker = scout.getTracker();
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
-	
+
+	candidates.setPersistence( ofGetFrameRate() * 0.5 );
 	candidates.track(scout.getObjects());
 
 	vector <candidate> candidatesList = candidates.getFollowers();
