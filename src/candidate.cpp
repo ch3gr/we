@@ -6,16 +6,28 @@ using namespace cv;
 void candidate::setup(const cv::Rect& track) {
 	rememberPeriod = 2;
 	evaluatePeriod = 2;
+	lostTime = -1;
 	birthTime = ofGetElapsedTimef();
+
 	trigger = false;
 	captured = false;
+	tracking = true;
+
 	faceBounds = toOf(track);
-	cout << "New Label : " << label << endl;
+	pos = pos0 = faceBounds.getCenter();
+	vel = ofVec2f(0, 0);
+
+	cout << "New Candidate : " << label << endl;
 }
 
 void candidate::update(const cv::Rect& track) {
-	faceBounds = toOf(track);
+	tracking = true;
 	lostTime = -1;
+
+	faceBounds = toOf(track);
+	pos = faceBounds.getCenter();
+	vel = pos - pos0;
+	pos0 = pos;
 
 	if (trigger) {
 		trigger = false;
@@ -26,19 +38,28 @@ void candidate::update(const cv::Rect& track) {
 	
 }
 
+
 void candidate::kill() {
-	if (lostTime == -1)
+	if (lostTime == -1){
 		lostTime = ofGetElapsedTimef();
-	else if (ofGetElapsedTimef() - lostTime > rememberPeriod)
+		tracking = false;
+		birthTime = ofGetElapsedTimef();
+	}
+	else if (ofGetElapsedTimef() > lostTime + rememberPeriod)
 		dead = true;
 }
+
 
 void candidate::draw() {
 	ofPushStyle();
 	ofColor c = ofColor::blue;
 	if (captured)
 		c = ofColor::green;
-	
+
+	if( tracking )
+		ofSetLineWidth(3);
+	else
+		ofSetLineWidth(1);
 
 	float fade = 0;
 	if (lostTime != -1) {
@@ -52,12 +73,20 @@ void candidate::draw() {
 	else {
 		ofSetColor(c);
 		ofNoFill();
-		ofSetLineWidth(2);
+		
 	}
 	ofDrawRectangle(faceBounds);
 	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
-	
 	ofPopStyle();
+
+	ofPushStyle();
+	ofSetColor(ofColor::lightGrey);
+	ofDrawLine(pos, pos + vel);
+	ofSetColor(ofColor::darkGrey);
+	ofDrawCircle(pos, 3);
+	ofPopStyle();
+
+	tracking = false;
 }
 
 
