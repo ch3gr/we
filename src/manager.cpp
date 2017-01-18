@@ -217,6 +217,7 @@ void manager::detectFaces(ofImage cam) {
 		}
 	}
 
+
 	// timer
 	ss << getTimeDiff(timerDetectFaces) << " get candidates" << endl;
 
