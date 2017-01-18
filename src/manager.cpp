@@ -202,11 +202,11 @@ void manager::detectFaces(ofImage cam) {
 
 
 	// Get the tracker
-	//RectTracker tracker = scout.getTracker();
+	RectTracker tracker = scout.getTracker();
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
-	//candidates.setPersistence( ofGetFrameRate() * 0.5 );
 
+	candidates.setPersistence( ofGetFrameRate() * 0.5 );
 	candidates.track(scout.getObjects());
 
 	vector <candidate> candidatesList = candidates.getFollowers();
@@ -228,44 +228,51 @@ void manager::detectFaces(ofImage cam) {
 	cam.draw(0, 0);
 
 	// Draw the face trackers
-
+	//scout.draw();
+	vector<candidate> & followers = candidates.getFollowers();
+	for (int i = 0; i < followers.size(); i++) {
+		followers[i].draw();
+	}
 
 	// timer
-	ss << getTimeDiff(timerDetectFaces) << " Start drawing trackers" << endl;
+	ss << getTimeDiff(timerDetectFaces) << " draw more shit" << endl;
 
-	//// Only needed for debuging
+
+
+	// Only needed for debuging
 	for (int i = 0; i < scout.size(); i++) {
 		ofRectangle faceBounds = scout.getObject(i);
-		ofPushStyle();
+		int label = scout.getLabel(i);
+		float age = tracker.getAge(label);
+
+		cv::Vec2f vel = scout.getVelocity(i);
+
 		ofNoFill();
-		ofSetLineWidth(5);
-		ofSetColor(ofColor::white);
-		ofDrawRectangle(faceBounds);
+		//ofDrawRectangle(faceBounds);
+		ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + ofPoint(vel[0],vel[1]));
+		ofFill();
+		ofDrawCircle(faceBounds.getCenter(), 2);
+
 		// adjust face
 		faceBounds = adjustFaceBounds(faceBounds, camW, camH);
+
+
 		// Draw captured face
 		ofImage portrait;
 		portrait.clone(cam);
 		portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
-		portrait.resize(100, 100);
+		portrait.resize(200, 200);
 		ofPushMatrix();
 		ofTranslate(cam.getWidth(), 0);
-		portrait.draw(100 * i, 0);
+		portrait.draw(200 * i, 0);
+		ofDrawBitmapString(label, 200 * i, 10);
+		ofDrawBitmapString(age, 200 * i, 40);
 		ofPopMatrix();
-		ofPopStyle();
-	}
 
-	// timer
-	ss << getTimeDiff(timerDetectFaces) << " End drawing trackers" << endl;
+
+	}
 	
-	vector<candidate> & followers = candidates.getFollowers();
-	for (int i = 0; i < followers.size(); i++) {
-		followers[i].draw();
-		
-	}
-
-	// timer
-	ss << getTimeDiff(timerDetectFaces) << " End drawing Candidates" << endl;
+	
 	
 
 	debugTrackers.end();

@@ -119,31 +119,31 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
-		if (selectSamplePerson != -1)
-		{
-			camHacked.begin();
-			ofClear(0);
-			cam.draw(0, 0);
-			// Add a sample person on the mouse cursor
-			if (selectSamplePerson >= 0) {
-				ofImage extraFace = samplePeople[selectSamplePerson][uCount % samplePeople[selectSamplePerson].size()];
-				ofPushMatrix();
-				ofTranslate(mouseX, mouseY);
-				ofScale(fScale, fScale);
-				extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
 
+		camHacked.begin();
+		ofClear(0);
+		cam.draw(0, 0);
+		
+		// Add a sample person on the mouse cursor
+		if (selectSamplePerson >= 0) {
+			ofImage extraFace = samplePeople[selectSamplePerson][uCount % samplePeople[selectSamplePerson].size()];
+			ofPushMatrix();
+			ofTranslate(mouseX, mouseY);
+			ofScale(fScale, fScale);
+			extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
+			
 
-				ofPopMatrix();
-			}
-			camHacked.end();
-
-			ofImage bridge;
-			camHacked.readToPixels(bridge.getPixelsRef());
-			manage.detectFaces(bridge);
+			ofPopMatrix();
 		}
-		else {
-			manage.detectFaces(cam);
-		}
+		camHacked.end();
+
+
+
+		ofImage bridge;
+		camHacked.readToPixels(bridge.getPixelsRef());
+		
+		
+		manage.detectFaces(bridge);
 		
 
 
@@ -201,8 +201,7 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 
-	//ofClear(ofColor::lightGrey);
-	ofClear(ofColor(241, 220, 212));
+	ofClear(ofColor::lightGrey);
 
 	ofDrawBitmapString("start draw", 0, 20);
 
