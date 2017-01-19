@@ -47,7 +47,7 @@ manager::manager(int _camW, int _camH)
 	scout.setMaxSizeScale(0.8);
 
 	candidates.setMaximumDistance(camW / 5);
-	//candidates.setPersistence(10);
+	candidates.setPersistence(50);
 
 }
 
@@ -240,38 +240,38 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-	// Only needed for debuging
-	for (int i = 0; i < scout.size(); i++) {
-		ofRectangle faceBounds = scout.getObject(i);
-		int label = scout.getLabel(i);
-		float age = tracker.getAge(label);
+	//// Only needed for debuging
+	//for (int i = 0; i < scout.size(); i++) {
+	//	ofRectangle faceBounds = scout.getObject(i);
+	//	int label = scout.getLabel(i);
+	//	float age = tracker.getAge(label);
 
-		cv::Vec2f vel = scout.getVelocity(i);
+	//	cv::Vec2f vel = scout.getVelocity(i);
 
-		ofNoFill();
-		//ofDrawRectangle(faceBounds);
-		ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + ofPoint(vel[0],vel[1]));
-		ofFill();
-		ofDrawCircle(faceBounds.getCenter(), 2);
+	//	ofNoFill();
+	//	//ofDrawRectangle(faceBounds);
+	//	ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + ofPoint(vel[0],vel[1]));
+	//	ofFill();
+	//	ofDrawCircle(faceBounds.getCenter(), 2);
 
-		// adjust face
-		faceBounds = adjustFaceBounds(faceBounds, camW, camH);
-
-
-		// Draw captured face
-		ofImage portrait;
-		portrait.clone(cam);
-		portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
-		portrait.resize(200, 200);
-		ofPushMatrix();
-		ofTranslate(cam.getWidth(), 0);
-		portrait.draw(200 * i, 0);
-		ofDrawBitmapString(label, 200 * i, 10);
-		ofDrawBitmapString(age, 200 * i, 40);
-		ofPopMatrix();
+	//	// adjust face
+	//	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
 
 
-	}
+	//	// Draw captured face
+	//	ofImage portrait;
+	//	portrait.clone(cam);
+	//	portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
+	//	portrait.resize(200, 200);
+	//	ofPushMatrix();
+	//	ofTranslate(cam.getWidth(), 0);
+	//	portrait.draw(200 * i, 0);
+	//	ofDrawBitmapString(label, 200 * i, 10);
+	//	ofDrawBitmapString(age, 200 * i, 40);
+	//	ofPopMatrix();
+
+
+	//}
 	
 	
 	

@@ -8,7 +8,7 @@ class candidate : public ofxCv::RectFollower
 public:
 	ofRectangle faceBounds;
 	
-	float rememberPeriod ;
+
 	float evaluatePeriod ;
 
 	float birthTime;

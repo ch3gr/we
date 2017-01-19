@@ -4,7 +4,7 @@ using namespace ofxCv;
 using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
-	rememberPeriod = 2;
+
 	evaluatePeriod = 2;
 	birthTime = ofGetElapsedTimef();
 	trigger = false;
@@ -27,10 +27,7 @@ void candidate::update(const cv::Rect& track) {
 }
 
 void candidate::kill() {
-	if (lostTime == -1)
-		lostTime = ofGetElapsedTimef();
-	else if (ofGetElapsedTimef() - lostTime > rememberPeriod)
-		dead = true;
+	dead = true;
 }
 
 void candidate::draw() {
@@ -40,11 +37,7 @@ void candidate::draw() {
 		c = ofColor::green;
 	
 
-	float fade = 0;
-	if (lostTime != -1) {
-		fade = ofMap(ofGetElapsedTimef(), lostTime, lostTime+rememberPeriod, 1, 0, true);
-		c.a = fade * 255;
-	}
+
 	if (trigger) {
 		ofFill();
 		ofSetColor(ofColor::white);
