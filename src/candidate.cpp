@@ -5,13 +5,15 @@ using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
 
-	activeTimer = -10;
+	activeTimer = -30;
 	birthTime = ofGetElapsedTimef();
 	active = false;
 	trigger = false;
 	captured = false;
 	faceBounds = toOf(track);
 	cout << "New Label : " << label << endl;
+
+
 }
 
 void candidate::update(const cv::Rect& track) {
@@ -32,7 +34,7 @@ void candidate::update(const cv::Rect& track) {
 	faceBoundsOld = faceBounds;
 
 
-	lostTime = -1;
+
 
 	if (trigger) {
 		trigger = false;
@@ -71,11 +73,14 @@ void candidate::draw() {
 		ofSetColor(ofColor::grey);
 	}
 
+	if( isSnapshot() )
+		ofSetLineWidth(5);
 
 	ofDrawRectangle(faceBounds);
 	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
 	ofDrawBitmapString(activeTimer, faceBounds.x + 5, faceBounds.y + 30);
-	
+
+
 	ofPopStyle();
 }
 
@@ -95,3 +100,23 @@ void candidate::info() {
 	cout << "Am I active : " << active << endl;
 }
 
+
+bool candidate::isSnapshot() {
+	int intervals = 3;
+	bool out = active;
+
+	if ( activeTimer% intervals != 0) // Set every how many frames to take a snapshot
+		out = false;
+
+	if (activeTimer > 0)
+		out = false;
+
+	return out;
+}
+
+void candidate::takeSnapshot(ofImage snapshot)
+{
+	snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
+	snapshot.resize(75, 75);
+	snapshots.push_back(snapshot);
+}

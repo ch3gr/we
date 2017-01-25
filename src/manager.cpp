@@ -138,6 +138,13 @@ void manager::drawDebug(ofImage camFrame) {
 		makePortrait(camFrame, someone, 0.1);
 	}
 
+	for (int c = 0; c < followers.size(); c++)
+	{
+		for (int s = 0; s < followers[c].snapshots.size(); s++) {
+			followers[c].snapshots[s].draw(camW+c*75, s * 75);
+		}
+	}
+
 	debugPortrait.draw(ofGetWidth()-camW, 0);
 }
 
@@ -217,9 +224,15 @@ void manager::detectFaces(ofImage cam) {
 	vector<candidate> & followers = candidates.getFollowers();
 
 	for (int c = 0; c < followers.size(); c++) {
+
+		// Take the final portrait
 		if (followers[c].trigger) {
 			ofImage portrait = makePortrait(cam, followers[c].faceBounds, 0.1);
 			addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+		}
+		// Or keep a training snapshots
+		else if (followers[c].isSnapshot() ) {
+			followers[c].takeSnapshot(cam);
 		}
 	}
 

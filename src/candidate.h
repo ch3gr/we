@@ -9,11 +9,11 @@ public:
 	ofRectangle faceBounds;
 	ofRectangle faceBoundsOld;
 	
+	vector<ofImage> snapshots;
 
-	float activeTimer ;
+	int activeTimer ;
 
 	float birthTime;
-	float lostTime;
 
 	bool active;
 	bool trigger;
@@ -29,5 +29,7 @@ public:
 	void update(const cv::Rect& track);
 	void kill();
 	void draw();
+	bool isSnapshot();
+	void takeSnapshot(ofImage snapshot);
 };
 
