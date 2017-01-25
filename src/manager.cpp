@@ -47,7 +47,7 @@ manager::manager(int _camW, int _camH)
 	scout.setMaxSizeScale(0.8);
 
 	candidates.setMaximumDistance(camW / 5);
-	candidates.setPersistence(50);
+	candidates.setPersistence(10);
 
 }
 
@@ -202,24 +202,27 @@ void manager::detectFaces(ofImage cam) {
 
 
 	// Get the tracker
-	RectTracker tracker = scout.getTracker();
+	//RectTracker tracker = scout.getTracker();
 	//tracker.setMaximumDistance(100);
 	//tracker.setPersistence(30);
 
-	candidates.setPersistence( ofGetFrameRate() * 0.5 );
 	candidates.track(scout.getObjects());
-
-	vector <candidate> candidatesList = candidates.getFollowers();
-	for (int c = 0; c < candidatesList.size(); c++) {
-		if (candidatesList[c].trigger) {
-			ofImage portrait = makePortrait(cam, candidatesList[c].faceBounds, 0.1);
-			addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
-		}
-	}
 
 
 	// timer
 	ss << getTimeDiff(timerDetectFaces) << " get candidates" << endl;
+
+
+
+	vector<candidate> & followers = candidates.getFollowers();
+
+	for (int c = 0; c < followers.size(); c++) {
+		if (followers[c].trigger) {
+			ofImage portrait = makePortrait(cam, followers[c].faceBounds, 0.1);
+			addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+		}
+	}
+
 
 
 
@@ -230,7 +233,7 @@ void manager::detectFaces(ofImage cam) {
 
 	// Draw the face trackers
 	//scout.draw();
-	vector<candidate> & followers = candidates.getFollowers();
+	
 	for (int i = 0; i < followers.size(); i++) {
 		followers[i].draw();
 	}

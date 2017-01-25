@@ -7,13 +7,15 @@ class candidate : public ofxCv::RectFollower
 {
 public:
 	ofRectangle faceBounds;
+	ofRectangle faceBoundsOld;
 	
 
-	float evaluatePeriod ;
+	float activeTimer ;
 
 	float birthTime;
 	float lostTime;
 
+	bool active;
 	bool trigger;
 	bool captured;
 
