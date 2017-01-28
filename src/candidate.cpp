@@ -52,21 +52,24 @@ void candidate::kill() {
 void candidate::draw() {
 	ofPushStyle();
 	ofColor c = ofColor::white;
-	if (captured)
-		c = ofColor::green;
-	
 
 
 	if (trigger) {
 		ofFill();
 		ofSetColor(ofColor::white);
 	}
-	else if (active) {
+	else if (active && !captured) {
 		ofNoFill();
-		ofSetLineWidth(2);
+		ofSetLineWidth(3);
 		ofSetColor(ofColor::red);
 	}
-	else {
+	else if (captured) {
+		ofNoFill();
+		ofSetLineWidth(3);
+		ofSetColor(ofColor::green);
+	}
+
+	if( !active) {
 		ofSetColor(c);
 		ofNoFill();
 		ofSetLineWidth(1);
@@ -74,7 +77,7 @@ void candidate::draw() {
 	}
 
 	if( isSnapshot() )
-		ofSetLineWidth(5);
+		ofSetLineWidth(10);
 
 	ofDrawRectangle(faceBounds);
 	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
