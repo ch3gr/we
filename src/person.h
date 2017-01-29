@@ -1,6 +1,8 @@
 #pragma once
 #include "ofMain.h"
+#include "ofxCv.h"
 
+using namespace cv;
 
 class person
 {
@@ -9,9 +11,14 @@ public:
 	int x;
 	int y;
 	ofImage face;
+	vector<ofImage> snapshots;
+	vector<Mat> snapshotsCV;
+
 
 	person();
 	person(int _id, int _x, int _y);
+	person(int _id, ofImage _face);
+	person(int _id, ofImage _face, vector<ofImage> _snapshots);
 	person(int _id, ofImage _face, int _x, int _y);
 
 

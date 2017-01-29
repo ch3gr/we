@@ -5,7 +5,7 @@ using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
 
-	activeTimer = -30;
+	activeTimer = -10;
 	birthTime = ofGetElapsedTimef();
 	active = false;
 	trigger = false;
@@ -105,7 +105,7 @@ void candidate::info() {
 
 
 bool candidate::isSnapshot() {
-	int intervals = 3;
+	int intervals = 1;
 	bool out = active;
 
 	if ( activeTimer% intervals != 0) // Set every how many frames to take a snapshot

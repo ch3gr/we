@@ -7,6 +7,8 @@
 
 
 using namespace ofxCv;
+using namespace cv;
+
 
 class manager
 {
@@ -16,7 +18,8 @@ public:
 	~manager();
 
 
-	void manager::addPerson(ofImage _face, int _x, int _y);
+	void manager::addPerson(ofImage _face);
+	void manager::addPerson(ofImage _face, vector<ofImage> _snapshots);
 	void manager::setBg(ofImage _bg);
 	void manager::setBg(ofVideoGrabber _cam);
 	void manager::update();
@@ -51,7 +54,11 @@ public:
 	ObjectFinder scout;
 	RectTrackerFollower<candidate> candidates;
 	
-
+	// face recognition model
+	Ptr<FaceRecognizer> model;
+	vector<Mat> modelFaces;
+	vector<ofImage> modelOfFaces;
+	vector<int> modelLabels;
 	
 private:
 	ofImage bg;

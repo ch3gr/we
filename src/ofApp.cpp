@@ -60,7 +60,7 @@ void ofApp::setup() {
 
 
 
-	debugPortrait = true;
+	debugPortrait = false;
 	debugTrackers = true;
 
 
@@ -431,7 +431,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
 		ofImage portrait = manage.makePortrait(camFrame, crop, shdPrepThress);
-		manage.addPerson(portrait, mouseX- portrait.getWidth()/2, mouseY- portrait.getHeight()/2);
+		manage.addPerson(portrait);
 	}
 
 

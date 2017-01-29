@@ -34,6 +34,9 @@ toDo
 - curate
 - don't capture when the person is moving
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
+- isSnapshot : not when velocity is high
+- exand the faceBounds heigher (proportional to size)
+- read up and optimize passing ofImages and <vector>ofImages VS pointers as arguments
 
 
 

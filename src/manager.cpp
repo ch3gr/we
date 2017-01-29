@@ -29,7 +29,8 @@ manager::manager(int _camW, int _camH)
 	fDetectW = 256;
 	cDetectW = camW*0.5;
 	
-	previewScale = 0.333;
+	//previewScale = 0.333;
+	
 
 	nextPersonId = 0;
 	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
@@ -65,9 +66,13 @@ void manager::setBg(ofVideoGrabber _cam) {
 	bg.setFromPixels(_cam.getPixels());
 }
 
+void manager::addPerson(ofImage _face) {
+	person someoneNew = person(nextPersonId++, _face);
+	we.push_back(someoneNew);
+}
 
-void manager::addPerson(ofImage _face, int _x, int _y) {
-	person someoneNew = person(nextPersonId++, _face, _x, _y);
+void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
+	person someoneNew = person(nextPersonId++, _face, _snapshots);
 	we.push_back(someoneNew);
 }
 
@@ -138,17 +143,22 @@ void manager::drawDebug(ofImage camFrame) {
 		makePortrait(camFrame, someone, 0.1);
 	}
 
-	for (int c = 0; c < followers.size(); c++)
-	{
-		for (int s = 0; s < followers[c].snapshots.size(); s++) {
-			followers[c].snapshots[s].draw(camW+c*75, s * 75);
-		}
-	}
+
 
 	debugPortrait.draw(ofGetWidth()-camW, 0);
 }
 
 void manager::drawDebugTrackers(){
+
+	debugTrackers.begin();
+	vector<candidate> & followers = candidates.getFollowers();
+	for (int c = 0; c < followers.size(); c++)
+	{
+		for (int s = 0; s < followers[c].snapshots.size(); s++) {
+			followers[c].snapshots[s].draw(camW + c * 75, s * 75);
+		}
+	}
+	debugTrackers.end();
 	debugTrackers.draw(0, 0);
 }
 
@@ -228,7 +238,7 @@ void manager::detectFaces(ofImage cam) {
 		// Take the final portrait
 		if (followers[c].trigger) {
 			ofImage portrait = makePortrait(cam, followers[c].faceBounds, 0.1);
-			addPerson(portrait, ofRandom(ofGetWidth()), ofRandom(ofGetHeight()));
+			addPerson(portrait, followers[c].snapshots);
 		}
 		// Or keep a training snapshots
 		else if (followers[c].isSnapshot() ) {
@@ -256,40 +266,6 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-	//// Only needed for debuging
-	//for (int i = 0; i < scout.size(); i++) {
-	//	ofRectangle faceBounds = scout.getObject(i);
-	//	int label = scout.getLabel(i);
-	//	float age = tracker.getAge(label);
-
-	//	cv::Vec2f vel = scout.getVelocity(i);
-
-	//	ofNoFill();
-	//	//ofDrawRectangle(faceBounds);
-	//	ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + ofPoint(vel[0],vel[1]));
-	//	ofFill();
-	//	ofDrawCircle(faceBounds.getCenter(), 2);
-
-	//	// adjust face
-	//	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
-
-
-	//	// Draw captured face
-	//	ofImage portrait;
-	//	portrait.clone(cam);
-	//	portrait.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height);
-	//	portrait.resize(200, 200);
-	//	ofPushMatrix();
-	//	ofTranslate(cam.getWidth(), 0);
-	//	portrait.draw(200 * i, 0);
-	//	ofDrawBitmapString(label, 200 * i, 10);
-	//	ofDrawBitmapString(age, 200 * i, 40);
-	//	ofPopMatrix();
-
-
-	//}
-	
-	
 	
 
 	debugTrackers.end();
