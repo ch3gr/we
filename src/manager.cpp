@@ -158,9 +158,14 @@ void manager::drawDebugTrackers(){
 			followers[c].snapshots[s].draw(camW + c * 75, s * 75);
 		}
 	}
+
 	debugTrackers.end();
 	debugTrackers.draw(0, 0);
 }
+
+
+
+
 
 void manager::info() {
 	// print people

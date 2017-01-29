@@ -90,7 +90,7 @@ void ofApp::setup() {
 		}
 	}
 
-
+	mouseLB_Pressed = false;
 	// Doesn't grab anything, cam is still empty, kind of works
 	//manage.setBg(cam);
 }
@@ -226,6 +226,26 @@ void ofApp::draw() {
 	manage.draw();
 
 
+	camFrame.draw(700, 0);
+	ofPixels toMatPixels = camFrame.getPixels();
+	Mat color = ofxCv::toCv(toMatPixels);
+	Mat grey;
+	cvtColor(color, grey, CV_RGB2GRAY);
+
+	ofImage ofMat;
+	ofxCv::toOf(grey, ofMat);
+	ofMat.draw(900, 0);
+
+
+
+	if (mouseLB_Pressed) {
+		//ofDrawCircle(mouseX, mouseY, 20);
+
+		unsigned char color[3];
+		glReadPixels(mouseX, ofGetHeight() - mouseY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, color);
+		cout << "R :" << color[0] << endl;
+
+	}
 
 
 	//cam.draw(0,0);
@@ -409,6 +429,7 @@ void ofApp::keyPressed(int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {
 
+	mouseLB_Pressed = false;
 }
 
 //--------------------------------------------------------------
@@ -425,8 +446,10 @@ void ofApp::mouseDragged(int x, int y, int button) {
 void ofApp::mousePressed(int x, int y, int button) {
 
 	
+	mouseLB_Pressed = true;
 
-	if (true) {
+
+	if (false) {
 		ofRectangle crop = ofRectangle(0, 0, camW, camH);
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());

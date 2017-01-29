@@ -53,7 +53,7 @@ public:
 	
 	ofFbo camHacked;
 
-
+	bool mouseLB_Pressed;
 
 
 	// Sample people faces

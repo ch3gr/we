@@ -13,6 +13,7 @@ public:
 	ofImage face;
 	vector<ofImage> snapshots;
 	vector<Mat> snapshotsCV;
+	vector<ofImage> ofSnapshotsCV;
 
 
 	person();
