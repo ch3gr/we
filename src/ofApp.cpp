@@ -245,6 +245,7 @@ void ofApp::draw() {
 		glReadPixels(mouseX, ofGetHeight() - mouseY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, color);
 		cout << "R :" << color[0] << endl;
 
+
 	}
 
 
