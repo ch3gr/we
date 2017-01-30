@@ -50,6 +50,11 @@ manager::manager(int _camW, int _camH)
 	candidates.setMaximumDistance(camW / 5);
 	candidates.setPersistence(10);
 
+
+	model = createEigenFaceRecognizer(80, 5000);
+	//model = createFisherFaceRecognizer(0, 5000);
+	//model = createLBPHFaceRecognizer();
+
 }
 
 
@@ -72,8 +77,23 @@ void manager::addPerson(ofImage _face) {
 }
 
 void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
-	person someoneNew = person(nextPersonId++, _face, _snapshots);
+	person someoneNew = person(nextPersonId, _face, _snapshots);
 	we.push_back(someoneNew);
+
+
+	//vector<Mat> modelFaces;
+	//vector<ofImage> modelOfFaces;
+	//vector<int> modelLabels;
+
+	
+	for (int s = 0; s < someoneNew.snapshotsCV.size(); s++) {
+		modelFaces.push_back(someoneNew.snapshotsCV[s]);
+		modelLabels.push_back(nextPersonId);
+	}
+	//model->update(modelFaces, modelLabels);
+	model->train(modelFaces, modelLabels);
+
+	nextPersonId++;
 }
 
 
@@ -186,6 +206,8 @@ void manager::info() {
 
 void manager::clearPeople() {
 	we.clear();
+	//model->~FaceRecognizer();
+	//model = createEigenFaceRecognizer(80, 5000);
 }
 
 
@@ -264,6 +286,14 @@ void manager::detectFaces(ofImage cam) {
 	
 	for (int i = 0; i < followers.size(); i++) {
 		followers[i].draw();
+
+		ofPushStyle();
+		ofNoFill();
+		ofSetColor(ofColor::lightGrey);
+		ofRectangle framing = adjustFaceBounds(followers[i].faceBounds, camW, camH);
+		ofDrawRectangle(framing.x, framing.y, framing.width, framing.height);
+		ofPopStyle();
+
 	}
 
 	// timer
@@ -271,7 +301,53 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-	
+
+
+	// Face recognition stuff
+	// optimize
+
+
+	if (we.size() > 0)
+	{
+		int match[100];
+		double confidence[100];
+
+		for (int i = 0; i < followers.size(); i++) {
+			if (followers[i].snapshots.size() > 0) {
+
+				//ofImage idSnapshot = followers[i].snapshots[0];
+				Mat idSnapshotCv = ofxCv::toCv(followers[i].snapshots[0]);
+				Mat idSnapshotCvGrey;
+				cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
+
+
+				
+
+				int prediction = model->predict(idSnapshotCvGrey);
+				//model->predict(idSnapshotCvGrey, match[i], confidence[i]);
+				
+
+
+				ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
+
+				int pX = we[prediction].x;
+				int pY = we[prediction].y;
+				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	debugTrackers.end();
 	ofPopMatrix();
@@ -286,6 +362,9 @@ void manager::detectFaces(ofImage cam) {
 
 
 }
+
+
+
 
 void manager::detectFaces(ofVideoGrabber cam) {
 	ofImage camFrame;
@@ -622,8 +701,8 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 // Make the faceBounds bigger for better cropping
 ofRectangle adjustFaceBounds(ofRectangle faceBounds, int camW, int camH) {
 	
-	faceBounds.scaleFromCenter(2, 2);
-	faceBounds.translateY(faceBounds.getHeight()*0.1);
+	faceBounds.scaleFromCenter(1.5, 2.2);
+	faceBounds.translateY(faceBounds.getHeight()*0.05);
 
 	// make sure the new bounds are not getting outside the camera image
 	faceBounds.setX(ofClamp(faceBounds.x, 0, camW));

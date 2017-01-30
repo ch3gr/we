@@ -60,7 +60,7 @@ void ofApp::setup() {
 
 
 
-	debugPortrait = true;
+	debugPortrait = false;
 	debugTrackers = true;
 
 
@@ -213,10 +213,10 @@ void ofApp::draw() {
 		manage.drawDebug(camFrame);
 
 		// direct draw portrait
-		ofImage camFrame;
-		camFrame.setFromPixels(cam.getPixels());
-		ofRectangle crop = ofRectangle(0, 0, camW, camH);
-		manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
+		//ofImage camFrame;
+		//camFrame.setFromPixels(cam.getPixels());
+		//ofRectangle crop = ofRectangle(0, 0, camW, camH);
+		//manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
 	}
 
 	if (debugTrackers){
@@ -252,7 +252,7 @@ void ofApp::draw() {
 		
 		std::stringstream rgbValues;
 		rgbValues << int(color[0]) << " " << int(color[1]) << " " << int(color[2]) ;
-		ofDrawBitmapStringHighlight(rgbValues.str(), mouseX, mouseY+10, ofColor::black, ofColor::white);
+		ofDrawBitmapStringHighlight(rgbValues.str(), mouseX+10, mouseY+30, ofColor::black, ofColor::white);
 	}
 
 

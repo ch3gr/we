@@ -37,6 +37,8 @@ toDo
 - isSnapshot : not when velocity is high
 - exand the faceBounds heigher (proportional to size)
 - read up and optimize passing ofImages and <vector>ofImages VS pointers as arguments
+- leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
+
 
 
 

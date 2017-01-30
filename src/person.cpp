@@ -90,22 +90,27 @@ void person::draw() {
 	// Debuging
 	if (true) {
 		if (snapshots.size() > 0) {
+			ofPushMatrix();
 			ofScale(0.5, 0.5);
-			for (int s = 0; s < snapshots.size(); s++) {
-				snapshots[s].draw(0, s * snapshots[s].getHeight());
-
-			}
+			//for (int s = 0; s < snapshots.size(); s++) {
+			//	snapshots[s].draw(0, s * snapshots[s].getHeight());
+			//}
 			for (int s = 0; s < snapshotsCV.size(); s++) {
 				// Draw mat
 				ofImage ofMat;
 				ofxCv::toOf(snapshotsCV[s], ofMat);
 				if (ofMat.isAllocated()) {
 					ofMat.update();
-					ofMat.draw(snapshots[s].getWidth(), s * snapshots[s].getHeight());
+					ofMat.draw(snapshots[s].getWidth()*0, s * snapshots[s].getHeight());
 				}
 			}
+			ofPopMatrix();
 		}
 	}
+
+
+	ofDrawBitmapStringHighlight(ofToString(id), 5, -5, ofColor::black, ofColor::white);
+
 
 	ofPopStyle();
 	ofPopMatrix();
