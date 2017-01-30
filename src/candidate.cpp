@@ -5,7 +5,7 @@ using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
 
-	activeTimer = -20;
+	activeTimer = -50;
 	birthTime = ofGetElapsedTimef();
 	active = false;
 	trigger = false;

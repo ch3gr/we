@@ -34,7 +34,7 @@ public:
 	void manager::detectFaces(ofImage cam);
 	void manager::detectFaces(ofVideoGrabber cam);
 	ofImage manager::makePortrait(ofImage cam, ofRectangle crop, float shdThress);
-
+	person manager::getPerson(int id);
 
 	int camW, camH;
 	int fDetectW;
@@ -69,3 +69,4 @@ private:
 ofRectangle adjustFaceBounds(ofRectangle _faceBounds, int camW, int camH);
 
 float getTimeDiff(float refTime);
+

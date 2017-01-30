@@ -206,6 +206,9 @@ void manager::info() {
 
 void manager::clearPeople() {
 	we.clear();
+	nextPersonId = 0;
+
+	// doesn't work, but maybe it needs something similar
 	//model->~FaceRecognizer();
 	//model = createEigenFaceRecognizer(80, 5000);
 }
@@ -304,35 +307,61 @@ void manager::detectFaces(ofImage cam) {
 
 
 	// Face recognition stuff
-	// optimize
+	// optimize!!
 
 
 	if (we.size() > 0)
 	{
-		int match[100];
-		double confidence[100];
+		//int match[100];
+		//double confidence[100];
 
 		for (int i = 0; i < followers.size(); i++) {
 			if (followers[i].snapshots.size() > 0) {
 
-				//ofImage idSnapshot = followers[i].snapshots[0];
-				Mat idSnapshotCv = ofxCv::toCv(followers[i].snapshots[0]);
+				ofImage idSnapshot;
+				// Use one of the snapshots to id the person
+				//idSnapshot = followers[i].snapshots[0];
+				
+				// Or better/slower use the live cam
+				
+				idSnapshot.clone(cam);
+				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
+				idSnapshot.resize(75, 75);
+
+				Mat idSnapshotCv = ofxCv::toCv(idSnapshot);
 				Mat idSnapshotCvGrey;
 				cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
 
 
 				
-
-				int prediction = model->predict(idSnapshotCvGrey);
-				//model->predict(idSnapshotCvGrey, match[i], confidence[i]);
+				int match = -1;
+				double confidence = 0.0;
+				//int prediction = model->predict(idSnapshotCvGrey);
+				model->predict(idSnapshotCvGrey, match, confidence);
 				
 
 
-				ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
+				//ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
 
-				int pX = we[prediction].x;
-				int pY = we[prediction].y;
-				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+				
+				//person foundPerson = getPerson(match);
+
+				if (match != -1 && match <= we.size()) {
+
+					int pX = we[match].x;
+					int pY = we[match].y;
+					//int pX = foundPerson.x;
+					//int pY = foundPerson.y;
+					ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+					ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 20, ofColor::black, ofColor::white);
+				}
+
+
+
+				//for (int p = 0; p < we.size(); p++) {
+				//	pX = we[i].x;
+				//	pY = we[i].y;
+				//}
 			}
 		}
 	}
@@ -691,6 +720,16 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds, float s
 
 
 
+// return the person by id
+person manager::getPerson(int id) {
+	for (int p = 0; p < we.size(); p++) {
+		if (we[p].id == id)
+			return we[p];
+	}
+	
+}
+
+
 
 
 
@@ -718,3 +757,6 @@ ofRectangle adjustFaceBounds(ofRectangle faceBounds, int camW, int camH) {
 float getTimeDiff(float refTime) {
 	return roundf((ofGetElapsedTimef() - refTime) * 100000) / 100;
 }
+
+
+
