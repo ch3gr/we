@@ -60,7 +60,7 @@ void ofApp::setup() {
 
 
 
-	debugPortrait = false;
+	debugPortrait = true;
 	debugTrackers = true;
 
 
@@ -213,10 +213,10 @@ void ofApp::draw() {
 		manage.drawDebug(camFrame);
 
 		// direct draw portrait
-		//ofImage camFrame;
-		//camFrame.setFromPixels(cam.getPixels());
-		//ofRectangle crop = ofRectangle(0, 0, camW, camH);
-		//manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
+		ofImage camFrame;
+		camFrame.setFromPixels(cam.getPixels());
+		ofRectangle crop = ofRectangle(0, 0, camW, camH);
+		manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
 	}
 
 	if (debugTrackers){
@@ -226,26 +226,33 @@ void ofApp::draw() {
 	manage.draw();
 
 
-	camFrame.draw(700, 0);
-	ofPixels toMatPixels = camFrame.getPixels();
-	Mat color = ofxCv::toCv(toMatPixels);
-	Mat grey;
-	cvtColor(color, grey, CV_RGB2GRAY);
 
-	ofImage ofMat;
-	ofxCv::toOf(grey, ofMat);
-	ofMat.draw(900, 0);
+	// From ofImage to Mat and back
+	if( false ){
+		camFrame.draw(750, 0);
+		ofPixels toMatPixels = camFrame.getPixels();
+		Mat color = ofxCv::toCv(toMatPixels);
+		Mat grey;
+		cvtColor(color, grey, CV_RGB2GRAY);
+
+		ofImage ofMat;
+		ofxCv::toOf(grey, ofMat);
+		ofMat.update();
+		ofMat.draw(1200, 0);
+	}
 
 
 
+
+
+	// display RGB values below the mouse
 	if (mouseLB_Pressed) {
-		//ofDrawCircle(mouseX, mouseY, 20);
-
 		unsigned char color[3];
 		glReadPixels(mouseX, ofGetHeight() - mouseY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, color);
-		cout << "R :" << color[0] << endl;
-
-
+		
+		std::stringstream rgbValues;
+		rgbValues << int(color[0]) << " " << int(color[1]) << " " << int(color[2]) ;
+		ofDrawBitmapStringHighlight(rgbValues.str(), mouseX, mouseY+10, ofColor::black, ofColor::white);
 	}
 
 
@@ -430,7 +437,6 @@ void ofApp::keyPressed(int key) {
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key) {
 
-	mouseLB_Pressed = false;
 }
 
 //--------------------------------------------------------------
@@ -463,6 +469,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button) {
+	mouseLB_Pressed = false;
 
 }
 

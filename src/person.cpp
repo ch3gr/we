@@ -38,7 +38,7 @@ person::person(int _id, ofImage _face, vector<ofImage> _snapshots) {
 		Mat color = ofxCv::toCv(toMatPixels);
 		Mat grey;
 		cvtColor(color, grey, CV_RGB2GRAY);
-		snapshotsCV.push_back(color);
+		snapshotsCV.push_back(grey);
 
 	}
 
@@ -88,19 +88,22 @@ void person::draw() {
 	ofDrawBitmapString(id, x, y+20);
 
 	// Debuging
-	if (snapshots.size() > 0) {
-		//ofScale(0.5, 0.5);
-		for (int s = 0; s < snapshots.size(); s++) {
-			snapshots[s].draw(0, s * snapshots[s].getHeight());
+	if (true) {
+		if (snapshots.size() > 0) {
+			ofScale(0.5, 0.5);
+			for (int s = 0; s < snapshots.size(); s++) {
+				snapshots[s].draw(0, s * snapshots[s].getHeight());
 
-			// Draw mat
-			//snapshotsCV[s]
-			ofImage ofMat;
-			ofxCv::toOf(snapshotsCV[s], ofMat);
-			ofMat.draw(snapshots[s].getWidth(), s * snapshots[s].getHeight());
-
-			//ofxCv::toOf()
-			//ofxCv::toCv()
+			}
+			for (int s = 0; s < snapshotsCV.size(); s++) {
+				// Draw mat
+				ofImage ofMat;
+				ofxCv::toOf(snapshotsCV[s], ofMat);
+				if (ofMat.isAllocated()) {
+					ofMat.update();
+					ofMat.draw(snapshots[s].getWidth(), s * snapshots[s].getHeight());
+				}
+			}
 		}
 	}
 

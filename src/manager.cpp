@@ -144,8 +144,8 @@ void manager::drawDebug(ofImage camFrame) {
 	}
 
 
-
-	debugPortrait.draw(ofGetWidth()-camW, 0);
+	//debugPortrait.draw(ofGetWidth()-camW, 0);
+	debugPortrait.draw(1200, 0);
 }
 
 void manager::drawDebugTrackers(){
