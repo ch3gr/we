@@ -5,11 +5,13 @@ using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
 
-	activeTimer = -50;
+	snapshotIntervals = 4;
+	activeTimer = -snapshotIntervals * 10 -1;
 	birthTime = ofGetElapsedTimef();
 	active = false;
 	trigger = false;
 	captured = false;
+	exist = false;
 	faceBounds = toOf(track);
 	cout << "New Label : " << label << endl;
 
@@ -36,13 +38,17 @@ void candidate::update(const cv::Rect& track) {
 
 
 
-	if (trigger) {
+	if (trigger)
 		trigger = false;
-		captured = true;
-	}
-	else if (!captured && activeTimer >= 0)
+		
+	else if (!exist && !captured && activeTimer >= 0)
 		trigger = true;
 	
+	if (exist)
+	{
+		snapshots.clear();
+		captured = true;
+	}
 }
 
 void candidate::kill() {
@@ -58,15 +64,20 @@ void candidate::draw() {
 		ofFill();
 		ofSetColor(ofColor::white);
 	}
-	else if (active && !captured) {
+	else if (exist) {
 		ofNoFill();
 		ofSetLineWidth(3);
 		ofSetColor(ofColor::red);
 	}
-	else if (captured) {
+	else if (active && !captured) {
 		ofNoFill();
 		ofSetLineWidth(3);
 		ofSetColor(ofColor::green);
+	}
+	else if (captured) {
+		ofNoFill();
+		ofSetLineWidth(3);
+		ofSetColor(ofColor::blue);
 	}
 
 	if( !active) {
@@ -105,10 +116,12 @@ void candidate::info() {
 
 
 bool candidate::isSnapshot() {
-	int intervals = 2;
 	bool out = active;
 
-	if ( activeTimer% intervals != 0) // Set every how many frames to take a snapshot
+	if (exist)
+		return false;
+
+	if ( activeTimer% snapshotIntervals != 0) // Set every how many frames to take a snapshot
 		out = false;
 
 	if (activeTimer > 0)

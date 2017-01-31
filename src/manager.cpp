@@ -29,7 +29,7 @@ manager::manager(int _camW, int _camH)
 	fDetectW = 256;
 	cDetectW = camW*0.5;
 	
-	//previewScale = 0.333;
+	previewScale = 0.333;
 	
 
 	nextPersonId = 0;
@@ -266,12 +266,22 @@ void manager::detectFaces(ofImage cam) {
 	for (int c = 0; c < followers.size(); c++) {
 
 		// Take the final portrait
-		if (followers[c].trigger) {
-			ofImage portrait = makePortrait(cam, followers[c].faceBounds, 0.1);
-			addPerson(portrait, followers[c].snapshots);
+		if (!followers[c].exist && followers[c].trigger) {
+			
+			ofImage portrait;
+			// create Alpha portrait
+			if (false) {
+				portrait = makePortrait(cam, followers[c].faceBounds, 0.1);
+			}
+			else {
+				portrait.clone(cam);
+				ofRectangle frame = adjustFaceBounds(followers[c].faceBounds, camW, camH);
+				portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
+				addPerson(portrait, followers[c].snapshots);
+			}
 		}
 		// Or keep a training snapshots
-		else if (followers[c].isSnapshot() ) {
+		else if (!followers[c].exist && followers[c].isSnapshot() ) {
 			followers[c].takeSnapshot(cam);
 		}
 	}
@@ -305,7 +315,7 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-
+	////////////////////////////
 	// Face recognition stuff
 	// optimize!!
 
@@ -316,14 +326,13 @@ void manager::detectFaces(ofImage cam) {
 		//double confidence[100];
 
 		for (int i = 0; i < followers.size(); i++) {
-			if (followers[i].snapshots.size() > 0) {
+//			if (followers[i].snapshots.size() > 0) {
 
 				ofImage idSnapshot;
 				// Use one of the snapshots to id the person
 				//idSnapshot = followers[i].snapshots[0];
 				
 				// Or better/slower use the live cam
-				
 				idSnapshot.clone(cam);
 				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
 				idSnapshot.resize(75, 75);
@@ -339,7 +348,8 @@ void manager::detectFaces(ofImage cam) {
 				//int prediction = model->predict(idSnapshotCvGrey);
 				model->predict(idSnapshotCvGrey, match, confidence);
 				
-
+				if (confidence < 1000)
+					followers[i].exist = true;
 
 				//ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
 
@@ -362,20 +372,30 @@ void manager::detectFaces(ofImage cam) {
 				//	pX = we[i].x;
 				//	pY = we[i].y;
 				//}
-			}
+//			}
 		}
 	}
 
 
+	// see if I can view the internal model
 
+	//Mat eigenvalues = model->getMat("eigenvectors");
+	//ofImage ofMat;
+	//ofxCv::toOf(eigenvalues, ofMat);
+	//ofMat.update();
+	//ofMat.draw(1200, 10);
 
+	//eigenvalues = model->getMat("eigenvalues");
+	//ofxCv::toOf(eigenvalues, ofMat);
+	//ofMat.update();
+	//ofMat.draw(1300, 10);
+	//
+	//eigenvalues = model->getMat("mean");
+	//ofxCv::toOf(eigenvalues, ofMat);
+	//ofMat.update();
+	//ofMat.draw(1400, 10);
 
-
-
-
-
-
-
+		
 
 
 	debugTrackers.end();

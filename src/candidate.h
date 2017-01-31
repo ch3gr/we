@@ -12,12 +12,14 @@ public:
 	vector<ofImage> snapshots;
 
 	int activeTimer ;
+	int snapshotIntervals;
 
 	float birthTime;
 
 	bool active;
 	bool trigger;
 	bool captured;
+	bool exist;
 
 	candidate();
 	~candidate();
