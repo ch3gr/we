@@ -319,6 +319,7 @@ void manager::detectFaces(ofImage cam) {
 			cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
 
 			
+
 			// <----------- EDW
 			int match = -1;
 			double confidence = 0.0;
