@@ -13,6 +13,7 @@ void candidate::setup(const cv::Rect& track) {
 	captured = false;
 	exist = false;
 	faceBounds = toOf(track);
+
 	cout << "New Label : " << label << endl;
 
 
@@ -135,4 +136,11 @@ void candidate::takeSnapshot(ofImage snapshot)
 	snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
 	snapshot.resize(75, 75);
 	snapshots.push_back(snapshot);
+
+	// <----------- EDW
+	//set the mat to ID against
+	Mat snapToIdCvColor = ofxCv::toCv(snapshot);
+	cvtColor(snapToIdCvColor, snapToIdCv, CV_RGB2GRAY);
 }
+
+

@@ -119,32 +119,31 @@ void ofApp::update() {
 	cam.update();
 	if (cam.isFrameNew()) {
 
-
-		camHacked.begin();
-		ofClear(0);
-		cam.draw(0, 0);
+		// Hack the camera and add test faces, only during debugging or test face
+		if (debugTrackers && selectSamplePerson!=-1) {
+			camHacked.begin();
+			ofClear(0);
+			cam.draw(0, 0);
 		
-		// Add a sample person on the mouse cursor
-		if (selectSamplePerson >= 0) {
-			ofImage extraFace = samplePeople[selectSamplePerson][uCount % samplePeople[selectSamplePerson].size()];
-			ofPushMatrix();
-			ofTranslate(mouseX, mouseY);
-			ofScale(fScale, fScale);
-			extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
-			
+			// Add a sample person on the mouse cursor
+			if (selectSamplePerson >= 0) {
+				ofImage extraFace = samplePeople[selectSamplePerson][uCount++ % samplePeople[selectSamplePerson].size()];
+				ofPushMatrix();
+				ofTranslate(mouseX, mouseY);
+				ofScale(fScale, fScale);
+				extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
+				ofPopMatrix();
+			}
+			camHacked.end();
 
-			ofPopMatrix();
+			ofImage bridge;
+			camHacked.readToPixels(bridge.getPixelsRef());
+		
+			manage.detectFaces(bridge);
 		}
-		camHacked.end();
-
-
-
-		ofImage bridge;
-		camHacked.readToPixels(bridge.getPixelsRef());
-		
-		
-		manage.detectFaces(bridge);
-		
+		else {
+			manage.detectFaces(cam);
+		}
 
 
 		//ofxCv::convertColor(cam, frame, CV_RGB2GRAY);
@@ -181,7 +180,7 @@ void ofApp::update() {
 		//cvImgTmp.setFromPixels( personCanvas.)
 		//cvImgColor *= cvImgColor2;
 
-		uCount++;
+		
 	}
 }
 

@@ -2,7 +2,6 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 
-
 class candidate : public ofxCv::RectFollower
 {
 public:
@@ -10,6 +9,9 @@ public:
 	ofRectangle faceBoundsOld;
 	
 	vector<ofImage> snapshots;
+	cv::Mat snapToIdCv;
+	
+
 
 	int activeTimer ;
 	int snapshotIntervals;

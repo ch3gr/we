@@ -29,7 +29,7 @@ manager::manager(int _camW, int _camH)
 	
 	faceDetectW = 256;
 	contourDetectW = camW*0.5;
-	debugPortraitScale = 1;
+	debugPortraitScale = 0.5;
 
 	portraitWithAlpha = true;
 	debugPeople = true;
@@ -235,34 +235,19 @@ void manager::clearPeople() {
 
 
 void manager::detectFaces(ofImage cam) {
-	
+
+	// only at the first frame
 	if (!bg.isAllocated())
 		setBg(cam);
 
 
-	cam.resize(cam.getWidth(), cam.getHeight());
-
-
 	scout.update(cam);
-
-
-
-	// Get the tracker
-	//RectTracker tracker = scout.getTracker();
-	//tracker.setMaximumDistance(100);
-	//tracker.setPersistence(30);
-
 	candidates.track(scout.getObjects());
 
-
-
-
-
 	vector<candidate> & followers = candidates.getFollowers();
-
 	for (int c = 0; c < followers.size(); c++) {
 
-		// Take the final portrait
+		// Take the <<PHOTO>> portrait
 		if (!followers[c].exist && followers[c].trigger) {
 			
 			ofImage portrait;
@@ -287,7 +272,6 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-	ofPushMatrix();
 	debugTrackers.begin();
 	ofClear(0);
 	cam.draw(0, 0);
@@ -318,58 +302,57 @@ void manager::detectFaces(ofImage cam) {
 
 	if (we.size() > 0)
 	{
-		//int match[100];
-		//double confidence[100];
-
 		for (int i = 0; i < followers.size(); i++) {
-//			if (followers[i].snapshots.size() > 0) {
 
-				ofImage idSnapshot;
-				// Use one of the snapshots to id the person
-				//idSnapshot = followers[i].snapshots[0];
+			ofImage idSnapshot;
+			
+			// Use one of the snapshots to id the person
+			//idSnapshot = followers[i].snapshots[0];
 				
-				// Or better/slower use the live cam
-				idSnapshot.clone(cam);
-				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
-				idSnapshot.resize(75, 75);
+			// Or better/slower use the live cam
+			idSnapshot.clone(cam);
+			idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
+			idSnapshot.resize(75, 75);
 
-				Mat idSnapshotCv = ofxCv::toCv(idSnapshot);
-				Mat idSnapshotCvGrey;
-				cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
+			Mat idSnapshotCv = ofxCv::toCv(idSnapshot);
+			Mat idSnapshotCvGrey;
+			cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
 
+			
+			// <----------- EDW
+			int match = -1;
+			double confidence = 0.0;
+			//int prediction = model->predict(idSnapshotCvGrey);
+			if (followers[i].snapshots.size() != 0 ) {
+				model->predict(followers[i].snapToIdCv, match, confidence);
+				//model->predict(idSnapshotCvGrey, match, confidence);
+			}
+				
+			if (confidence < 1000)
+				followers[i].exist = true;
+
+			//ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
 
 				
-				int match = -1;
-				double confidence = 0.0;
-				//int prediction = model->predict(idSnapshotCvGrey);
-				model->predict(idSnapshotCvGrey, match, confidence);
-				
-				if (confidence < 1000)
-					followers[i].exist = true;
+			//person foundPerson = getPerson(match);
 
-				//ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
+			if (match != -1 && match <= we.size()) {
 
-				
-				//person foundPerson = getPerson(match);
-
-				if (match != -1 && match <= we.size()) {
-
-					int pX = we[match].x;
-					int pY = we[match].y;
-					pX += we[match].face.getWidth() / 2;
-					//int pX = foundPerson.x;
-					//int pY = foundPerson.y;
-					ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
-					ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 20, ofColor::black, ofColor::white);
-				}
+				int pX = we[match].x;
+				int pY = we[match].y;
+				pX += we[match].face.getWidth() / 2;
+				//int pX = foundPerson.x;
+				//int pY = foundPerson.y;
+				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 20, ofColor::black, ofColor::white);
+			}
 
 
 
-				//for (int p = 0; p < we.size(); p++) {
-				//	pX = we[i].x;
-				//	pY = we[i].y;
-				//}
-//			}
+			//for (int p = 0; p < we.size(); p++) {
+			//	pX = we[i].x;
+			//	pY = we[i].y;
+			//}
 		}
 	}
 
@@ -396,7 +379,7 @@ void manager::detectFaces(ofImage cam) {
 
 
 	debugTrackers.end();
-	ofPopMatrix();
+
 
 	
 
@@ -410,6 +393,12 @@ void manager::detectFaces(ofVideoGrabber cam) {
 	camFrame.setFromPixels(cam.getPixels());
 	detectFaces(camFrame);
 }
+
+
+
+
+
+
 
 
 
