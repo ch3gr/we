@@ -33,23 +33,27 @@ public:
 
 	void manager::detectFaces(ofImage cam);
 	void manager::detectFaces(ofVideoGrabber cam);
-	ofImage manager::makePortrait(ofImage cam, ofRectangle crop, float shdThress);
+	ofImage manager::makePortrait(ofImage cam, ofRectangle crop);
 	person manager::getPerson(int id);
 
 	int camW, camH;
-	int fDetectW;
-	int cDetectW;
-	float previewScale;
+	int faceDetectW;
+	int contourDetectW;
+	float debugPortraitScale;
+
+	bool portraitWithAlpha;
+
+	bool debugPeople;
 
 	vector<person> we;
 	int nextPersonId;
 	ofFbo canvas;
 	ofFbo debugPortrait;
 	ofFbo debugTrackers;
-	ofFbo debugTimers;
 	
 
 	ofShader shdPrep, shdComp;
+	float shdPrepThress;
 
 	ObjectFinder scout;
 	RectTrackerFollower<candidate> candidates;

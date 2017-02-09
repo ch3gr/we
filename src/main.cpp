@@ -12,7 +12,7 @@ int main( ){
 //	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
-	//ofSetWindowPosition(1920, 20);
+	ofSetWindowPosition(1920, 20);
 
 	//ofCreateWindow(settings);
 	ofRunApp(new ofApp());
@@ -24,18 +24,17 @@ int main( ){
 
 toDo
 - Threading
+- optimise the whole trigger/capture process
+- don't capture when the person is moving
 - Fix camera res & processing resolution
-- Face recognition !!!
+- train model : tighter crop in for face recognition
+- train model : align eyes?
+- fine tune tracker settings
+- fine tune Face recognition
 - write to disk all the faces and 10 snapshots etc
 - Webcame frame rate
 - Mipos to manage exei reference tou cam (h' camHacked) apo tin arxi ston constractor
-- fine tune tracker settings
-- control gia shader thresshold
-- curate
-- don't capture when the person is moving
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
-- isSnapshot : not when velocity is high
-- exand the faceBounds heigher (proportional to size)
 - read up and optimize passing ofImages and <vector>ofImages VS pointers as arguments
 - leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
 

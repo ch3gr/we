@@ -21,7 +21,7 @@ void ofApp::setup() {
 
 
 
-	shdPrepThress = 0.1;
+
 
 	camW = 640;
 	camH = 480;
@@ -194,7 +194,6 @@ void ofApp::update() {
 
 
 
-
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -346,22 +345,49 @@ void ofApp::keyPressed(int key) {
 		cout << "People cleared" << endl;
 	}
 
-	if (key == 'd') {
-		debugPortrait = !debugPortrait;
-		cout << "Debug Mode" << debugPortrait << endl;
-	}
-	if (key == 't') {
+	// Debug face Trackers
+	if (key == '1') {
 		debugTrackers = !debugTrackers;
 		cout << "Debug tracking :" << debugTrackers << endl;
 	}
+	// Debug Portrait creation
+	if (key == '2') {
+		debugPortrait = !debugPortrait;
+		cout << "Debug Mode" << debugPortrait << endl;
+	}
+	// Debug People
+	if (key == '3') {
+		manage.debugPeople = !manage.debugPeople;
+		cout << "debugPortraits :" << manage.debugPeople << endl;
+	}
+
 	// info
 	if (key == 'i') {
 		manage.info();
 	}
 
+	// camera settings
 	if (key == 's' || key == 'S') {
 		cam.videoSettings();
 	}
+
+	// Make portraits with Alpha channel
+	if (key == 'a') {
+		manage.portraitWithAlpha = !manage.portraitWithAlpha;
+		cout << "portraitWithAlpha :" << manage.portraitWithAlpha << endl;
+	}
+
+
+	//	shdPrepThress - Threshold for the cutout
+	if (key == ',') {
+		manage.shdPrepThress = ofClamp(manage.shdPrepThress - 0.01, 0, 1);
+		cout << "shdPrepThress : " << manage.shdPrepThress << endl;
+	}
+	if (key == '.') {
+		manage.shdPrepThress = ofClamp(manage.shdPrepThress + 0.01, 0, 1);
+		cout << "shdPrepThress : " << manage.shdPrepThress << endl;
+	}
+
 
 
 
@@ -408,15 +434,7 @@ void ofApp::keyPressed(int key) {
 		cout << "Model thress: " << thress << endl;
 	}
 
-	//		shdPrepThress
-	if (key == ',') {
-		shdPrepThress = ofClamp(shdPrepThress - 0.01, 0, 1);
-		cout << "shdPrepThress : " << shdPrepThress << endl;
-	}
-	if (key == '.') {
-		shdPrepThress = ofClamp(shdPrepThress + 0.01, 0, 1);
-		cout << "shdPrepThress : " << shdPrepThress << endl;
-	}
+
 
 
 
@@ -460,7 +478,7 @@ void ofApp::mousePressed(int x, int y, int button) {
 		ofRectangle crop = ofRectangle(0, 0, camW, camH);
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
-		ofImage portrait = manage.makePortrait(camFrame, crop, shdPrepThress);
+		ofImage portrait = manage.makePortrait(camFrame, crop);
 		manage.addPerson(portrait);
 	}
 

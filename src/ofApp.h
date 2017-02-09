@@ -62,7 +62,7 @@ public:
 	int selectSamplePerson;
 	float fScale;
 
-	float shdPrepThress;
+
 
 	// Contour detection openCV
 	ofxCvColorImage cvImgColor, cvImgColor2;
