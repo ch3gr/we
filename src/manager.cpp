@@ -32,15 +32,15 @@ manager::manager(int _camW, int _camH)
 	debugPortraitScale = 0.5;
 
 	portraitWithAlpha = true;
+	debugPortrait = false;
+	debugTrackers = true;
 	debugPeople = true;
 	debugUpdateEvidence = false;
 	
-	
 
 	nextPersonId = 0;
-	canvas.allocate(ofGetWindowWidth(), ofGetWindowHeight());
-	debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
-	debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	FBO_debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
+	FBO_debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
 	shdPrepThress = 0.09;
 
@@ -88,16 +88,10 @@ void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 	we.push_back(someoneNew);
 
 
-	//vector<Mat> modelFaces;
-	//vector<ofImage> modelOfFaces;
-	//vector<int> modelLabels;
-
-	
 	for (int s = 0; s < someoneNew.snapshotsCV.size(); s++) {
 		modelFaces.push_back(someoneNew.snapshotsCV[s]);
 		modelLabels.push_back(nextPersonId);
 	}
-	//model->update(modelFaces, modelLabels);
 	model->train(modelFaces, modelLabels);
 
 	nextPersonId++;
@@ -119,10 +113,6 @@ void manager::curate() {
 		int y = ofLerp(yMin, yMax, wave);
 
 		we[p].setPos(x, y);
-		
-		// debug some values
-		//if (p == 0)
-		//	cout << we[p].id << endl;
 	}
 	
 	
@@ -130,19 +120,11 @@ void manager::curate() {
 }
 
 
-void manager::update() {
-	curate();
-	for (int p = 0; p < we.size(); ++p)
-		we[p].update();
-}
 
 
 
 void manager::draw() {
-	update();
-
-	canvas.begin();
-	ofClear(0);
+	curate();
 
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
@@ -150,12 +132,6 @@ void manager::draw() {
 		if(debugPeople )
 			we[p].drawDebug();
 	}
-
-	canvas.end();
-	canvas.draw(0, 0);
-
-	//debugTimers.draw(0, 0);
-
 }
 
 
@@ -175,12 +151,12 @@ void manager::drawDebug(ofImage camFrame) {
 	}
 
 
-	debugPortrait.draw(ofGetWindowWidth() - (camW*3*debugPortraitScale), 0);
+	FBO_debugPortrait.draw(ofGetWindowWidth() - (camW*3*debugPortraitScale), 0);
 }
 
 void manager::drawDebugTrackers(){
 
-	debugTrackers.begin();
+	FBO_debugTrackers.begin();
 	vector<candidate> & followers = candidates.getFollowers();
 	for (int c = 0; c < followers.size(); c++)
 	{
@@ -200,8 +176,8 @@ void manager::drawDebugTrackers(){
 		}
 	}
 
-	debugTrackers.end();
-	debugTrackers.draw(0, 0);
+	FBO_debugTrackers.end();
+	FBO_debugTrackers.draw(0, 0);
 }
 
 
@@ -228,6 +204,10 @@ void manager::info() {
 void manager::clearPeople() {
 	we.clear();
 	nextPersonId = 0;
+
+	modelFaces.clear();
+	modelOfFaces.clear();
+	modelLabels.clear();
 
 	// doesn't work, but maybe it needs something similar
 	//model->~FaceRecognizer();
@@ -283,7 +263,7 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-	debugTrackers.begin();
+	FBO_debugTrackers.begin();
 	ofClear(0);
 	cam.draw(0, 0);
 
@@ -323,7 +303,7 @@ void manager::detectFaces(ofImage cam) {
 
 			// constant update identification evidence
 			// only useful for debuging
-			if (debugUpdateEvidence) {
+			if (debugUpdateEvidence && debugTrackers) {
 				// better/slower use the live cam
 				idSnapshot.clone(cam);
 				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
@@ -396,7 +376,7 @@ void manager::detectFaces(ofImage cam) {
 		
 
 
-	debugTrackers.end();
+	FBO_debugTrackers.end();
 
 
 	
@@ -441,7 +421,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds) {
 
 	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
 
-	debugPortrait.begin();
+	FBO_debugPortrait.begin();
 	ofClear(0);
 
 
@@ -681,7 +661,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds) {
 	// -----------------------
 
 
-	debugPortrait.end();
+	FBO_debugPortrait.end();
 
 	ofImage fboImage;
 	comp.readToPixels(fboImage.getPixelsRef());

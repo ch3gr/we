@@ -56,12 +56,6 @@ void ofApp::setup() {
 	cvImgColor.allocate(camW, camH);			
 	cvImgGrayscale.allocate(camW, camH);
 
-	//faceDetectSetup();
-
-
-
-	debugPortrait = false;
-	debugTrackers = true;
 
 
 	//samplePeople
@@ -120,7 +114,7 @@ void ofApp::update() {
 	if (cam.isFrameNew()) {
 
 		// Hack the camera and add test faces, only during debugging or test face
-		if (debugTrackers && selectSamplePerson!=-1) {
+		if (manage.debugTrackers && selectSamplePerson!=-1) {
 			camHacked.begin();
 			ofClear(0);
 			cam.draw(0, 0);
@@ -206,7 +200,7 @@ void ofApp::draw() {
 	ofImage camFrame;
 	camFrame.setFromPixels(cam.getPixels());
 
-	if (debugPortrait)
+	if (manage.debugPortrait)
 	{
 		manage.drawDebug(camFrame);
 
@@ -217,7 +211,7 @@ void ofApp::draw() {
 		//manage.makePortrait(camFrame, crop, shdPrepThress).draw(0,camH);
 	}
 
-	if (debugTrackers){
+	if (manage.debugTrackers){
 		manage.drawDebugTrackers();
 	}
 
@@ -346,13 +340,13 @@ void ofApp::keyPressed(int key) {
 
 	// Debug face Trackers
 	if (key == '1') {
-		debugTrackers = !debugTrackers;
-		cout << "Debug tracking :" << debugTrackers << endl;
+		manage.debugTrackers = !manage.debugTrackers;
+		cout << "Debug tracking :" << manage.debugTrackers << endl;
 	}
 	// Debug Portrait creation
 	if (key == '2') {
-		debugPortrait = !debugPortrait;
-		cout << "Debug Mode" << debugPortrait << endl;
+		manage.debugPortrait = !manage.debugPortrait;
+		cout << "Debug Mode" << manage.debugPortrait << endl;
 	}
 	// Debug People
 	if (key == '3') {

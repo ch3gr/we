@@ -22,7 +22,6 @@ public:
 	void manager::addPerson(ofImage _face, vector<ofImage> _snapshots);
 	void manager::setBg(ofImage _bg);
 	void manager::setBg(ofVideoGrabber _cam);
-	void manager::update();
 	void manager::draw();
 	void manager::drawDebug(ofImage camFrame);
 	void manager::drawDebugTrackers();
@@ -43,14 +42,17 @@ public:
 
 	bool portraitWithAlpha;
 
+
 	bool debugPeople;
 	bool debugUpdateEvidence;
+	bool debugPortrait;
+	bool debugTrackers;
+	bool debugTest;
 
 	vector<person> we;
 	int nextPersonId;
-	ofFbo canvas;
-	ofFbo debugPortrait;
-	ofFbo debugTrackers;
+	ofFbo FBO_debugPortrait;
+	ofFbo FBO_debugTrackers;
 	
 
 	ofShader shdPrep, shdComp;

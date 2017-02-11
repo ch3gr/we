@@ -69,11 +69,6 @@ void person::setPos(int _x, int _y) {
 }
 
 
-void person::update() {
-	//ofSeedRandom(id);
-	//x += sin((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
-	//y += cos((ofGetElapsedTimef() + ofRandom(10)) * 5) * 5;
-}
 
 void person::draw() {
 	ofPushMatrix();

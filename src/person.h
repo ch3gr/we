@@ -28,7 +28,6 @@ public:
 
 	void person::setFace( ofImage _face);
 	void person::setPos(int _x, int _y);
-	void person::update();
 	void person::draw();
 	void person::drawDebug();
 	void person::info();

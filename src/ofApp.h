@@ -37,9 +37,6 @@ public:
 
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
-	bool debugPortrait;
-	bool debugTrackers;
-
 
 	int camW, camH;
 	float				camProxySize;
