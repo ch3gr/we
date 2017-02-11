@@ -1,4 +1,5 @@
 #include "candidate.h"
+#include "ofApp.h"
 
 using namespace ofxCv;
 using namespace cv;
@@ -18,6 +19,7 @@ void candidate::setup(const cv::Rect& track) {
 	lastConfidence = -1;
 
 	faceBounds = toOf(track);
+	vel = ofVec2f(0, 0);
 
 	cout << "New Label : " << label << endl;
 
@@ -39,8 +41,8 @@ void candidate::update(const cv::Rect& track) {
 	else
 		active = false;
 
+	vel = faceBounds.getCenter() - faceBoundsOld.getCenter();
 	faceBoundsOld = faceBounds;
-
 
 
 
@@ -96,9 +98,23 @@ void candidate::draw() {
 	if( isSnapshot() )
 		ofSetLineWidth(10);
 
+
 	ofDrawRectangle(faceBounds);
-	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
-	ofDrawBitmapString(activeTimer, faceBounds.x + 5, faceBounds.y + 30);
+	
+
+
+	ofSetLineWidth(3);
+	ofSetColor(ofColor::darkGreen);
+	ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + vel);
+	
+	ofDrawBitmapStringHighlight("id  :" + ofToString( label ), faceBounds.x + 5, faceBounds.y + 15, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("time:" + ofToString(activeTimer), faceBounds.x + 5, faceBounds.y + 30, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("vel :" + ofToString(int(vel.length()*100)/100.0), faceBounds.x , faceBounds.getBottom()-10, ofColor::black, ofColor::white);
+
+	ofNoFill();
+	ofSetColor(ofColor::lightGrey);
+	ofRectangle framing = adjustFaceBounds(faceBounds);
+	ofDrawRectangle(framing.x, framing.y, framing.width, framing.height);
 
 	ofPopStyle();
 }
@@ -131,6 +147,10 @@ bool candidate::isSnapshot() {
 
 	if (activeTimer > 0)
 		out = false;
+
+	// prevent taking blurry snapshot
+	//if (vel.length() > 10)
+	//	out = false;
 
 	return out;
 }

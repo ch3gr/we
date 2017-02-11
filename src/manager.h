@@ -14,7 +14,6 @@ class manager
 {
 public:
 	manager();
-	manager(int _camW, int _camH);
 	~manager();
 
 
@@ -35,7 +34,6 @@ public:
 	ofImage manager::makePortrait(ofImage cam, ofRectangle crop);
 	person manager::getPerson(int id);
 
-	int camW, camH;
 	int faceDetectW;
 	int contourDetectW;
 	float debugPortraitScale;
@@ -73,7 +71,7 @@ private:
 };
 
 
-ofRectangle adjustFaceBounds(ofRectangle _faceBounds, int camW, int camH);
 
-float getTimeDiff(float refTime);
+
+
 

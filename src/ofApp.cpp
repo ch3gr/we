@@ -21,18 +21,8 @@ void ofApp::setup() {
 
 
 
-
-
-	camW = 640;
-	camH = 480;
-	//camW = 1280;
-	//camH = 720;
-	//camW = 1920;
-	//camH = 1080;
-
-
 	// Create Manager
-	manage = manager(camW, camH);
+	manage = manager();
 	// Load background from disk if exists
 	if (ofFile::doesFileExist("background.jpg", true)) {
 		ofImage background;
@@ -537,6 +527,49 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 
 
+// Make the faceBounds bigger for better cropping
+ofRectangle adjustFaceBounds(ofRectangle faceBounds) {
+
+	faceBounds.scaleFromCenter(1.5, 2.2);
+	faceBounds.translateY(faceBounds.getHeight()*0.05);
+
+	// make sure the new bounds are not getting outside the camera image
+	faceBounds.setX(ofClamp(faceBounds.x, 0, camW));
+	faceBounds.setY(ofClamp(faceBounds.y, 0, camH));
+	faceBounds.setWidth(ofClamp(faceBounds.getWidth(), 0, camW - faceBounds.x));
+	faceBounds.setHeight(ofClamp(faceBounds.getHeight(), 0, camH - faceBounds.y));
+
+	return faceBounds;
+}
+
+
+// Get the time difference between the refTime and current time with set precision
+float getTimeDiff(float refTime) {
+	return roundf((ofGetElapsedTimef() - refTime) * 100000) / 100;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -545,7 +578,7 @@ void ofApp::dragEvent(ofDragInfo dragInfo) {
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-
+// DELETE EVERYTHING BELOW AT SOME POINT
 
 
 void ofApp::faceDetectSetup() {

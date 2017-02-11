@@ -7,6 +7,7 @@ class candidate : public ofxCv::RectFollower
 public:
 	ofRectangle faceBounds;
 	ofRectangle faceBoundsOld;
+	ofVec2f vel;
 	
 	vector<ofImage> snapshots;
 	cv::Mat cv_evidence;

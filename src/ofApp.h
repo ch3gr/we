@@ -38,7 +38,6 @@ public:
 	void ofApp::drawWithNormals(const ofPolyline& polyline);
 
 
-	int camW, camH;
 	float				camProxySize;
 	
 	ofVideoGrabber		cam;
@@ -96,3 +95,16 @@ public:
 
 
 };
+
+// Video stream resolution
+const int camW = 640;
+const int camH = 480;
+//const int camW = 1280;
+//const int camH = 720;
+//const int camW = 1920;
+//const int camH = 1080;
+
+
+ofRectangle adjustFaceBounds(ofRectangle _faceBounds);
+
+float getTimeDiff(float refTime);

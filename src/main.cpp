@@ -24,11 +24,11 @@ int main( ){
 
 toDo
 - Threading
-- optimise the whole trigger/capture process
 - don't capture when the person is moving
 - Fix camera res & processing resolution
 - train model : tighter crop in for face recognition
 - train model : align eyes?
+- add ofGui
 - fine tune tracker settings
 - fine tune Face recognition
 - write to disk all the faces and 10 snapshots etc

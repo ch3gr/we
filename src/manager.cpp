@@ -1,12 +1,11 @@
 #include "manager.h"
+#include "ofApp.h"
 
 using namespace ofxCv;
 
 
-manager::manager(){
-}
 
-manager::manager(int _camW, int _camH)
+manager::manager()
 {
 #ifdef TARGET_OPENGLES
 	shdPrep.load("shaders/ES2/prep");
@@ -24,8 +23,6 @@ manager::manager(int _camW, int _camH)
 
 
 
-	camW = _camW;
-	camH = _camH;
 	
 	faceDetectW = 256;
 	contourDetectW = camW*0.5;
@@ -232,12 +229,22 @@ void manager::detectFaces(ofImage cam) {
 		setBg(cam);
 
 
+	// Prep the debuggin buffer
+	if (debugTrackers) {
+		FBO_debugTrackers.begin();
+		ofClear(0);
+		cam.draw(0, 0);
+	}
+
+
+
 	scout.update(cam);
 	candidates.track(scout.getObjects());
 
 	vector<candidate> & followers = candidates.getFollowers();
 	for (int c = 0; c < followers.size(); c++) {
-
+		////////////////////////////
+		// LOGIC
 		// Take the <<PHOTO>> portrait
 		if (!followers[c].exist && followers[c].trigger) {
 			
@@ -249,7 +256,7 @@ void manager::detectFaces(ofImage cam) {
 			}
 			else {
 				portrait.clone(cam);
-				ofRectangle frame = adjustFaceBounds(followers[c].faceBounds, camW, camH);
+				ofRectangle frame = adjustFaceBounds(followers[c].faceBounds);
 				portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
 				addPerson(portrait, followers[c].snapshots);
 			}
@@ -258,38 +265,28 @@ void manager::detectFaces(ofImage cam) {
 		else if (!followers[c].exist && followers[c].isSnapshot() ) {
 			followers[c].takeSnapshot(cam);
 		}
+
+
+
+		////////////////////////////
+		// DRAW trackers debug
+		if (debugTrackers) {
+			followers[c].draw();
+		}
 	}
 
 
 
 
-	FBO_debugTrackers.begin();
-	ofClear(0);
-	cam.draw(0, 0);
 
-	// Draw the face trackers
-	//scout.draw();
-	
-	for (int i = 0; i < followers.size(); i++) {
-		followers[i].draw();
-
-		ofPushStyle();
-		ofNoFill();
-		ofSetColor(ofColor::lightGrey);
-		ofRectangle framing = adjustFaceBounds(followers[i].faceBounds, camW, camH);
-		ofDrawRectangle(framing.x, framing.y, framing.width, framing.height);
-		ofPopStyle();
-
-	}
 
 
 
 
 
 	////////////////////////////
-	// Face recognition stuff
-	// optimize!!
-
+	// FACE recognition stuff
+	
 
 	if (we.size() > 0)
 	{
@@ -340,7 +337,7 @@ void manager::detectFaces(ofImage cam) {
 
 				
 			// if no person was found, use the last recorded match
-			if (followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
+			if (debugTrackers && followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
 				
 				match = followers[i].lastMatch;
 				confidence = followers[i].lastConfidence;
@@ -354,6 +351,8 @@ void manager::detectFaces(ofImage cam) {
 		}
 	}
 
+	if (debugTrackers)
+		FBO_debugTrackers.end();
 
 	// see if I can view the internal model
 
@@ -373,13 +372,6 @@ void manager::detectFaces(ofImage cam) {
 	//ofMat.update();
 	//ofMat.draw(1400, 10);
 
-		
-
-
-	FBO_debugTrackers.end();
-
-
-	
 
 }
 
@@ -419,7 +411,7 @@ ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds) {
 
 	float cScale = contourDetectW / float(camW);
 
-	faceBounds = adjustFaceBounds(faceBounds, camW, camH);
+	faceBounds = adjustFaceBounds(faceBounds);
 
 	FBO_debugPortrait.begin();
 	ofClear(0);
@@ -699,30 +691,6 @@ person manager::getPerson(int id) {
 
 
 
-
-
-
-
-// Make the faceBounds bigger for better cropping
-ofRectangle adjustFaceBounds(ofRectangle faceBounds, int camW, int camH) {
-	
-	faceBounds.scaleFromCenter(1.5, 2.2);
-	faceBounds.translateY(faceBounds.getHeight()*0.05);
-
-	// make sure the new bounds are not getting outside the camera image
-	faceBounds.setX(ofClamp(faceBounds.x, 0, camW));
-	faceBounds.setY(ofClamp(faceBounds.y, 0, camH));
-	faceBounds.setWidth(ofClamp(faceBounds.getWidth(), 0, camW - faceBounds.x));
-	faceBounds.setHeight(ofClamp(faceBounds.getHeight(), 0, camH - faceBounds.y));
-
-	return faceBounds;
-}
-
-
-// Get the time difference between the refTime and current time with set precision
-float getTimeDiff(float refTime) {
-	return roundf((ofGetElapsedTimef() - refTime) * 100000) / 100;
-}
 
 
 
