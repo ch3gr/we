@@ -15,15 +15,15 @@ public:
 	
 
 
-	int activeTimer ;
-	int snapshotIntervals;
-
 	float birthTime;
+	float lastSnapshotTime;
+	float snapshotInterval;
+	int snapshotSum;
+
 
 	bool active;
 	bool trigger;
-	bool captured;
-	bool exist;
+	bool ignore;
 
 	int lastMatch;
 	double lastConfidence;
@@ -38,7 +38,7 @@ public:
 	void update(const cv::Rect& track);
 	void kill();
 	void draw();
-	bool isSnapshot();
+	bool isPhotoTime();
 	void takeSnapshot(ofImage snapshot);
 };
 

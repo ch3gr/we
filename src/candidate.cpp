@@ -6,13 +6,16 @@ using namespace cv;
 
 void candidate::setup(const cv::Rect& track) {
 
-	snapshotIntervals = 4;
-	activeTimer = -snapshotIntervals * 10 -1;
 	birthTime = ofGetElapsedTimef();
+	lastSnapshotTime = birthTime;
+	snapshotInterval = 0.1;
+	snapshotSum = 20;
+
+
+
 	active = false;
 	trigger = false;
-	captured = false;
-	exist = false;
+	ignore = false;
 	evidenceIsSet = false;
 
 	lastMatch = -1;
@@ -36,7 +39,6 @@ void candidate::update(const cv::Rect& track) {
 		faceBounds.getHeight() != faceBoundsOld.getHeight()) {
 
 		active = true;
-		activeTimer += 1;
 	}
 	else
 		active = false;
@@ -49,14 +51,9 @@ void candidate::update(const cv::Rect& track) {
 	if (trigger)
 		trigger = false;
 		
-	else if (!exist && !captured && activeTimer >= 0)
+	else if (!ignore && snapshots.size() >= snapshotSum)
 		trigger = true;
 	
-	if (exist)
-	{
-//		snapshots.clear();
-		captured = true;
-	}
 }
 
 void candidate::kill() {
@@ -64,39 +61,31 @@ void candidate::kill() {
 }
 
 void candidate::draw() {
+
 	ofPushStyle();
-	ofColor c = ofColor::white;
 
+	// default
+	ofNoFill();
+	ofSetLineWidth(1);
+	ofSetColor(ofColor::grey);
 
-	if (trigger) {
+	if (active) {
+		ofSetColor(ofColor::green);
+		if (isPhotoTime()) {
+			ofSetColor(ofColor::white);
+			ofSetLineWidth(100);
+		}
+	}
+	if (trigger && active && isPhotoTime()) {
 		ofFill();
 		ofSetColor(ofColor::white);
 	}
-	else if (exist) {
+	if (ignore && active) {
 		ofNoFill();
 		ofSetLineWidth(3);
 		ofSetColor(ofColor::red);
 	}
-	else if (active && !captured) {
-		ofNoFill();
-		ofSetLineWidth(3);
-		ofSetColor(ofColor::green);
-	}
-	else if (captured) {
-		ofNoFill();
-		ofSetLineWidth(3);
-		ofSetColor(ofColor::blue);
-	}
 
-	if( !active) {
-		ofSetColor(c);
-		ofNoFill();
-		ofSetLineWidth(1);
-		ofSetColor(ofColor::grey);
-	}
-
-	if( isSnapshot() )
-		ofSetLineWidth(10);
 
 
 	ofDrawRectangle(faceBounds);
@@ -107,8 +96,10 @@ void candidate::draw() {
 	ofSetColor(ofColor::darkGreen);
 	ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + vel);
 	
+	ofDrawBitmapStringHighlight("ignore  :" + ofToString(ignore), faceBounds.x + 5, faceBounds.y - 15, ofColor::black, ofColor::white);
+
 	ofDrawBitmapStringHighlight("id  :" + ofToString( label ), faceBounds.x + 5, faceBounds.y + 15, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight("time:" + ofToString(activeTimer), faceBounds.x + 5, faceBounds.y + 30, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("snap:" + ofToString(snapshots.size()) +"/"+ ofToString(snapshotSum), faceBounds.x + 5, faceBounds.y + 30, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight("vel :" + ofToString(int(vel.length()*100)/100.0), faceBounds.x , faceBounds.getBottom()-10, ofColor::black, ofColor::white);
 
 	ofNoFill();
@@ -136,35 +127,42 @@ void candidate::info() {
 }
 
 
-bool candidate::isSnapshot() {
+bool candidate::isPhotoTime() {
 	bool out = active;
 
-	if (exist)
+	if (ignore)
 		return false;
 
-	if ( activeTimer% snapshotIntervals != 0) // Set every how many frames to take a snapshot
+	//If it's time to take another snapshot
+	if (ofGetElapsedTimef() > lastSnapshotTime + snapshotInterval)
+		out = true;
+	else
 		out = false;
+	
 
-	if (activeTimer > 0)
-		out = false;
-
+	
 	// prevent taking blurry snapshot
-	//if (vel.length() > 10)
-	//	out = false;
+	if (vel.length() > 5)
+		out = false;
 
 	return out;
 }
 
 void candidate::takeSnapshot(ofImage snapshot)
 {
-	snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
-	snapshot.resize(75, 75);
-	snapshots.push_back(snapshot);
+	if (snapshots.size() < snapshotSum) {
 
-	//set the mat to ID against
-	Mat snapToIdCvColor = ofxCv::toCv(snapshot);
-	cvtColor(snapToIdCvColor, cv_evidence, CV_RGB2GRAY);
-	evidenceIsSet = true;
+		snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
+		snapshot.resize(75, 75);
+		snapshots.push_back(snapshot);
+
+		//set the mat to ID against
+		Mat snapToIdCvColor = ofxCv::toCv(snapshot);
+		cvtColor(snapToIdCvColor, cv_evidence, CV_RGB2GRAY);
+		evidenceIsSet = true;
+
+		lastSnapshotTime = ofGetElapsedTimef();
+	}
 }
 
 

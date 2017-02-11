@@ -244,34 +244,39 @@ void manager::detectFaces(ofImage cam) {
 	vector<candidate> & followers = candidates.getFollowers();
 	for (int c = 0; c < followers.size(); c++) {
 		////////////////////////////
-		// LOGIC
-		// Take the <<PHOTO>> portrait
-		if (!followers[c].exist && followers[c].trigger) {
-			
-			ofImage portrait;
-			// create Alpha portrait
-			if (portraitWithAlpha) {
-				portrait = makePortrait(cam, followers[c].faceBounds);
-				addPerson(portrait, followers[c].snapshots);
-			}
-			else {
-				portrait.clone(cam);
-				ofRectangle frame = adjustFaceBounds(followers[c].faceBounds);
-				portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
-				addPerson(portrait, followers[c].snapshots);
-			}
-		}
-		// Or keep a training snapshots
-		else if (!followers[c].exist && followers[c].isSnapshot() ) {
-			followers[c].takeSnapshot(cam);
-		}
-
-
-
-		////////////////////////////
 		// DRAW trackers debug
 		if (debugTrackers) {
 			followers[c].draw();
+		}
+		////////////////////////////
+		// LOGIC
+
+		// Is it possible to take a photo?
+		if (!followers[c].ignore && followers[c].active && followers[c].isPhotoTime()) {
+
+			// Take the <<PHOTO>> portrait
+			if ( followers[c].trigger) {
+			
+				ofImage portrait;
+				// create Alpha portrait
+				if (portraitWithAlpha) {
+					portrait = makePortrait(cam, followers[c].faceBounds);
+					addPerson(portrait, followers[c].snapshots);
+				}
+				else {
+					portrait.clone(cam);
+					ofRectangle frame = adjustFaceBounds(followers[c].faceBounds);
+					portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
+					addPerson(portrait, followers[c].snapshots);
+				}
+
+				followers[c].ignore = true;
+				followers[c].lastMatch = nextPersonId - 1;
+			}
+			// Or take a <<SNAPSHOT>>
+			else {
+				followers[c].takeSnapshot(cam);
+			}
 		}
 	}
 
@@ -318,7 +323,7 @@ void manager::detectFaces(ofImage cam) {
 			}
 			// or use the predifined snapshot
 			else {
-				if (!followers[i].exist && followers[i].evidenceIsSet) {
+				if (!followers[i].ignore && followers[i].evidenceIsSet) {
 					cv_idSnapshot = followers[i].cv_evidence;
 
 					model->predict(cv_idSnapshot, match, confidence);
@@ -331,11 +336,14 @@ void manager::detectFaces(ofImage cam) {
 				
 
 			
-		
+			////////////////////////////
+			// RECOGNIZED peson
 			if (confidence != -1 && confidence < 1000)
-				followers[i].exist = true;
+				followers[i].ignore = true;
 
-				
+			
+
+
 			// if no person was found, use the last recorded match
 			if (debugTrackers && followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
 				
