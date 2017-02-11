@@ -39,6 +39,9 @@ toDo
 - leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
 
 
+Gui controls
+- perpShaderThress
+- candidate : speed thresshold
 
 
 

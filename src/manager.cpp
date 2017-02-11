@@ -80,6 +80,7 @@ void manager::addPerson(ofImage _face) {
 	we.push_back(someoneNew);
 }
 
+
 void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 	person someoneNew = person(nextPersonId, _face, _snapshots);
 	we.push_back(someoneNew);
@@ -89,7 +90,11 @@ void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 		modelFaces.push_back(someoneNew.snapshotsCV[s]);
 		modelLabels.push_back(nextPersonId);
 	}
+	
+	cout << "Adding person " << endl;
+	float timer = ofGetElapsedTimef();
 	model->train(modelFaces, modelLabels);
+	cout << "Training took : " << (ofGetElapsedTimef() - timer) << " seconds" << endl;
 
 	nextPersonId++;
 }
@@ -327,7 +332,6 @@ void manager::detectFaces(ofImage cam) {
 					cv_idSnapshot = followers[i].cv_evidence;
 
 					model->predict(cv_idSnapshot, match, confidence);
-					cout << "INVESTIGATE " << ofGetElapsedTimef() << endl;
 
 					followers[i].lastMatch = match;
 					followers[i].lastConfidence = confidence;
@@ -338,7 +342,7 @@ void manager::detectFaces(ofImage cam) {
 			
 			////////////////////////////
 			// RECOGNIZED peson
-			if (confidence != -1 && confidence < 1000)
+			if (false && confidence != -1 && confidence < 1000)
 				followers[i].ignore = true;
 
 			

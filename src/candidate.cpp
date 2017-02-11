@@ -8,7 +8,7 @@ void candidate::setup(const cv::Rect& track) {
 
 	birthTime = ofGetElapsedTimef();
 	lastSnapshotTime = birthTime;
-	snapshotInterval = 0.1;
+	snapshotInterval = 0.01;
 	snapshotSum = 20;
 
 
