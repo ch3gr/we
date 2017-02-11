@@ -9,7 +9,8 @@ public:
 	ofRectangle faceBoundsOld;
 	
 	vector<ofImage> snapshots;
-	cv::Mat snapToIdCv;
+	cv::Mat cv_evidence;
+	bool evidenceIsSet;
 	
 
 
@@ -22,6 +23,9 @@ public:
 	bool trigger;
 	bool captured;
 	bool exist;
+
+	int lastMatch;
+	double lastConfidence;
 
 	candidate();
 	~candidate();

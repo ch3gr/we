@@ -359,6 +359,12 @@ void ofApp::keyPressed(int key) {
 		manage.debugPeople = !manage.debugPeople;
 		cout << "debugPortraits :" << manage.debugPeople << endl;
 	}
+	// Debug People
+	if (key == '4') {
+		manage.debugUpdateEvidence = !manage.debugUpdateEvidence;
+		cout << "debugUpdateEvidence :" << manage.debugUpdateEvidence << endl;
+	}
+
 
 	// info
 	if (key == 'i') {

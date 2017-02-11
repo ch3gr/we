@@ -44,6 +44,7 @@ public:
 	bool portraitWithAlpha;
 
 	bool debugPeople;
+	bool debugUpdateEvidence;
 
 	vector<person> we;
 	int nextPersonId;

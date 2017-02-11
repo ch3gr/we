@@ -33,7 +33,7 @@ manager::manager(int _camW, int _camH)
 
 	portraitWithAlpha = true;
 	debugPeople = true;
-	
+	debugUpdateEvidence = false;
 	
 	
 
@@ -184,8 +184,19 @@ void manager::drawDebugTrackers(){
 	vector<candidate> & followers = candidates.getFollowers();
 	for (int c = 0; c < followers.size(); c++)
 	{
+		if(followers[c].evidenceIsSet){ 
+			// Draw cv_evidence
+			ofImage ofMat;
+			ofxCv::toOf(followers[c].cv_evidence, ofMat);
+			if (ofMat.isAllocated()) {
+				ofMat.update();
+				ofMat.draw(camW + c * 75, 0);
+			}
+		}
+
+		// Draw snapshots
 		for (int s = 0; s < followers[c].snapshots.size(); s++) {
-			followers[c].snapshots[s].draw(camW + c * 75, s * 75);
+			followers[c].snapshots[s].draw(camW + c * 75, (s+1) * 75);
 		}
 	}
 
@@ -303,57 +314,63 @@ void manager::detectFaces(ofImage cam) {
 	if (we.size() > 0)
 	{
 		for (int i = 0; i < followers.size(); i++) {
-
-			ofImage idSnapshot;
-			
-			// Use one of the snapshots to id the person
-			//idSnapshot = followers[i].snapshots[0];
-				
-			// Or better/slower use the live cam
-			idSnapshot.clone(cam);
-			idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
-			idSnapshot.resize(75, 75);
-
-			Mat idSnapshotCv = ofxCv::toCv(idSnapshot);
-			Mat idSnapshotCvGrey;
-			cvtColor(idSnapshotCv, idSnapshotCvGrey, CV_RGB2GRAY);
-
-			
-
-			// <----------- EDW
 			int match = -1;
-			double confidence = 0.0;
-			//int prediction = model->predict(idSnapshotCvGrey);
-			if (followers[i].snapshots.size() != 0 ) {
-				model->predict(followers[i].snapToIdCv, match, confidence);
-				//model->predict(idSnapshotCvGrey, match, confidence);
+			double confidence = -1;
+
+			// Make sure it has a snapshot
+			ofImage idSnapshot;
+			Mat cv_idSnapshot;
+
+			// constant update identification evidence
+			// only useful for debuging
+			if (debugUpdateEvidence) {
+				// better/slower use the live cam
+				idSnapshot.clone(cam);
+				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
+				idSnapshot.resize(75, 75);
+
+				Mat cv_idSnapshotRGB = ofxCv::toCv(idSnapshot);
+				cvtColor(cv_idSnapshotRGB, cv_idSnapshot, CV_RGB2GRAY);
+					
+				model->predict(cv_idSnapshot, match, confidence);
+				ofDrawBitmapStringHighlight("?", followers[i].faceBounds.x+5, followers[i].faceBounds.getBottom() - 10, ofColor::black, ofColor::yellow);
+
+				followers[i].cv_evidence = cv_idSnapshot;
+				followers[i].lastMatch = match;
+				followers[i].lastConfidence = confidence;
+			}
+			// or use the predifined snapshot
+			else {
+				if (!followers[i].exist && followers[i].evidenceIsSet) {
+					cv_idSnapshot = followers[i].cv_evidence;
+
+					model->predict(cv_idSnapshot, match, confidence);
+					cout << "INVESTIGATE " << ofGetElapsedTimef() << endl;
+
+					followers[i].lastMatch = match;
+					followers[i].lastConfidence = confidence;
+				}
 			}
 				
-			if (confidence < 1000)
+
+			
+		
+			if (confidence != -1 && confidence < 1000)
 				followers[i].exist = true;
 
-			//ofDrawBitmapStringHighlight(ofToString(prediction), followers[i].faceBounds.x, followers[i].faceBounds.getBottom()+20 , ofColor::black, ofColor::white);
-
 				
-			//person foundPerson = getPerson(match);
-
-			if (match != -1 && match <= we.size()) {
-
+			// if no person was found, use the last recorded match
+			if (followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
+				
+				match = followers[i].lastMatch;
+				confidence = followers[i].lastConfidence;
 				int pX = we[match].x;
 				int pY = we[match].y;
 				pX += we[match].face.getWidth() / 2;
-				//int pX = foundPerson.x;
-				//int pY = foundPerson.y;
 				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
 				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 20, ofColor::black, ofColor::white);
 			}
 
-
-
-			//for (int p = 0; p < we.size(); p++) {
-			//	pX = we[i].x;
-			//	pY = we[i].y;
-			//}
 		}
 	}
 

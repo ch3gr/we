@@ -12,6 +12,11 @@ void candidate::setup(const cv::Rect& track) {
 	trigger = false;
 	captured = false;
 	exist = false;
+	evidenceIsSet = false;
+
+	lastMatch = -1;
+	lastConfidence = -1;
+
 	faceBounds = toOf(track);
 
 	cout << "New Label : " << label << endl;
@@ -47,7 +52,7 @@ void candidate::update(const cv::Rect& track) {
 	
 	if (exist)
 	{
-		snapshots.clear();
+//		snapshots.clear();
 		captured = true;
 	}
 }
@@ -95,7 +100,6 @@ void candidate::draw() {
 	ofDrawBitmapString(label, faceBounds.x+5, faceBounds.y + 20);
 	ofDrawBitmapString(activeTimer, faceBounds.x + 5, faceBounds.y + 30);
 
-
 	ofPopStyle();
 }
 
@@ -137,10 +141,10 @@ void candidate::takeSnapshot(ofImage snapshot)
 	snapshot.resize(75, 75);
 	snapshots.push_back(snapshot);
 
-	// <----------- EDW
 	//set the mat to ID against
 	Mat snapToIdCvColor = ofxCv::toCv(snapshot);
-	cvtColor(snapToIdCvColor, snapToIdCv, CV_RGB2GRAY);
+	cvtColor(snapToIdCvColor, cv_evidence, CV_RGB2GRAY);
+	evidenceIsSet = true;
 }
 
 
