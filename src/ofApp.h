@@ -93,7 +93,7 @@ public:
 
 	manager manage;
 
-
+	
 };
 
 // Video stream resolution
@@ -108,3 +108,4 @@ const int camH = 480;
 ofRectangle adjustFaceBounds(ofRectangle _faceBounds);
 
 float getTimeDiff(float refTime);
+

@@ -4,15 +4,21 @@
 #include "person.h"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
+//#include "ThreadedModel.h"
 
 
 using namespace ofxCv;
 using namespace cv;
 
 
+
+
+
+
 class manager
 {
 public:
+
 	manager();
 	~manager();
 
@@ -33,6 +39,8 @@ public:
 	void manager::detectFaces(ofVideoGrabber cam);
 	ofImage manager::makePortrait(ofImage cam, ofRectangle crop);
 	person manager::getPerson(int id);
+
+	
 
 	int faceDetectW;
 	int contourDetectW;
@@ -65,11 +73,13 @@ public:
 	vector<ofImage> modelOfFaces;
 	vector<int> modelLabels;
 	
+
+	//ThreadedModel threadedModel;
+
 private:
 	ofImage bg;
 
 };
-
 
 
 

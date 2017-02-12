@@ -1,6 +1,7 @@
 #include "manager.h"
 #include "ofApp.h"
 
+
 using namespace ofxCv;
 
 
@@ -59,6 +60,7 @@ manager::manager()
 	//model = createFisherFaceRecognizer(0, 5000);
 	//model = createLBPHFaceRecognizer();
 
+
 }
 
 
@@ -81,6 +83,7 @@ void manager::addPerson(ofImage _face) {
 }
 
 
+
 void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 	person someoneNew = person(nextPersonId, _face, _snapshots);
 	we.push_back(someoneNew);
@@ -91,6 +94,8 @@ void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 		modelLabels.push_back(nextPersonId);
 	}
 	
+	
+
 	cout << "Adding person " << endl;
 	float timer = ofGetElapsedTimef();
 	model->train(modelFaces, modelLabels);
@@ -98,6 +103,11 @@ void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 
 	nextPersonId++;
 }
+
+
+
+
+
 
 
 void manager::curate() {
@@ -342,7 +352,7 @@ void manager::detectFaces(ofImage cam) {
 			
 			////////////////////////////
 			// RECOGNIZED peson
-			if (false && confidence != -1 && confidence < 1000)
+			if (true && confidence != -1 && confidence < 1000)
 				followers[i].ignore = true;
 
 			
@@ -698,11 +708,6 @@ person manager::getPerson(int id) {
 	}
 	
 }
-
-
-
-
-
 
 
 

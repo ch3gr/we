@@ -785,6 +785,9 @@
     <ClInclude Include="src\candidate.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\ThreadedModel.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />

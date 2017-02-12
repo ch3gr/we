@@ -2,7 +2,6 @@
 
 
 
-
 using namespace ofxCv;
 using namespace cv;
 
