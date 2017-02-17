@@ -24,9 +24,6 @@ void candidate::setup(const cv::Rect& track) {
 	faceBounds = toOf(track);
 	vel = ofVec2f(0, 0);
 
-	cout << "New Label : " << label << endl;
-
-
 }
 
 void candidate::update(const cv::Rect& track) {
@@ -96,11 +93,9 @@ void candidate::draw() {
 	ofSetColor(ofColor::darkGreen);
 	ofDrawLine(faceBounds.getCenter(), faceBounds.getCenter() + vel);
 	
-	ofDrawBitmapStringHighlight("ignore  :" + ofToString(ignore), faceBounds.x + 5, faceBounds.y - 15, ofColor::black, ofColor::white);
-
-	ofDrawBitmapStringHighlight("id  :" + ofToString( label ), faceBounds.x + 5, faceBounds.y + 15, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight("snap:" + ofToString(snapshots.size()) +"/"+ ofToString(snapshotSum), faceBounds.x + 5, faceBounds.y + 30, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight("vel :" + ofToString(int(vel.length()*100)/100.0), faceBounds.x , faceBounds.getBottom()-10, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("id  :" + ofToString( label ), faceBounds.x + 5, faceBounds.y - 5, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("snap:" + ofToString(snapshots.size()) +"/"+ ofToString(snapshotSum), faceBounds.getCenter().x, faceBounds.y - 5, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight("v:" + ofToString(int(vel.length()*100)/100.0), faceBounds.getCenter().x , faceBounds.getBottom()+15, ofColor::black, ofColor::white);
 
 	ofNoFill();
 	ofSetColor(ofColor::lightGrey);

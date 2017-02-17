@@ -73,9 +73,12 @@ void ofApp::setup() {
 		}
 	}
 
-	mouseLB_Pressed = false;
+
 	// Doesn't grab anything, cam is still empty, kind of works
 	//manage.setBg(cam);
+
+	mouseLB_Pressed = false;
+	cout << "Initialised" << endl;
 }
 
 
@@ -364,6 +367,10 @@ void ofApp::keyPressed(int key) {
 		manage.saveUs();
 	}
 
+	// loadUs
+	if (key == 'l' || key == 'L') {
+		manage.loadUs();
+	}
 
 	// Make portraits with Alpha channel
 	if (key == 'a') {

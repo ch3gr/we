@@ -23,7 +23,7 @@ int main( ){
 /*
 
 toDo
-- write to disk all the faces and 10 snapshots etc
+- write/load update or append
 - curate
 - Threading
 - add ofGui

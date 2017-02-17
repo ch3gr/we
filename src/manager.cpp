@@ -96,7 +96,6 @@ void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
 	
 	
 
-	cout << "Adding person " << endl;
 	float timer = ofGetElapsedTimef();
 	model->train(modelFaces, modelLabels);
 	cout << "Training took : " << (ofGetElapsedTimef() - timer) << " seconds" << endl;
@@ -271,6 +270,76 @@ void manager::saveUs() {
 
 
 
+// Load a session from disk
+void manager::loadUs() {
+	string sessionPath = "sessions/s_01/";
+	string personPrefix = "p_";
+	string snapshotPrefix = "s.";
+	string ext = ".tif";
+
+
+	cout << "\nLoading session \n" << "  data/" << sessionPath << endl;
+
+	ofDirectory sessionDir = ofDirectory(sessionPath);
+	sessionDir.listDir();
+
+	// PEOPLE
+	for (int p = 0; p < sessionDir.size(); p++) {
+		cout << "\n    Loading Person" << endl;
+		cout << "    |__ " << sessionDir.getName(p) << endl;
+
+		ofDirectory personDir = ofDirectory(sessionDir.getPath(p));
+		if (personDir.exists())
+		{
+			// check if person directory actually matches the prefix
+			if (sessionDir.getName(p).substr(0, personPrefix.length()) == personPrefix) {
+
+				ofImage face;
+				vector<ofImage> snapshots;
+
+				// Read all data
+				personDir.listDir();
+				vector<ofFile> files = personDir.getFiles();
+				for (int f = 0; f < files.size(); f++) {
+					cout << "      |__ " << files[f].getBaseName() << endl;
+
+					// Load face
+					if (files[f].getBaseName().substr(0, 4) == "face") {
+						face.load( files[f].path() );
+					}
+					// Load snapshots
+					if (files[f].getBaseName().substr(0, snapshotPrefix.length()) == snapshotPrefix) {
+						ofImage snapshot;
+						snapshot.load(files[f].path());
+						snapshots.push_back(snapshot);
+					}
+				}
+
+				// Are we good to add a person?
+				if (face.isAllocated() && snapshots.size() > 0) {
+					addPerson(face, snapshots);
+				}
+			}
+		}
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void manager::detectFaces(ofImage cam) {
 
 	// only at the first frame
@@ -402,7 +471,7 @@ void manager::detectFaces(ofImage cam) {
 				int pY = we[match].y;
 				pX += we[match].face.getWidth() / 2;
 				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
-				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 20, ofColor::black, ofColor::white);
+				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);
 			}
 
 		}

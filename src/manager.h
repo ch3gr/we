@@ -33,6 +33,7 @@ public:
 	void manager::info();
 	void manager::forgetUs();
 	void manager::saveUs();
+	void manager::loadUs();
 	void manager::curate();
 
 
