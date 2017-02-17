@@ -213,7 +213,7 @@ void manager::info() {
 }
 
 
-void manager::clearPeople() {
+void manager::forgetUs() {
 	we.clear();
 	nextPersonId = 0;
 
@@ -228,7 +228,41 @@ void manager::clearPeople() {
 
 
 
+// Save the group to disk
+void manager::saveUs() {
 
+	string sessionPath = "sessions/s_01/";
+	string personPrefix = "p_";
+	string snapshotPrefix = "s.";
+	string ext = ".tif";
+	cout << "\nSaving session \n" << "data/" << sessionPath << endl;
+
+	// Delete existing session directory
+	ofDirectory::removeDirectory(sessionPath, true, true);
+
+	// ALL OF US
+	for (int p = 0; p < we.size(); p++) {
+		string personPath = personPrefix + padThis(4, p) + "/";
+		cout << "  |__ " << personPath << endl;
+
+		// SAVE FACE
+		personPath = sessionPath + personPath;
+		string personFacePath = personPath + "face.tif";
+		we[p].face.save(personFacePath, OF_IMAGE_QUALITY_BEST);
+
+
+		// SNAPSHOTS
+		for (int s = 0; s < we[p].snapshots.size(); s++) {
+			
+			string snapshotFile = snapshotPrefix + padThis(4, s) + ext;
+			cout << "    |__ " << snapshotFile << endl;
+
+			// Prepare snapshot file path and SAVE
+			snapshotFile = personPath + snapshotFile;
+			we[p].snapshots[s].save(snapshotFile, OF_IMAGE_QUALITY_BEST);
+		}
+	}
+}
 
 
 
@@ -242,6 +276,7 @@ void manager::detectFaces(ofImage cam) {
 	// only at the first frame
 	if (!bg.isAllocated())
 		setBg(cam);
+
 
 
 	// Prep the debuggin buffer

@@ -23,15 +23,15 @@ int main( ){
 /*
 
 toDo
+- write to disk all the faces and 10 snapshots etc
+- curate
 - Threading
-- don't capture when the person is moving
-- Fix camera res & processing resolution
-- train model : tighter crop in for face recognition
-- train model : align eyes?
 - add ofGui
 - fine tune tracker settings
 - fine tune Face recognition
-- write to disk all the faces and 10 snapshots etc
+- Fix camera res & processing resolution
+- train model : tighter crop in for face recognition
+- train model : align eyes?
 - Webcame frame rate
 - Mipos to manage exei reference tou cam (h' camHacked) apo tin arxi ston constractor
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements

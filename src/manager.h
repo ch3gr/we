@@ -31,7 +31,8 @@ public:
 	void manager::drawDebug(ofImage camFrame);
 	void manager::drawDebugTrackers();
 	void manager::info();
-	void manager::clearPeople();
+	void manager::forgetUs();
+	void manager::saveUs();
 	void manager::curate();
 
 

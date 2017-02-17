@@ -31,6 +31,8 @@ public:
 
 
 
+
+
 	void ofApp::faceDetectSetup();
 	void ofApp::faceDetectUpdate();
 	void ofApp::faceDetectDraw();
@@ -109,3 +111,4 @@ ofRectangle adjustFaceBounds(ofRectangle _faceBounds);
 
 float getTimeDiff(float refTime);
 
+string padThis(int pads, int number);

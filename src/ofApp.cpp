@@ -323,7 +323,7 @@ void ofApp::keyPressed(int key) {
 
 	if (key == 'c')
 	{
-		manage.clearPeople();
+		manage.forgetUs();
 		cout << "People cleared" << endl;
 	}
 
@@ -355,9 +355,15 @@ void ofApp::keyPressed(int key) {
 	}
 
 	// camera settings
-	if (key == 's' || key == 'S') {
+	if (key == 'v' || key == 'V') {
 		cam.videoSettings();
 	}
+
+	// saveUs
+	if (key == 's' || key == 'S') {
+		manage.saveUs();
+	}
+
 
 	// Make portraits with Alpha channel
 	if (key == 'a') {
@@ -550,16 +556,15 @@ float getTimeDiff(float refTime) {
 
 
 
+string padThis(int pads, int number) {
+	string out;
+	string strNum = ofToString(number);
 
-
-
-
-
-
-
-
-
-
+	for (int i = 0; i < pads - strNum.length(); i++) {
+		out += "0";
+	}
+	return out + strNum;
+}
 
 
 
