@@ -31,64 +31,23 @@ public:
 
 
 
-
-
-	void ofApp::faceDetectSetup();
-	void ofApp::faceDetectUpdate();
-	void ofApp::faceDetectDraw();
-
-	void ofApp::drawWithNormals(const ofPolyline& polyline);
-
-
-	float				camProxySize;
 	
+
 	ofVideoGrabber		cam;
-	ofImage frame;						// cam + comps
-	ofImage frameCompute;				// reduced frame for computation
-
-	ofFbo contourMask;					// calculated contours
-	
-	
-	ofFbo camHacked;
-
-	bool mouseLB_Pressed;
+	ofFbo				camHacked;
 
 
-	// Sample people faces
+
+	// Sample people faces for DEBUGING
 	int uCount;
 	vector< vector<ofImage> > samplePeople;
 	int selectSamplePerson;
 	float fScale;
 
 
+	// color picker
+	bool mouseLB_Pressed;
 
-	// Contour detection openCV
-	ofxCvColorImage cvImgColor, cvImgColor2;
-	ofxCvGrayscaleImage cvImgGrayscale;
-	ofxCvContourFinder contourFinder;
-	vector<ofPath> controurSurfaces;
-
-	int threshold;
-
-
-	
-
-	//	face detection and recognition
-	vector<Rect> objects;
-	CascadeClassifier classifier;
-	Ptr<FaceRecognizer> model;
-
-	vector<Mat> images, faces;
-	vector<ofImage> ofFaces;
-	vector<int> labels;
-
-	ofImage mouseFace;
-	ofImage unknownFace;
-
-	int match[10];
-	double confidence[10];
-
-	int mousePic;
 
 
 

@@ -25,18 +25,25 @@ int main( ){
 toDo
 
 - curate
-- Threading
 - add ofGui
 - fine tune tracker settings
 - fine tune Face recognition
+- Threading ( threaded channel )
 - Fix camera res & processing resolution
 - train model : tighter crop in for face recognition
 - train model : align eyes?
 - Webcame frame rate
-- Mipos to manage exei reference tou cam (h' camHacked) apo tin arxi ston constractor
-- remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
-- read up and optimize passing ofImages and <vector>ofImages VS pointers as arguments
+
 - leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
+- remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
+
+
+From Zach
+now using : harr
+should look into : dlib	hog
+local histogram
+clahe openCV
+
 
 
 Gui controls

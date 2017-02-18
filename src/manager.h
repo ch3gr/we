@@ -23,12 +23,12 @@ public:
 	~manager();
 
 
-	void manager::addPerson(ofImage _face);
-	void manager::addPerson(ofImage _face, vector<ofImage> _snapshots);
-	void manager::setBg(ofImage _bg);
-	void manager::setBg(ofVideoGrabber _cam);
+	void manager::addPerson(ofImage & _face);
+	void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots);
+	void manager::setBg(ofImage & _bg);
+	void manager::setBg(ofVideoGrabber & _cam);
 	void manager::draw();
-	void manager::drawDebug(ofImage camFrame);
+	void manager::drawDebug(ofImage & camFrame);
 	void manager::drawDebugTrackers();
 	void manager::info();
 	void manager::forgetUs();
@@ -37,9 +37,9 @@ public:
 	void manager::curate();
 
 
-	void manager::detectFaces(ofImage cam);
-	void manager::detectFaces(ofVideoGrabber cam);
-	ofImage manager::makePortrait(ofImage cam, ofRectangle crop);
+	void manager::detectFaces(ofImage & cam);
+	void manager::detectFaces(ofVideoGrabber & cam);
+	ofImage manager::makePortrait(ofImage & cam, ofRectangle & crop);
 	person manager::getPerson(int id);
 
 	

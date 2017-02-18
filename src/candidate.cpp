@@ -143,7 +143,7 @@ bool candidate::isPhotoTime() {
 	return out;
 }
 
-void candidate::takeSnapshot(ofImage snapshot)
+void candidate::takeSnapshot(ofImage & snapshot)
 {
 	if (snapshots.size() < snapshotSum) {
 

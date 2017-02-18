@@ -25,7 +25,7 @@ manager::manager()
 
 
 	
-	faceDetectW = 256;
+	faceDetectW = 128;
 	contourDetectW = camW*0.5;
 	debugPortraitScale = 0.5;
 
@@ -69,22 +69,22 @@ manager::~manager()
 }
 
 
-void manager::setBg(ofImage _bg) {
+void manager::setBg(ofImage & _bg) {
 	bg = _bg;
 }
 
-void manager::setBg(ofVideoGrabber _cam) {
+void manager::setBg(ofVideoGrabber & _cam) {
 	bg.setFromPixels(_cam.getPixels());
 }
 
-void manager::addPerson(ofImage _face) {
+void manager::addPerson(ofImage & _face) {
 	person someoneNew = person(nextPersonId++, _face);
 	we.push_back(someoneNew);
 }
 
 
 
-void manager::addPerson(ofImage _face, vector<ofImage> _snapshots) {
+void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 	person someoneNew = person(nextPersonId, _face, _snapshots);
 	we.push_back(someoneNew);
 
@@ -153,7 +153,7 @@ void manager::draw() {
 
 
 
-void manager::drawDebug(ofImage camFrame) {
+void manager::drawDebug(ofImage & camFrame) {
 
 	vector<candidate> & followers = candidates.getFollowers();
 	if (followers.size() > 0) {
@@ -245,7 +245,7 @@ void manager::saveUs(bool append) {
 		string lastPerson = sessionDir.getName(sessionDir.size()-1);
 		lastPerson = lastPerson.substr(personPrefix.length() ,lastPerson.length()-1);
 		nextId = std::stoi(lastPerson) + 1;
-		cout << "next :" << nextId << endl;
+		cout << "     append next id :" << nextId << endl;
 	}
 	else {
 		// Delete existing session directory
@@ -353,7 +353,7 @@ void manager::loadUs() {
 
 
 
-void manager::detectFaces(ofImage cam) {
+void manager::detectFaces(ofImage & cam) {
 
 	// only at the first frame
 	if (!bg.isAllocated())
@@ -517,10 +517,10 @@ void manager::detectFaces(ofImage cam) {
 
 
 
-void manager::detectFaces(ofVideoGrabber cam) {
+void manager::detectFaces(ofVideoGrabber & cam) {
 	ofImage camFrame;
 	camFrame.setFromPixels(cam.getPixels());
-	detectFaces(camFrame);
+	detectFaces( camFrame);
 }
 
 
@@ -545,7 +545,7 @@ void manager::detectFaces(ofVideoGrabber cam) {
 
 
 
-ofImage manager::makePortrait( ofImage camFrame, ofRectangle faceBounds) {
+ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 
 
 	float cScale = contourDetectW / float(camW);

@@ -14,7 +14,7 @@ person::person(int _id, int _x, int _y) {
 	y = _y;
 }
 
-person::person(int _id, ofImage _face) {
+person::person(int _id, ofImage & _face) {
 
 	id = _id;
 
@@ -23,7 +23,7 @@ person::person(int _id, ofImage _face) {
 	cout << "New Person added to the list. ID :" << id << endl;
 }
 
-person::person(int _id, ofImage _face, vector<ofImage> _snapshots) {
+person::person(int _id, ofImage & _face, vector<ofImage> & _snapshots) {
 
 	id = _id;
 
@@ -46,7 +46,7 @@ person::person(int _id, ofImage _face, vector<ofImage> _snapshots) {
 	cout << "New Person added to the list. ID :" << id << endl;
 }
 
-person::person( int _id, ofImage _face, int _x, int _y) {
+person::person( int _id, ofImage & _face, int _x, int _y) {
 
 	id = _id;
 
@@ -59,7 +59,7 @@ person::person( int _id, ofImage _face, int _x, int _y) {
 }
 
 
-void person::setFace( ofImage _face){
+void person::setFace( ofImage & _face){
 	face = _face;
 }
 

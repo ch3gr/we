@@ -39,6 +39,6 @@ public:
 	void kill();
 	void draw();
 	bool isPhotoTime();
-	void takeSnapshot(ofImage snapshot);
+	void takeSnapshot(ofImage & snapshot);
 };
 
