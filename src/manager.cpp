@@ -31,12 +31,13 @@ manager::manager()
 
 	portraitWithAlpha = true;
 	debugPortrait = false;
-	debugTrackers = true;
-	debugPeople = true;
+	debugTrackers = false;
+	debugPeople = false;
 	debugUpdateEvidence = false;
 	
 
 	nextPersonId = 0;
+	flash = 0;
 	FBO_debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	FBO_debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
@@ -80,6 +81,7 @@ void manager::setBg(ofVideoGrabber & _cam) {
 void manager::addPerson(ofImage & _face) {
 	person someoneNew = person(nextPersonId++, _face);
 	we.push_back(someoneNew);
+	flash = 1;
 }
 
 
@@ -88,23 +90,21 @@ void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 	person someoneNew = person(nextPersonId, _face, _snapshots);
 	we.push_back(someoneNew);
 
-
 	for (int s = 0; s < someoneNew.snapshotsCV.size(); s++) {
 		modelFaces.push_back(someoneNew.snapshotsCV[s]);
 		modelLabels.push_back(nextPersonId);
 	}
-	
-	
-
-	float timer = ofGetElapsedTimef();
-	model->train(modelFaces, modelLabels);
-	cout << "Training took : " << (ofGetElapsedTimef() - timer) << " seconds" << endl;
 
 	nextPersonId++;
+	flash = 1;
 }
 
 
-
+void manager::trainModel() {
+	float timer = ofGetElapsedTimef();
+	model->train(modelFaces, modelLabels);
+	cout << "Training took : " << (ofGetElapsedTimef() - timer) << " seconds" << endl;
+}
 
 
 
@@ -112,20 +112,56 @@ void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 void manager::curate() {
 	int size = we.size();
 
-	// spread them at the bottom of the half window
-	for (int p = 0; p < size; ++p) {
-		int x = (1-(float(p+1) / float(size))) * ofGetWidth();
+	// debugging
+	if( debugPortrait || debugTrackers)
+	{
+		// spread them at the bottom of the half window
+		for (int p = 0; p < size; ++p) {
+			int x = (1-(float(p+1) / float(size))) * ofGetWidth() + we[p].face.getWidth()/2;
 		
-		int yMax = ofGetHeight()*0.5;
-		int yMin = ofGetHeight() - we[p].face.getHeight();
+			int yMax = (ofGetHeight()*0.4) + we[p].face.getHeight();
+			int yMin = ofGetHeight();
 
-		ofSeedRandom(we[p].id);
-		float wave = cos(ofGetElapsedTimef() + ofRandom(1000))*0.5 +0.5;
-		int y = ofLerp(yMin, yMax, wave);
+			ofSeedRandom(we[p].id);
+			float wave = cos(ofGetElapsedTimef() + ofRandom(1000))*0.5 +0.5;
+			int y = ofLerp(yMin, yMax, wave);
 
-		we[p].setPos(x, y);
+			we[p].setPos(x, y);
+		}
 	}
-	
+	else {
+		ofSeedRandom(size);
+
+		for (int p = 0; p < size; ++p) {
+			float param=0;
+			float x = 0;
+			float y = 0;
+
+			if (size > 1)
+			{
+				float yMin = ofGetHeight()*0.2;
+				float yMax = ofGetHeight() + 100;
+
+
+				param = float(p) / float(size - 1);
+				//x = ofMap(sin(ofGetElapsedTimef()+p*10), -1,1,0, ofGetWidth(), 1);
+				x = ofRandom(ofGetWidth());
+				y = ofMap(param, 0, 1, yMin, yMax, true);
+			}
+			else
+			{
+				x = ofGetWidth() / 2.0;
+				y = ofGetWidth() / 2.0;
+			}
+
+			x += (ofNoise((p + ofGetElapsedTimef()) * 0.1 )*2-1) * 50;
+			y += (ofNoise((p - ofGetElapsedTimef()) * 0.11)*2-1) * 10;
+
+
+			we[p].setPos(x, y);
+		}
+	}
+
 	
 	
 }
@@ -134,8 +170,19 @@ void manager::curate() {
 
 
 
+
+
+
+
+
+
+
+
+
 void manager::draw() {
-	curate();
+	
+	ofColor bgColor = ofColor::darkRed;
+	ofClear(bgColor);
 
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
@@ -143,6 +190,20 @@ void manager::draw() {
 		if(debugPeople )
 			we[p].drawDebug();
 	}
+
+
+	// Flash fade
+	if (flash > 0.01) {
+		bgColor = ofColor(ofColor::white, flash*255);
+		ofPushStyle();
+		ofSetColor(bgColor);
+		ofFill();
+		ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+		ofPopStyle();
+		flash *= 0.92;
+	}
+
+
 }
 
 
@@ -197,16 +258,17 @@ void manager::drawDebugTrackers(){
 
 void manager::info() {
 	// print people
-	cout << "I am a manager and these are my people :" << endl;
+	cout << "I am the manager and these are my people :" << endl;
 	for (int p = 0; p < we.size(); ++p)
 		we[p].info();
 
+	cout << "\n   there are " << we.size() << " of us." << endl;
 
 	// candidates
-	vector<candidate> & followers = candidates.getFollowers();
-	for (int i = 0; i < followers.size(); i++) {
-		cout << "I am follower : " << followers[i].getLabel()  << endl;
-	}
+	//vector<candidate> & followers = candidates.getFollowers();
+	//for (int i = 0; i < followers.size(); i++) {
+	//	cout << "I am follower : " << followers[i].getLabel()  << endl;
+	//}
 
 	
 }
@@ -240,12 +302,19 @@ void manager::saveUs(bool append) {
 	if (append) {
 		// Find the last person in the session and set the nextId
 		ofDirectory sessionDir = ofDirectory(sessionPath);
-		sessionDir.listDir();
-		sessionDir.sort();
-		string lastPerson = sessionDir.getName(sessionDir.size()-1);
-		lastPerson = lastPerson.substr(personPrefix.length() ,lastPerson.length()-1);
-		nextId = std::stoi(lastPerson) + 1;
-		cout << "     append next id :" << nextId << endl;
+		if (!sessionDir.exists())
+			sessionDir.create();
+		else
+		{
+			sessionDir.listDir();
+			if (sessionDir.size() > 0) {
+				sessionDir.sort();
+				string lastPerson = sessionDir.getName(sessionDir.size() - 1);
+				lastPerson = lastPerson.substr(personPrefix.length(), lastPerson.length() - 1);
+				nextId = std::stoi(lastPerson) + 1;
+				cout << "     append next id :" << nextId << endl;
+			}
+		}
 	}
 	else {
 		// Delete existing session directory
@@ -285,7 +354,7 @@ void manager::saveUs(bool append) {
 
 // Load a session from disk
 void manager::loadUs() {
-	string sessionPath = "sessions/s_01/";
+	string sessionPath = "sessions/s_02/";
 	string personPrefix = "p_";
 	string snapshotPrefix = "s.";
 	string ext = ".tif";
@@ -401,6 +470,7 @@ void manager::detectFaces(ofImage & cam) {
 					portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
 					addPerson(portrait, followers[c].snapshots);
 				}
+				trainModel();
 
 				followers[c].ignore = true;
 				followers[c].lastMatch = nextPersonId - 1;
@@ -482,6 +552,11 @@ void manager::detectFaces(ofImage & cam) {
 				confidence = followers[i].lastConfidence;
 				int pX = we[match].x;
 				int pY = we[match].y;
+				if (we[match].face.isAllocated()) {
+					pX -= we[match].face.getWidth() / 2;
+					pY -= we[match].face.getHeight();
+				}
+
 				pX += we[match].face.getWidth() / 2;
 				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
 				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);

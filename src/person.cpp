@@ -75,7 +75,7 @@ void person::draw() {
 	ofTranslate(x, y);
 
 	if (face.isAllocated())
-		face.draw(0, 0);
+		face.draw(-face.getWidth()/2, -face.getHeight());
 
 	ofPopMatrix();
 }
@@ -83,6 +83,7 @@ void person::draw() {
 void person::drawDebug() {
 	ofPushMatrix();
 	ofTranslate(x, y);
+	ofTranslate(-face.getWidth()/2, -face.getHeight());
 
 	ofPushStyle();
 	ofNoFill();
@@ -123,5 +124,5 @@ void person::drawDebug() {
 
 void person::info() {
 
-	cout << "I am person : " << id << "X: " << x << endl;
+	cout << "I'm person: " << id << "\t\tX: " << x << "\tY: " << y <<endl;
 }

@@ -24,7 +24,7 @@ int main( ){
 
 toDo
 
-- curate
+- curate / add size control on the person
 - add ofGui
 - fine tune tracker settings
 - fine tune Face recognition

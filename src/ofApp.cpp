@@ -145,15 +145,15 @@ void ofApp::update() {
 //--------------------------------------------------------------
 void ofApp::draw() {
 	
-	ofClear(ofColor::lightGrey);
+	manage.curate();
+	manage.draw();
 
-	ofDrawBitmapString("start draw", 0, 20);
 
-	ofImage camFrame;
-	camFrame.setFromPixels(cam.getPixels());
 
 	if (manage.debugPortrait)
 	{
+		ofImage camFrame;
+		camFrame.setFromPixels(cam.getPixels());
 		manage.drawDebug(camFrame);
 
 		// direct draw portrait
@@ -167,12 +167,23 @@ void ofApp::draw() {
 		manage.drawDebugTrackers();
 	}
 
-	manage.draw();
+
+
+	// display RGB values below the mouse
+	if (mouseLB_Pressed) {
+		unsigned char color[3];
+		glReadPixels(mouseX, ofGetHeight() - mouseY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, color);
+		
+		std::stringstream rgbValues;
+		rgbValues << int(color[0]) << " " << int(color[1]) << " " << int(color[2]) ;
+		ofDrawBitmapStringHighlight(rgbValues.str(), mouseX+10, mouseY+30, ofColor::black, ofColor::white);
+	}
 
 
 	// REFERENCE
 	// From ofImage to Mat and back
 	if( false ){
+		ofImage camFrame;
 		camFrame.draw(750, 0);
 		ofPixels toMatPixels = camFrame.getPixels();
 		Mat color = ofxCv::toCv(toMatPixels);
@@ -189,28 +200,14 @@ void ofApp::draw() {
 
 
 
-	// display RGB values below the mouse
-	if (mouseLB_Pressed) {
-		unsigned char color[3];
-		glReadPixels(mouseX, ofGetHeight() - mouseY, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, color);
-		
-		std::stringstream rgbValues;
-		rgbValues << int(color[0]) << " " << int(color[1]) << " " << int(color[2]) ;
-		ofDrawBitmapStringHighlight(rgbValues.str(), mouseX+10, mouseY+30, ofColor::black, ofColor::white);
-	}
 
 
 
-
-
-
-	// OF Time
-	ofDrawBitmapString(ofGetElapsedTimef(), 5, ofGetWindowHeight() - 40);
 
 	
 	//	Framerate
 	std::stringstream strm;
-	strm << "fps: " << ofGetFrameRate();
+	strm << "fps: " << ofGetFrameRate() << "   | Timer: " << ofGetElapsedTimef();
 	ofSetWindowTitle(strm.str());
 }
 
@@ -272,7 +269,7 @@ void ofApp::keyPressed(int key) {
 	// Debug People
 	if (key == '3') {
 		manage.debugPeople = !manage.debugPeople;
-		cout << "debugPortraits :" << manage.debugPeople << endl;
+		cout << "debugPeople :" << manage.debugPeople << endl;
 	}
 	// Debug People
 	if (key == '4') {
@@ -300,6 +297,8 @@ void ofApp::keyPressed(int key) {
 	// loadUs
 	if (key == 'l' || key == 'L') {
 		manage.loadUs();
+		if(key == 'L')
+			manage.trainModel();
 	}
 
 	// Make portraits with Alpha channel

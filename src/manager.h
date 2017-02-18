@@ -25,6 +25,7 @@ public:
 
 	void manager::addPerson(ofImage & _face);
 	void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots);
+	void manager::trainModel();
 	void manager::setBg(ofImage & _bg);
 	void manager::setBg(ofVideoGrabber & _cam);
 	void manager::draw();
@@ -55,7 +56,6 @@ public:
 	bool debugUpdateEvidence;
 	bool debugPortrait;
 	bool debugTrackers;
-	bool debugTest;
 
 	vector<person> we;
 	int nextPersonId;
@@ -80,6 +80,7 @@ public:
 
 private:
 	ofImage bg;
+	float flash;
 
 };
 
