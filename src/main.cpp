@@ -23,7 +23,7 @@ int main( ){
 /*
 
 toDo
-- write/load update or append
+
 - curate
 - Threading
 - add ofGui

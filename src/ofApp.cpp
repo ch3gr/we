@@ -364,8 +364,9 @@ void ofApp::keyPressed(int key) {
 
 	// saveUs
 	if (key == 's' || key == 'S') {
-		manage.saveUs();
+		manage.saveUs(key == 's');
 	}
+
 
 	// loadUs
 	if (key == 'l' || key == 'L') {

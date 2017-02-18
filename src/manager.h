@@ -32,7 +32,7 @@ public:
 	void manager::drawDebugTrackers();
 	void manager::info();
 	void manager::forgetUs();
-	void manager::saveUs();
+	void manager::saveUs(bool append);
 	void manager::loadUs();
 	void manager::curate();
 

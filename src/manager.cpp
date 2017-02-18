@@ -228,20 +228,33 @@ void manager::forgetUs() {
 
 
 // Save the group to disk
-void manager::saveUs() {
+void manager::saveUs(bool append) {
 
-	string sessionPath = "sessions/s_01/";
+	string sessionPath = "sessions/s_02/";
 	string personPrefix = "p_";
 	string snapshotPrefix = "s.";
 	string ext = ".tif";
 	cout << "\nSaving session \n" << "data/" << sessionPath << endl;
 
-	// Delete existing session directory
-	ofDirectory::removeDirectory(sessionPath, true, true);
+	int nextId = 0;
+	if (append) {
+		// Find the last person in the session and set the nextId
+		ofDirectory sessionDir = ofDirectory(sessionPath);
+		sessionDir.listDir();
+		sessionDir.sort();
+		string lastPerson = sessionDir.getName(sessionDir.size()-1);
+		lastPerson = lastPerson.substr(personPrefix.length() ,lastPerson.length()-1);
+		nextId = std::stoi(lastPerson) + 1;
+		cout << "next :" << nextId << endl;
+	}
+	else {
+		// Delete existing session directory
+		ofDirectory::removeDirectory(sessionPath, true, true);
+	}
 
 	// ALL OF US
 	for (int p = 0; p < we.size(); p++) {
-		string personPath = personPrefix + padThis(4, p) + "/";
+		string personPath = personPrefix + padThis(4, p+nextId) + "/";
 		cout << "  |__ " << personPath << endl;
 
 		// SAVE FACE
