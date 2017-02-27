@@ -47,6 +47,9 @@ public:
 
 	int faceDetectW;
 	int contourDetectW;
+	
+
+	float debugTrackersScale;
 	float debugPortraitScale;
 
 	bool portraitWithAlpha;

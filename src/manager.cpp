@@ -24,14 +24,18 @@ manager::manager()
 
 
 
-	
+	// EDW
 	faceDetectW = 128;
 	contourDetectW = camW*0.5;
 	debugPortraitScale = 0.5;
 
+	int debugTrackersW = ofGetWindowWidth() / 2 - 300;
+	debugTrackersScale = debugTrackersW / camW;
+
+
 	portraitWithAlpha = true;
+	debugTrackers = true;
 	debugPortrait = false;
-	debugTrackers = false;
 	debugPeople = false;
 	debugUpdateEvidence = false;
 	

@@ -34,7 +34,7 @@ void ofApp::setup() {
 	//ofSetFrameRate(10);
 
 	
-
+	cam.setDeviceID(2);
 	cam.initGrabber(camW, camH);
 	camHacked.allocate(camW, camH);
 
@@ -126,7 +126,13 @@ void ofApp::update() {
 			manage.detectFaces(cam);
 		}
 
-				
+
+
+		//	Framerates
+		std::stringstream strm;
+		strm << "Draw FPS: " << int(ofGetFrameRate()) << "   | Update FPS: " << int(1/(ofGetElapsedTimef()- lastUpdate)) << "   | clock: " << int(ofGetElapsedTimef());
+		ofSetWindowTitle(strm.str());
+		lastUpdate = ofGetElapsedTimef();
 	}
 }
 
@@ -205,10 +211,7 @@ void ofApp::draw() {
 
 
 	
-	//	Framerate
-	std::stringstream strm;
-	strm << "fps: " << ofGetFrameRate() << "   | Timer: " << ofGetElapsedTimef();
-	ofSetWindowTitle(strm.str());
+
 }
 
 

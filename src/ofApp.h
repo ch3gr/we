@@ -35,7 +35,7 @@ public:
 
 	ofVideoGrabber		cam;
 	ofFbo				camHacked;
-
+	float lastUpdate;
 
 
 	// Sample people faces for DEBUGING
@@ -58,8 +58,10 @@ public:
 };
 
 // Video stream resolution
+//const int camW = 640;
+//const int camH = 480;
 const int camW = 640;
-const int camH = 480;
+const int camH = 360;
 //const int camW = 1280;
 //const int camH = 720;
 //const int camW = 1920;
