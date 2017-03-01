@@ -109,7 +109,8 @@ void ofApp::update() {
 			if (selectSamplePerson >= 0) {
 				ofImage extraFace = samplePeople[selectSamplePerson][uCount++ % samplePeople[selectSamplePerson].size()];
 				ofPushMatrix();
-				ofTranslate(mouseX, mouseY);
+				// move to mouse but counteract the scaling of the debug draw
+				ofTranslate(mouseX/manage.debugTrackersScale , mouseY/manage.debugTrackersScale);
 				ofScale(fScale, fScale);
 				extraFace.draw(-extraFace.getWidth()*0.5, -extraFace.getHeight()*0.35);
 				ofPopMatrix();

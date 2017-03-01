@@ -24,13 +24,19 @@ manager::manager()
 
 
 
-	// EDW
+	// frame size for calculations
 	faceDetectW = 128;
 	contourDetectW = camW*0.5;
-	debugPortraitScale = 0.5;
 
-	float debugTrackersW = ofGetWindowWidth() / 2 - 300;
+
+	// frame size for debuging
+	float debugTrackersW = ofGetWindowWidth() / 2.0 - 300;
 	debugTrackersScale = debugTrackersW / camW;
+
+	float debugPortraitW = (ofGetWindowWidth() / 2.0) / 3.0 ;
+	debugPortraitScale = debugPortraitW / camW;
+
+
 
 
 	portraitWithAlpha = true;
@@ -661,8 +667,8 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 
 	//////////////////////
 	// Temp Draw face mask - will be replace with faceTracker
-	ofFbo faceMask;
-	faceMask.allocate(camW, camH, GL_RGBA);
+	//ofFbo faceMask;
+	//faceMask.allocate(camW, camH, GL_RGBA);
 	//faceMask.begin();
 	//ofClear(0);
 	//ofSetColor(ofColor::white);
@@ -670,10 +676,10 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 	//faceMask.end();
 
 	// debugPortrait Draw faceMask
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	faceMask.draw(camW*2, 0);
-	ofPopMatrix();
+	//ofPushMatrix();
+	//ofScale(debugPortraitScale, debugPortraitScale);
+	//faceMask.draw(camW*2, 0);
+	//ofPopMatrix();
 	// -----------------------
 
 
@@ -715,6 +721,8 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 	shdPrep.setUniformTexture("tex2", faceBoundsFBO.getTexture(), 2);
 	//shdPrep.setUniformTexture("tex3", faceMask.getTexture(), 3);
 	shdPrep.setUniform1f("thress", shdPrepThress);
+	shdPrep.setUniform1f("imgW", camW);
+	shdPrep.setUniform1f("imgH", camH);
 
 	// Render Prep
 	ofPushMatrix();

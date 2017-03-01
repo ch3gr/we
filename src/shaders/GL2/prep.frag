@@ -4,6 +4,8 @@ uniform sampler2DRect tex0;		// contour mask
 uniform sampler2DRect tex1;		// background
 uniform sampler2DRect tex2;		// face bounds
 uniform sampler2DRect tex3;		// face mask
+uniform float imgW;
+uniform float imgH;
 uniform float thress;
 
 
@@ -27,15 +29,17 @@ void main()
 	outL *= faceBounds.r;
 
 	if( outL > thress )
-		outL = 255;
+		outL = 1;
 	else
 		outL = 0;
 	
-	// black out 2 pixel border for better controus
-	if( st.s<2 || st.s>638 || st.t<2 || st.t>478 )
+	int border = 10;
+	// black out the border pixel border for better contours
+	//if( st.s<imgW*0.25 || st.s>imgW*0.75 || st.t<imgH*0.25 || st.t>imgH*0.75 )
+	if( st.s<border || st.s>imgW-border || st.t<border || st.t>imgH-border )
 		outL = 0;
 
-	vec4 cOut = vec4(vec3(outL),255);
+	vec4 cOut = vec4(vec3(outL),1);
 
 	
 	gl_FragColor = cOut;

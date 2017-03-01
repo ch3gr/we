@@ -137,7 +137,8 @@ bool candidate::isPhotoTime() {
 
 	
 	// prevent taking blurry snapshot
-	if (vel.length() > 5)
+	// check velocity proportional to the camera's resolution 1280*0.01=12.8
+	if (vel.length()/camW > 0.01)
 		out = false;
 
 	return out;

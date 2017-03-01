@@ -29,10 +29,11 @@ toDo
 - fine tune tracker settings
 - fine tune Face recognition
 - Threading ( threaded channel )
-- Fix camera res & processing resolution
 - train model : tighter crop in for face recognition
 - train model : align eyes?
-- Webcame frame rate
+- Webcam frame rate
+- port all shader versions
+- fix scaling of test faces
 
 - leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
@@ -49,6 +50,7 @@ clahe openCV
 Gui controls
 - perpShaderThress
 - candidate : speed thresshold
+- candidate velocity thresshold
 
 
 
