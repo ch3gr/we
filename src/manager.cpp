@@ -29,7 +29,7 @@ manager::manager()
 	contourDetectW = camW*0.5;
 	debugPortraitScale = 0.5;
 
-	int debugTrackersW = ofGetWindowWidth() / 2 - 300;
+	float debugTrackersW = ofGetWindowWidth() / 2 - 300;
 	debugTrackersScale = debugTrackersW / camW;
 
 
@@ -242,13 +242,13 @@ void manager::drawDebugTrackers(){
 			ofxCv::toOf(followers[c].cv_evidence, ofMat);
 			if (ofMat.isAllocated()) {
 				ofMat.update();
-				ofMat.draw(camW + c * 75, 0);
+				ofMat.draw((camW*debugTrackersScale) + c * 75, 0);
 			}
 		}
 
 		// Draw snapshots
 		for (int s = 0; s < followers[c].snapshots.size(); s++) {
-			followers[c].snapshots[s].draw(camW + c * 75, (s+1) * 75);
+			followers[c].snapshots[s].draw((camW*debugTrackersScale) + c * 75, (s+1) * 75);
 		}
 	}
 
@@ -438,6 +438,7 @@ void manager::detectFaces(ofImage & cam) {
 	if (debugTrackers) {
 		FBO_debugTrackers.begin();
 		ofClear(0);
+		ofScale(debugTrackersScale, debugTrackersScale);
 		cam.draw(0, 0);
 	}
 
@@ -554,14 +555,19 @@ void manager::detectFaces(ofImage & cam) {
 				
 				match = followers[i].lastMatch;
 				confidence = followers[i].lastConfidence;
-				int pX = we[match].x;
-				int pY = we[match].y;
+				float pX = we[match].x;
+				float pY = we[match].y;
 				if (we[match].face.isAllocated()) {
 					pX -= we[match].face.getWidth() / 2;
 					pY -= we[match].face.getHeight();
 				}
 
 				pX += we[match].face.getWidth() / 2;
+
+				// adjust for debugTrackersScale
+				pX /= debugTrackersScale;
+				pY /= debugTrackersScale;
+
 				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
 				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);
 			}

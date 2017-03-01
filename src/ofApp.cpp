@@ -34,7 +34,7 @@ void ofApp::setup() {
 	//ofSetFrameRate(10);
 
 	
-	cam.setDeviceID(2);
+	//cam.setDeviceID(2);
 	cam.initGrabber(camW, camH);
 	camHacked.allocate(camW, camH);
 
