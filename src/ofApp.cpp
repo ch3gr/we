@@ -72,6 +72,36 @@ void ofApp::setup() {
 	//manage.setBg(cam);
 
 	mouseLB_Pressed = false;
+
+
+
+	////////////
+	// GUI
+
+	showGui = true;
+	gui.setup(); // most of the time you don't need a name
+	//gui.setDefaultWidth(500);
+	gui.add( winSize.setup("Win size", ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight())));
+	gui.add( camSize.setup("Cam size", ofToString(camW) + "x" + ofToString(camH)));
+	gui.add( guiTrackerWidth.setup("Trkr Img Width", 128, 8, 512));
+	gui.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
+	gui.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
+	gui.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
+	
+	gui.add( guiLumaKey.setup("key", 0.09, 0, 1));
+	gui.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
+	gui.add( guiContourImgSimplify.setup("Simplify Contour Img", 2, 0, 10));
+	gui.add( guiContourSmooth.setup("Contour smooth", 10, 0, 100));
+
+	gui.add( guiDebugSplit.setup("Debug Split screen", 0.5, 0, 1));
+	gui.add( guiDebugTrackers.setup("Debug Trackers", true));
+	
+
+
+	gui.saveToFile("gui.xml");
+	
+	
+
 	cout << "Initialised" << endl;
 }
 
@@ -94,6 +124,9 @@ void ofApp::setup() {
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 void ofApp::update() {
+
+	// gui
+	manage.debugTrackers = guiDebugTrackers;
 
 
 	cam.update();
@@ -161,7 +194,7 @@ void ofApp::draw() {
 	{
 		ofImage camFrame;
 		camFrame.setFromPixels(cam.getPixels());
-		manage.drawDebug(camFrame);
+		manage.drawDebugPortrait(camFrame);
 
 		// direct draw portrait
 		//ofImage camFrame;
@@ -208,7 +241,9 @@ void ofApp::draw() {
 
 
 
-
+	// GUI
+	if( showGui )
+		gui.draw();
 
 
 	
@@ -259,10 +294,15 @@ void ofApp::keyPressed(int key) {
 		manage.forgetUs();
 		cout << "People cleared" << endl;
 	}
+	if (key == '`') {
+		showGui = !showGui;
+	}
+
 
 	// Debug face Trackers
 	if (key == '1') {
 		manage.debugTrackers = !manage.debugTrackers;
+		guiDebugTrackers = !guiDebugTrackers;
 		cout << "Debug tracking :" << manage.debugTrackers << endl;
 	}
 	// Debug Portrait creation
@@ -309,17 +349,6 @@ void ofApp::keyPressed(int key) {
 	if (key == 'a') {
 		manage.portraitWithAlpha = !manage.portraitWithAlpha;
 		cout << "portraitWithAlpha :" << manage.portraitWithAlpha << endl;
-	}
-
-
-	//	shdPrepThress - Threshold for the cutout
-	if (key == ',') {
-		manage.shdPrepThress = ofClamp(manage.shdPrepThress - 0.01, 0, 1);
-		cout << "shdPrepThress : " << manage.shdPrepThress << endl;
-	}
-	if (key == '.') {
-		manage.shdPrepThress = ofClamp(manage.shdPrepThress + 0.01, 0, 1);
-		cout << "shdPrepThress : " << manage.shdPrepThress << endl;
 	}
 
 
@@ -407,7 +436,7 @@ void ofApp::mouseExited(int x, int y) {
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
-
+	winSize = ofToString(w) + "x" + ofToString(h);
 }
 
 //--------------------------------------------------------------

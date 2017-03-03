@@ -24,9 +24,8 @@ manager::manager()
 
 
 
-	// frame size for calculations
-	faceDetectW = 128;
-	contourDetectW = camW*0.5;
+
+	
 
 
 	// frame size for debuging
@@ -41,7 +40,7 @@ manager::manager()
 
 	portraitWithAlpha = true;
 	debugTrackers = true;
-	debugPortrait = false;
+	debugPortrait = true;
 	debugPeople = false;
 	debugUpdateEvidence = false;
 	
@@ -51,7 +50,6 @@ manager::manager()
 	FBO_debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	FBO_debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 
-	shdPrepThress = 0.09;
 
 
 	scout.setup("haarcascade_frontalface_default.xml");
@@ -59,9 +57,10 @@ manager::manager()
 	scout.setPreset(ObjectFinder::Fast);
 	//scout.setPreset(ObjectFinder::Accurate);
 	//scout.setPreset(ObjectFinder::Sensitive);
-	scout.setRescale( faceDetectW/float(camW) );
+	scout.setRescale( 128/float(camW) );
 	scout.setMinSizeScale(0.1);
 	scout.setMaxSizeScale(0.8);
+
 
 	candidates.setMaximumDistance(camW / 5);
 	candidates.setPersistence(10);
@@ -191,7 +190,8 @@ void manager::curate() {
 
 void manager::draw() {
 	
-	ofColor bgColor = ofColor::darkRed;
+
+	ofColor bgColor = ofColor::lightGray;
 	ofClear(bgColor);
 
 	for (int p = 0; p < we.size(); ++p) {
@@ -224,7 +224,14 @@ void manager::draw() {
 
 
 
-void manager::drawDebug(ofImage & camFrame) {
+void manager::drawDebugPortrait(ofImage & camFrame) {
+
+	float split = ((ofApp*)ofGetAppPtr())->guiDebugSplit;
+
+	float debugPortraitW = (ofGetWindowWidth() * split) / 3.0;
+	debugPortraitScale = debugPortraitW / camW;
+
+
 
 	vector<candidate> & followers = candidates.getFollowers();
 	if (followers.size() > 0) {
@@ -237,6 +244,12 @@ void manager::drawDebug(ofImage & camFrame) {
 }
 
 void manager::drawDebugTrackers(){
+
+	float split = ((ofApp*)ofGetAppPtr())->guiDebugSplit;
+	float debugTrackersW = ofGetWindowWidth() * (1-split) - 300;
+	debugTrackersScale = debugTrackersW / camW;
+
+
 
 	FBO_debugTrackers.begin();
 	vector<candidate> & followers = candidates.getFollowers();
@@ -434,6 +447,7 @@ void manager::loadUs() {
 
 void manager::detectFaces(ofImage & cam) {
 
+
 	// only at the first frame
 	if (!bg.isAllocated())
 		setBg(cam);
@@ -448,7 +462,10 @@ void manager::detectFaces(ofImage & cam) {
 		cam.draw(0, 0);
 	}
 
-
+	// Adjust tracker
+	scout.setRescale( ((ofApp*)ofGetAppPtr())->guiTrackerWidth / float(camW));
+	scout.setMinSizeScale( ((ofApp*)ofGetAppPtr())->guiTrackerMinSize );
+	scout.setMaxSizeScale( ((ofApp*)ofGetAppPtr())->guiTrackerMaxSize );
 
 	scout.update(cam);
 	candidates.track(scout.getObjects());
@@ -638,8 +655,11 @@ void manager::detectFaces(ofVideoGrabber & cam) {
 
 ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 
+	// frame size for calculations
 
-	float cScale = contourDetectW / float(camW);
+	float cScale = ((ofApp*)ofGetAppPtr())->guiContourImgScale;
+	//posterize the value, so it doesn't fuck up the scaling
+	cScale = ceil(cScale * 19 + 0.0001) / 20;
 
 	faceBounds = adjustFaceBounds(faceBounds);
 
@@ -720,7 +740,8 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 		shdPrep.setUniformTexture("tex1", bg.getTexture(), 1);
 	shdPrep.setUniformTexture("tex2", faceBoundsFBO.getTexture(), 2);
 	//shdPrep.setUniformTexture("tex3", faceMask.getTexture(), 3);
-	shdPrep.setUniform1f("thress", shdPrepThress);
+	shdPrep.setUniform1f("thress", ((ofApp*)ofGetAppPtr())->guiLumaKey );
+	
 	shdPrep.setUniform1f("imgW", camW);
 	shdPrep.setUniform1f("imgH", camH);
 
@@ -771,14 +792,13 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 
 
 
-	//cvImgGrayscale.resize(camW*cScale, camH*cScale);
+	// dilate and erode the image multiple times to siplify it
+	int simplify = ((ofApp*)ofGetAppPtr())->guiContourImgSimplify;
+	for (int i = 0; i < simplify; i++)
+		cvImgGrayscale.dilate();
+	for (int i = 0; i < simplify; i++)
+		cvImgGrayscale.erode();
 
-	
-
-	//cvImgGrayscale.dilate();
-	//cvImgGrayscale.dilate();
-	//cvImgGrayscale.erode();
-	//cvImgGrayscale.erode();
 
 
 
@@ -795,7 +815,7 @@ ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
 		ofPolyline outline;
 		outline.addVertices(contourFinder.blobs[i].pts);
 		outline.setClosed(true);
-		outline = outline.getSmoothed(2);
+		outline = outline.getSmoothed(((ofApp*)ofGetAppPtr())->guiContourSmooth);
 
 		ofPath newPath;
 		for (int i = 0; i < outline.getVertices().size(); i++) {

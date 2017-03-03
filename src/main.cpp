@@ -50,15 +50,26 @@ clahe openCV
 Gui controls
 - perpShaderThress
 - candidate : speed thresshold
-- candidate velocity thresshold
 
 
 
+
+
+// How to get a variable from the scope of ofApp 
+// include "ofApp.h"			sto .cpp
+// ((ofApp*)ofGetAppPtr())->guiLumaKey
 
 
 
 // post compile event to copy shaders from /src to /bin/data
 xcopy /e /y "$(ProjectDir)src\shaders" "$(ProjectDir)bin\data\shaders\"
+
+
+robocopy "$(OF_ROOT)/export/vs/$(Platform_Actual)/" "$(ProjectDir)bin/" "*.dll" /njs /njh /np /fp /bytes
+if errorlevel 1 exit 0 else exit %errorlevel%
+
+
+
 links
 http://docs.opencv.org/trunk/dd/d65/classcv_1_1face_1_1FaceRecognizer.html
 http://docs.opencv.org/2.4/modules/objdetect/doc/cascade_classification.html

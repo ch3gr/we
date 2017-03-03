@@ -29,7 +29,7 @@ public:
 	void manager::setBg(ofImage & _bg);
 	void manager::setBg(ofVideoGrabber & _cam);
 	void manager::draw();
-	void manager::drawDebug(ofImage & camFrame);
+	void manager::drawDebugPortrait(ofImage & camFrame);
 	void manager::drawDebugTrackers();
 	void manager::info();
 	void manager::forgetUs();
@@ -43,10 +43,6 @@ public:
 	ofImage manager::makePortrait(ofImage & cam, ofRectangle & crop);
 	person manager::getPerson(int id);
 
-	
-
-	int faceDetectW;
-	int contourDetectW;
 	
 
 	float debugTrackersScale;
@@ -67,7 +63,6 @@ public:
 	
 
 	ofShader shdPrep, shdComp;
-	float shdPrepThress;
 
 	ObjectFinder scout;
 	RectTrackerFollower<candidate> candidates;

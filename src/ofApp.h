@@ -5,6 +5,7 @@
 #include "person.h"
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
+#include "ofxGui.h"
 
 
 using namespace cv;
@@ -54,8 +55,28 @@ public:
 
 	manager manage;
 
-	
+
+	bool showGui;
+	ofxPanel gui;
+	ofxLabel winSize;
+	ofxLabel camSize;
+
+	ofxFloatSlider guiSpeedThress;
+	ofxFloatSlider guiTrackerWidth;
+	ofxFloatSlider guiTrackerMinSize;
+	ofxFloatSlider guiTrackerMaxSize;
+
+	ofxFloatSlider guiLumaKey;
+	ofxFloatSlider guiContourImgScale;
+	ofxIntSlider guiContourImgSimplify;
+	ofxIntSlider guiContourSmooth;
+
+	ofxFloatSlider guiDebugSplit;
+
+	ofxToggle guiDebugTrackers;
 };
+
+
 
 // Video stream resolution
 //const int camW = 640;
@@ -68,8 +89,10 @@ const int camH = 720;
 //const int camH = 1080;
 
 
+
+
+
+
 ofRectangle adjustFaceBounds(ofRectangle _faceBounds);
-
 float getTimeDiff(float refTime);
-
 string padThis(int pads, int number);

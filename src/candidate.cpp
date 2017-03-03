@@ -1,6 +1,7 @@
 #include "candidate.h"
 #include "ofApp.h"
 
+
 using namespace ofxCv;
 using namespace cv;
 
@@ -138,7 +139,7 @@ bool candidate::isPhotoTime() {
 	
 	// prevent taking blurry snapshot
 	// check velocity proportional to the camera's resolution 1280*0.01=12.8
-	if (vel.length()/camW > 0.01)
+	if (vel.length()/camW > ((ofApp*)ofGetAppPtr())->guiSpeedThress )
 		out = false;
 
 	return out;
