@@ -74,17 +74,21 @@ public:
 	ofxFloatSlider guiDebugSplit;
 
 	ofxToggle guiDebugTrackers;
+	ofxToggle guiDebugPortrait;
+	ofxToggle guiDebugPeople;
+	ofxToggle guiDebugUpdateEvidence;
+	
 };
 
 
 
 // Video stream resolution
-//const int camW = 640;
-//const int camH = 480;
+const int camW = 640;
+const int camH = 480;
 //const int camW = 640;
 //const int camH = 360;
-const int camW = 1280;
-const int camH = 720;
+//const int camW = 1280;
+//const int camH = 720;
 //const int camW = 1920;
 //const int camH = 1080;
 

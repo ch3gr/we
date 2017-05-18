@@ -95,6 +95,9 @@ void ofApp::setup() {
 
 	gui.add( guiDebugSplit.setup("Debug Split screen", 0.5, 0, 1));
 	gui.add( guiDebugTrackers.setup("Debug Trackers", true));
+	gui.add( guiDebugPortrait.setup("Debug Portrait", true));
+	gui.add( guiDebugPeople.setup("Debug Portrait", false));
+	gui.add( guiDebugUpdateEvidence.setup("Update Evidence", false));
 	
 
 
@@ -127,6 +130,9 @@ void ofApp::update() {
 
 	// gui
 	manage.debugTrackers = guiDebugTrackers;
+	manage.debugPortrait = guiDebugPortrait;
+	manage.debugPeople = guiDebugPeople;
+	manage.debugUpdateEvidence = guiDebugUpdateEvidence;
 
 
 	cam.update();
@@ -308,16 +314,19 @@ void ofApp::keyPressed(int key) {
 	// Debug Portrait creation
 	if (key == '2') {
 		manage.debugPortrait = !manage.debugPortrait;
+		guiDebugPortrait = !guiDebugPortrait;
 		cout << "Debug Mode" << manage.debugPortrait << endl;
 	}
 	// Debug People
 	if (key == '3') {
 		manage.debugPeople = !manage.debugPeople;
+		guiDebugPeople = !guiDebugPeople;
 		cout << "debugPeople :" << manage.debugPeople << endl;
 	}
 	// Debug People
 	if (key == '4') {
 		manage.debugUpdateEvidence = !manage.debugUpdateEvidence;
+		guiDebugUpdateEvidence = !guiDebugUpdateEvidence;
 		cout << "debugUpdateEvidence :" << manage.debugUpdateEvidence << endl;
 	}
 
