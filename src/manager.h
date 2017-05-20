@@ -4,12 +4,11 @@
 #include "person.h"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
-//#include "ThreadedModel.h"
+
 
 
 using namespace ofxCv;
 using namespace cv;
-
 
 
 
@@ -73,8 +72,7 @@ public:
 	vector<ofImage> modelOfFaces;
 	vector<int> modelLabels;
 	
-
-	//ThreadedModel threadedModel;
+	
 
 private:
 	ofImage bg;

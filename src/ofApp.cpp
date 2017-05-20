@@ -18,7 +18,7 @@ using namespace cv;
 void ofApp::setup() {
 
 
-
+	
 
 	// Create Manager
 	manage = manager();

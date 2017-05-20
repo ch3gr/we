@@ -6,6 +6,7 @@
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxGui.h"
+#include "trainThread.h"
 
 
 using namespace cv;
@@ -30,7 +31,7 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-
+	
 
 	
 
@@ -54,6 +55,7 @@ public:
 
 
 	manager manage;
+	trainThread trainer;
 
 
 	bool showGui;
@@ -77,6 +79,7 @@ public:
 	ofxToggle guiDebugPortrait;
 	ofxToggle guiDebugPeople;
 	ofxToggle guiDebugUpdateEvidence;
+	
 	
 };
 

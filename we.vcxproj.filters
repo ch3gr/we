@@ -25,6 +25,9 @@
     <ClCompile Include="src\test.txt">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\trainThread.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\addons\ofxCv\libs\CLD\src\ETF.cpp">
       <Filter>addons\ofxCv\libs\CLD\src</Filter>
     </ClCompile>
@@ -257,7 +260,7 @@
     <ClInclude Include="src\person.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\ThreadedModel.h">
+    <ClInclude Include="src\trainThread.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxCv\src\ofxCv.h">
