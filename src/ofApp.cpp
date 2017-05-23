@@ -21,7 +21,7 @@ void ofApp::setup() {
 	
 
 	// Create Manager
-	manage = manager();
+	//manage = manager();
 	// Load background from disk if exists
 	if (ofFile::doesFileExist("background.jpg", true)) {
 		ofImage background;
@@ -78,7 +78,7 @@ void ofApp::setup() {
 	////////////
 	// GUI
 
-	showGui = true;
+	showGui = false;
 	gui.setup(); // most of the time you don't need a name
 	//gui.setDefaultWidth(500);
 	gui.add( winSize.setup("Win size", ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight())));
@@ -95,7 +95,7 @@ void ofApp::setup() {
 
 	gui.add( guiDebugSplit.setup("Debug Split screen", 0.5, 0, 1));
 	gui.add( guiDebugTrackers.setup("Debug Trackers", true));
-	gui.add( guiDebugPortrait.setup("Debug Portrait", true));
+	gui.add( guiDebugPortrait.setup("Debug Portrait", false));
 	gui.add( guiDebugPeople.setup("Debug Portrait", false));
 	gui.add( guiDebugUpdateEvidence.setup("Update Evidence", false));
 	
@@ -253,6 +253,9 @@ void ofApp::draw() {
 
 
 	
+	string msg = ofToString( manage.model.modelFaces.size() );
+	ofDrawBitmapStringHighlight(msg, mouseX + 10, mouseY + 70, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight(ofToString( manage.model.isReady() ), mouseX + 10, mouseY + 100, ofColor::black, ofColor::white);
 
 }
 
@@ -351,7 +354,7 @@ void ofApp::keyPressed(int key) {
 	if (key == 'l' || key == 'L') {
 		manage.loadUs();
 		if(key == 'L')
-			manage.trainModel();
+			manage.model.train();
 	}
 
 	// Make portraits with Alpha channel
@@ -387,10 +390,7 @@ void ofApp::keyPressed(int key) {
 
 
 
-
-
-
-
+	
 
 }
 

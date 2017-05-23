@@ -66,9 +66,7 @@ manager::manager()
 	candidates.setPersistence(10);
 
 
-	model = createEigenFaceRecognizer(80, 5000);
-	//model = createFisherFaceRecognizer(0, 5000);
-	//model = createLBPHFaceRecognizer();
+	
 
 
 }
@@ -100,20 +98,13 @@ void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 	we.push_back(someoneNew);
 
 	for (int s = 0; s < someoneNew.snapshotsCV.size(); s++) {
-		modelFaces.push_back(someoneNew.snapshotsCV[s]);
-		modelLabels.push_back(nextPersonId);
+		model.addSample(someoneNew.snapshotsCV[s], nextPersonId);
 	}
-
 	nextPersonId++;
 	flash = 1;
 }
 
 
-void manager::trainModel() {
-	float timer = ofGetElapsedTimef();
-	model->train(modelFaces, modelLabels);
-	cout << "Training took : " << (ofGetElapsedTimef() - timer) << " seconds" << endl;
-}
 
 
 
@@ -300,14 +291,8 @@ void manager::info() {
 void manager::forgetUs() {
 	we.clear();
 	nextPersonId = 0;
+	model.forget();
 
-	modelFaces.clear();
-	modelOfFaces.clear();
-	modelLabels.clear();
-
-	// doesn't work, but maybe it needs something similar
-	//model->~FaceRecognizer();
-	//model = createEigenFaceRecognizer(80, 5000);
 }
 
 
@@ -427,7 +412,7 @@ void manager::loadUs() {
 			}
 		}
 	}
-
+	
 }
 
 
@@ -462,53 +447,56 @@ void manager::detectFaces(ofImage & cam) {
 		cam.draw(0, 0);
 	}
 
-	// Adjust tracker
-	scout.setRescale( ((ofApp*)ofGetAppPtr())->guiTrackerWidth / float(camW));
-	scout.setMinSizeScale( ((ofApp*)ofGetAppPtr())->guiTrackerMinSize );
-	scout.setMaxSizeScale( ((ofApp*)ofGetAppPtr())->guiTrackerMaxSize );
+	// If model is trainning, don't try to track and predict a person
+	if (model.isReady()) {
 
-	scout.update(cam);
-	candidates.track(scout.getObjects());
+		// Adjust tracker
+		scout.setRescale(((ofApp*)ofGetAppPtr())->guiTrackerWidth / float(camW));
+		scout.setMinSizeScale(((ofApp*)ofGetAppPtr())->guiTrackerMinSize);
+		scout.setMaxSizeScale(((ofApp*)ofGetAppPtr())->guiTrackerMaxSize);
 
-	vector<candidate> & followers = candidates.getFollowers();
-	for (int c = 0; c < followers.size(); c++) {
-		////////////////////////////
-		// DRAW trackers debug
-		if (debugTrackers) {
-			followers[c].draw();
-		}
-		////////////////////////////
-		// LOGIC
+		scout.update(cam);
+		candidates.track(scout.getObjects());
 
-		// Is it possible to take a photo?
-		if (!followers[c].ignore && followers[c].active && followers[c].isPhotoTime()) {
+		vector<candidate> & followers = candidates.getFollowers();
+		for (int c = 0; c < followers.size(); c++) {
+			////////////////////////////
+			// DRAW trackers debug
+			if (debugTrackers) {
+				followers[c].draw();
+			}
+			////////////////////////////
+			// LOGIC
 
-			// Take the <<PHOTO>> portrait
-			if ( followers[c].trigger) {
-			
-				ofImage portrait;
-				// create Alpha portrait
-				if (portraitWithAlpha) {
-					portrait = makePortrait(cam, followers[c].faceBounds);
-					addPerson(portrait, followers[c].snapshots);
+			// Is it possible to take a photo?
+			if (!followers[c].ignore && followers[c].active && followers[c].isPhotoTime()) {
+
+				// Take the <<PHOTO>> portrait
+				if (followers[c].trigger) {
+
+					ofImage portrait;
+					// create Alpha portrait
+					if (portraitWithAlpha) {
+						portrait = makePortrait(cam, followers[c].faceBounds);
+						addPerson(portrait, followers[c].snapshots);
+					}
+					else {
+						portrait.clone(cam);
+						ofRectangle frame = adjustFaceBounds(followers[c].faceBounds);
+						portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
+						addPerson(portrait, followers[c].snapshots);
+					}
+					model.train();
+
+					followers[c].ignore = true;
+					followers[c].lastMatch = nextPersonId - 1;
 				}
+				// Or take a <<SNAPSHOT>>
 				else {
-					portrait.clone(cam);
-					ofRectangle frame = adjustFaceBounds(followers[c].faceBounds);
-					portrait.crop(frame.x, frame.y, frame.getWidth(), frame.getHeight());
-					addPerson(portrait, followers[c].snapshots);
+					followers[c].takeSnapshot(cam);
 				}
-				trainModel();
-
-				followers[c].ignore = true;
-				followers[c].lastMatch = nextPersonId - 1;
-			}
-			// Or take a <<SNAPSHOT>>
-			else {
-				followers[c].takeSnapshot(cam);
 			}
 		}
-	}
 
 
 
@@ -519,83 +507,91 @@ void manager::detectFaces(ofImage & cam) {
 
 
 
-	////////////////////////////
-	// FACE recognition stuff
-	
+		////////////////////////////
+		// FACE recognition stuff
 
-	if (we.size() > 0)
-	{
-		for (int i = 0; i < followers.size(); i++) {
-			int match = -1;
-			double confidence = -1;
 
-			// Make sure it has a snapshot
-			ofImage idSnapshot;
-			Mat cv_idSnapshot;
+		if (we.size() > 0)
+		{
+			for (int i = 0; i < followers.size(); i++) {
+				int match = -1;
+				double confidence = -1;
 
-			// constant update identification evidence
-			// only useful for debuging
-			if (debugUpdateEvidence && debugTrackers) {
-				// better/slower use the live cam
-				idSnapshot.clone(cam);
-				idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
-				idSnapshot.resize(75, 75);
+				// Make sure it has a snapshot
+				ofImage idSnapshot;
+				Mat cv_idSnapshot;
 
-				Mat cv_idSnapshotRGB = ofxCv::toCv(idSnapshot);
-				cvtColor(cv_idSnapshotRGB, cv_idSnapshot, CV_RGB2GRAY);
-					
-				model->predict(cv_idSnapshot, match, confidence);
-				ofDrawBitmapStringHighlight("?", followers[i].faceBounds.x+5, followers[i].faceBounds.getBottom() - 10, ofColor::black, ofColor::yellow);
+				// constant update identification evidence
+				// only useful for debuging
+				if (debugUpdateEvidence && debugTrackers) {
+					// better/slower use the live cam
+					idSnapshot.clone(cam);
+					idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
+					idSnapshot.resize(75, 75);
 
-				followers[i].cv_evidence = cv_idSnapshot;
-				followers[i].lastMatch = match;
-				followers[i].lastConfidence = confidence;
-			}
-			// or use the predifined snapshot
-			else {
-				if (!followers[i].ignore && followers[i].evidenceIsSet) {
+					Mat cv_idSnapshotRGB = ofxCv::toCv(idSnapshot);
+					cvtColor(cv_idSnapshotRGB, cv_idSnapshot, CV_RGB2GRAY);
+
+					model.predict(cv_idSnapshot, match, confidence);
+					ofDrawBitmapStringHighlight("?", followers[i].faceBounds.x + 5, followers[i].faceBounds.getBottom() - 10, ofColor::black, ofColor::yellow);
+
+					followers[i].cv_evidence = cv_idSnapshot;
+					followers[i].lastMatch = match;
+					followers[i].lastConfidence = confidence;
+				}
+				// or use the predifined snapshot
+				else if (!followers[i].ignore && followers[i].evidenceIsSet) {
 					cv_idSnapshot = followers[i].cv_evidence;
 
-					model->predict(cv_idSnapshot, match, confidence);
+					model.predict(cv_idSnapshot, match, confidence);
 
 					followers[i].lastMatch = match;
 					followers[i].lastConfidence = confidence;
 				}
-			}
-				
-
-			
-			////////////////////////////
-			// RECOGNIZED peson
-			if (true && confidence != -1 && confidence < 1000)
-				followers[i].ignore = true;
-
-			
 
 
-			// if no person was found, use the last recorded match
-			if (debugTrackers && followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
-				
-				match = followers[i].lastMatch;
-				confidence = followers[i].lastConfidence;
-				float pX = we[match].x;
-				float pY = we[match].y;
-				if (we[match].face.isAllocated()) {
-					pX -= we[match].face.getWidth() / 2;
-					pY -= we[match].face.getHeight();
+
+				////////////////////////////
+				// RECOGNIZED peson
+				if (true && confidence != -1 && confidence < 1000)
+					followers[i].ignore = true;
+
+
+
+
+				// if no person was found, use the last recorded match
+				if (debugTrackers && followers[i].lastMatch != -1 && followers[i].lastMatch <= we.size()) {
+
+					match = followers[i].lastMatch;
+					confidence = followers[i].lastConfidence;
+					float pX = we[match].x;
+					float pY = we[match].y;
+					if (we[match].face.isAllocated()) {
+						pX -= we[match].face.getWidth() / 2;
+						pY -= we[match].face.getHeight();
+					}
+
+					pX += we[match].face.getWidth() / 2;
+
+					// adjust for debugTrackersScale
+					pX /= debugTrackersScale;
+					pY /= debugTrackersScale;
+
+					ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+					ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);
 				}
 
-				pX += we[match].face.getWidth() / 2;
-
-				// adjust for debugTrackersScale
-				pX /= debugTrackersScale;
-				pY /= debugTrackersScale;
-
-				ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
-				ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);
 			}
-
 		}
+	}
+	else if(debugTrackers){
+		ofDrawBitmapStringHighlight( "<<<<<< TRAINING >>>>>>", camH/2,50, ofColor::black, ofColor::red);
+		ofPushStyle();
+		ofSetColor(ofColor::red);
+		ofSetLineWidth(25);
+		ofNoFill();
+		ofDrawRectangle(0, 0, camW, camH);
+		ofPopStyle();
 	}
 
 	if (debugTrackers)

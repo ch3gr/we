@@ -172,12 +172,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\modelThread.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="src\candidate.cpp" />
     <ClCompile Include="src\manager.cpp" />
     <ClCompile Include="src\person.cpp" />
     <ClCompile Include="src\test.txt" />
-    <ClCompile Include="src\trainThread.cpp" />
     <ClCompile Include="..\..\..\addons\ofxCv\libs\CLD\src\ETF.cpp" />
     <ClCompile Include="..\..\..\addons\ofxCv\libs\CLD\src\fdog.cpp" />
     <ClCompile Include="..\..\..\addons\ofxCv\libs\ofxCv\src\Calibration.cpp" />
@@ -208,11 +208,11 @@
     <ClCompile Include="..\..\..\addons\ofxOpenCv\src\ofxCvShortImage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\modelThread.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\candidate.h" />
     <ClInclude Include="src\manager.h" />
     <ClInclude Include="src\person.h" />
-    <ClInclude Include="src\trainThread.h" />
     <ClInclude Include="..\..\..\addons\ofxCv\src\ofxCv.h" />
     <ClInclude Include="..\..\..\addons\ofxCv\libs\CLD\include\CLD\ETF.h" />
     <ClInclude Include="..\..\..\addons\ofxCv\libs\CLD\include\CLD\fdog.h" />

@@ -38,6 +38,10 @@ toDo
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements
 
 
+- dokimase ta alla modela
+http://docs.opencv.org/2.4/modules/contrib/doc/facerec/facerec_api.html#facerecognizer-train
+
+
 From Zach
 now using : harr
 should look into : dlib	hog

@@ -4,6 +4,7 @@
 #include "person.h"
 #include "ofxCv.h"
 #include "ofxOpenCv.h"
+#include "modelThread.h"
 
 
 
@@ -24,7 +25,6 @@ public:
 
 	void manager::addPerson(ofImage & _face);
 	void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots);
-	void manager::trainModel();
 	void manager::setBg(ofImage & _bg);
 	void manager::setBg(ofVideoGrabber & _cam);
 	void manager::draw();
@@ -66,11 +66,9 @@ public:
 	ObjectFinder scout;
 	RectTrackerFollower<candidate> candidates;
 	
-	// face recognition model
-	Ptr<FaceRecognizer> model;
-	vector<Mat> modelFaces;
-	vector<ofImage> modelOfFaces;
-	vector<int> modelLabels;
+	// Threaded face recognition model !!!
+	modelThread model;
+	
 	
 	
 

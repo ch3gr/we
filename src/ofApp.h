@@ -6,7 +6,6 @@
 #include "ofxOpenCv.h"
 #include "ofxCv.h"
 #include "ofxGui.h"
-#include "trainThread.h"
 
 
 using namespace cv;
@@ -55,7 +54,7 @@ public:
 
 
 	manager manage;
-	trainThread trainer;
+	
 
 
 	bool showGui;

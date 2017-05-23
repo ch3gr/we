@@ -25,9 +25,6 @@
     <ClCompile Include="src\test.txt">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\trainThread.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\addons\ofxCv\libs\CLD\src\ETF.cpp">
       <Filter>addons\ofxCv\libs\CLD\src</Filter>
     </ClCompile>
@@ -111,6 +108,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\addons\ofxOpenCv\src\ofxCvShortImage.cpp">
       <Filter>addons\ofxOpenCv\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\modelThread.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -258,9 +258,6 @@
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="src\person.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\trainThread.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxCv\src\ofxCv.h">
@@ -844,6 +841,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\addons\ofxOpenCv\libs\opencv\include\opencv2\videostab\videostab.hpp">
       <Filter>addons\ofxOpenCv\libs\opencv\include\opencv2\videostab</Filter>
+    </ClInclude>
+    <ClInclude Include="src\modelThread.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
