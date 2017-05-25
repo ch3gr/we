@@ -24,10 +24,10 @@ int main( ){
 
 toDo
 
+
 - curate / add size control on the person
 - fine tune tracker settings
 - fine tune Face recognition
-- Threading ( threaded channel )
 - train model : tighter crop in for face recognition
 - train model : align eyes?
 - Webcam frame rate

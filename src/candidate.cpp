@@ -145,6 +145,8 @@ bool candidate::isPhotoTime() {
 	return out;
 }
 
+
+// Will crash if takes two snapshots on the same frame, because of the reference
 void candidate::takeSnapshot(ofImage & snapshot)
 {
 	if (snapshots.size() < snapshotSum) {

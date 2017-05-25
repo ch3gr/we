@@ -447,8 +447,11 @@ void manager::detectFaces(ofImage & cam) {
 		cam.draw(0, 0);
 	}
 
-	// If model is trainning, don't try to track and predict a person
+	// If model is trainning, dont bother tracking
 	if (model.isReady()) {
+
+		// because candidate::takeSnapshot() takes a reference of frame, we need to avoid taking two snapshots on one frame
+		bool dirtyFrame = false;
 
 		// Adjust tracker
 		scout.setRescale(((ofApp*)ofGetAppPtr())->guiTrackerWidth / float(camW));
@@ -460,6 +463,7 @@ void manager::detectFaces(ofImage & cam) {
 
 		vector<candidate> & followers = candidates.getFollowers();
 		for (int c = 0; c < followers.size(); c++) {
+
 			////////////////////////////
 			// DRAW trackers debug
 			if (debugTrackers) {
@@ -492,8 +496,9 @@ void manager::detectFaces(ofImage & cam) {
 					followers[c].lastMatch = nextPersonId - 1;
 				}
 				// Or take a <<SNAPSHOT>>
-				else {
+				else if(!dirtyFrame){
 					followers[c].takeSnapshot(cam);
+					dirtyFrame = true;
 				}
 			}
 		}
@@ -514,6 +519,11 @@ void manager::detectFaces(ofImage & cam) {
 		if (we.size() > 0)
 		{
 			for (int i = 0; i < followers.size(); i++) {
+
+				// Break if the previous tracker captured a person, to avoid crash with untrained model
+				if (!model.isReady())
+					break;
+
 				int match = -1;
 				double confidence = -1;
 
