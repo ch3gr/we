@@ -205,6 +205,29 @@ void manager::draw() {
 	}
 
 
+
+
+
+	/*
+	if (we.size() >= 1) {
+		Mat eigenvalues = model.model->getMat("eigenvectors");
+		ofxCv::drawMat(eigenvalues, 1000, 10);
+		ofImage ofMat;
+		ofxCv::toOf(eigenvalues, ofMat);
+		ofMat.update();
+		ofMat.draw(1200, 10);
+		
+		eigenvalues = model.model->getMat("eigenvalues");
+		ofxCv::toOf(eigenvalues, ofMat);
+		ofMat.update();
+		ofMat.draw(1300, 10);
+		
+		eigenvalues = model.model->getMat("mean");
+		ofxCv::toOf(eigenvalues, ofMat);
+		ofMat.update();
+		ofMat.draw(1400, 10);
+	}
+	*/
 }
 
 
@@ -609,21 +632,7 @@ void manager::detectFaces(ofImage & cam) {
 
 	// see if I can view the internal model
 
-	//Mat eigenvalues = model->getMat("eigenvectors");
-	//ofImage ofMat;
-	//ofxCv::toOf(eigenvalues, ofMat);
-	//ofMat.update();
-	//ofMat.draw(1200, 10);
 
-	//eigenvalues = model->getMat("eigenvalues");
-	//ofxCv::toOf(eigenvalues, ofMat);
-	//ofMat.update();
-	//ofMat.draw(1300, 10);
-	//
-	//eigenvalues = model->getMat("mean");
-	//ofxCv::toOf(eigenvalues, ofMat);
-	//ofMat.update();
-	//ofMat.draw(1400, 10);
 
 
 }

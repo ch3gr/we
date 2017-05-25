@@ -4,9 +4,16 @@
 
 modelThread::modelThread(){
 
-	model = createEigenFaceRecognizer(80, 5000);
-	startThread();
+	//model = createEigenFaceRecognizer(80, 5000);
+	model = createFisherFaceRecognizer(10, 5000);
+	
+	// Fisher requires at least two samples 
+	//Mat empty(75, 75, CV_8UC3, Scalar(128, 128, 128));
+	//modelFaces.push_back(empty);
+	//modelLabels.push_back(999);
 
+
+	startThread();
 	training = false;
 }
 
@@ -36,7 +43,7 @@ void modelThread::train() {
 void modelThread::predict(Mat &sample, int &match, double &confidence) {
 	
 	model->predict(sample, match, confidence);
-//	cout << "Predict results	match: " << match << " conf: " << confidence << endl;
+	cout << "Predict results	match: " << match << " conf: " << confidence << endl;
 }
 
 
@@ -70,4 +77,22 @@ void modelThread::threadedFunction() {
 
 bool modelThread::isReady() {
 	return !training;
+}
+
+
+void modelThread::save() {
+	model->save("data/model.xml");
+	cout << "Model saved" << endl;
+}
+
+void modelThread::load() {
+	model->load("data/model.xml");
+	cout << "Model loaded" << endl;
+}
+
+
+
+void modelThread::test() {
+	model->save("out.xml");
+	//cout <<  << endl;
 }

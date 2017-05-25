@@ -253,10 +253,6 @@ void ofApp::draw() {
 
 
 	
-	string msg = ofToString( manage.model.modelFaces.size() );
-	ofDrawBitmapStringHighlight(msg, mouseX + 10, mouseY + 70, ofColor::black, ofColor::white);
-	ofDrawBitmapStringHighlight(ofToString( manage.model.isReady() ), mouseX + 10, mouseY + 100, ofColor::black, ofColor::white);
-
 }
 
 
@@ -364,6 +360,12 @@ void ofApp::keyPressed(int key) {
 	}
 
 
+	if (key == OF_KEY_F8) {
+		manage.model.save();
+	}
+	if (key == OF_KEY_F5) {
+		manage.model.load();
+	}
 
 
 
@@ -388,7 +390,9 @@ void ofApp::keyPressed(int key) {
 		cout << "fScale :" << fScale << endl;
 	}
 
-
+	if (key == 'X') {
+		manage.model.test();
+	}
 
 	
 

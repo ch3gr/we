@@ -21,6 +21,11 @@ public:
 	void threadedFunction();
 	bool isReady();
 
+	void save();
+	void load();
+
+	void test();
+
 
 	Ptr<FaceRecognizer> model;
 	vector<Mat> modelFaces;
