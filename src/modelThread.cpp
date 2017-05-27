@@ -5,14 +5,8 @@
 modelThread::modelThread(){
 
 	//model = createEigenFaceRecognizer(80, 5000);
-	model = createFisherFaceRecognizer(10, 5000);
+	model = createFisherFaceRecognizer(80, 5000);
 	
-	// Fisher requires at least two samples 
-	//Mat empty(75, 75, CV_8UC3, Scalar(128, 128, 128));
-	//modelFaces.push_back(empty);
-	//modelLabels.push_back(999);
-
-
 	startThread();
 	training = false;
 }

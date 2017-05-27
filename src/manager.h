@@ -36,6 +36,7 @@ public:
 	void manager::loadUs();
 	void manager::curate();
 
+	void manager::addMonkey();
 
 	void manager::detectFaces(ofImage & cam);
 	void manager::detectFaces(ofVideoGrabber & cam);

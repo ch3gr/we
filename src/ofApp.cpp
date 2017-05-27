@@ -83,21 +83,45 @@ void ofApp::setup() {
 	//gui.setDefaultWidth(500);
 	gui.add( winSize.setup("Win size", ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight())));
 	gui.add( camSize.setup("Cam size", ofToString(camW) + "x" + ofToString(camH)));
-	gui.add( guiTrackerWidth.setup("Trkr Img Width", 128, 8, 512));
-	gui.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
-	gui.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
-	gui.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
-	
-	gui.add( guiLumaKey.setup("key", 0.09, 0, 1));
-	gui.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
-	gui.add( guiContourImgSimplify.setup("Simplify Contour Img", 2, 0, 10));
-	gui.add( guiContourSmooth.setup("Contour smooth", 10, 0, 100));
 
-	gui.add( guiDebugSplit.setup("Debug Split screen", 0.5, 0, 1));
-	gui.add( guiDebugTrackers.setup("Debug Trackers", true));
-	gui.add( guiDebugPortrait.setup("Debug Portrait", false));
-	gui.add( guiDebugPeople.setup("Debug Portrait", false));
-	gui.add( guiDebugUpdateEvidence.setup("Update Evidence", false));
+	
+	guiGrpTrackers.setup();
+	guiGrpTrackers.setName("Trackers");
+	guiGrpTrackers.setBorderColor(ofColor::lightGreen);
+	guiGrpTrackers.add( guiTrackerWidth.setup("Trkr Img Width", 128, 8, 512));
+	guiGrpTrackers.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
+	guiGrpTrackers.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
+	guiGrpTrackers.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
+	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 1000, 50, 2000));
+
+	gui.add( &guiGrpTrackers );
+	//guiGrpTrackers.minimize();
+
+
+	
+	guiGrpPortrain.setup();
+	guiGrpPortrain.setName("Portrait");
+	guiGrpPortrain.setBorderColor(ofColor::lightBlue);
+	guiGrpPortrain.add( guiLumaKey.setup("key", 0.09, 0, 1));
+	guiGrpPortrain.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
+	guiGrpPortrain.add( guiContourImgSimplify.setup("Simplify Contour Img", 2, 0, 10));
+	guiGrpPortrain.add( guiContourSmooth.setup("Contour smooth", 10, 0, 100));
+
+	gui.add(&guiGrpPortrain);
+	//guiGrpPortrain.minimize();
+
+
+	guiGrpDebug.setup();
+	guiGrpDebug.setName("Debuging");
+	guiGrpDebug.setBorderColor(ofColor::salmon);
+	guiGrpDebug.add( guiDebugSplit.setup("Split screen", 0.5, 0, 1));
+	guiGrpDebug.add( guiDebugTrackers.setup("Debug Trackers", true));
+	guiGrpDebug.add( guiDebugPortrait.setup("Debug Portrait", false));
+	guiGrpDebug.add( guiDebugPeople.setup("Debug Portrait", false));
+	guiGrpDebug.add( guiDebugUpdateEvidence.setup("Update Evidence", false));
+
+	gui.add(&guiGrpDebug);
+	//guiGrpDebug.minimize();
 	
 
 

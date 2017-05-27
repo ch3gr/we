@@ -8,7 +8,8 @@ int main( ){
 	ofGLWindowSettings settings;
 	settings.setGLVersion(3, 2);
 
-	ofSetupOpenGL(1920,1080, OF_WINDOW);
+	ofSetupOpenGL(1280, 720, OF_WINDOW);
+//	ofSetupOpenGL(1920,1080, OF_WINDOW);
 //	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
@@ -90,6 +91,12 @@ faceMask
 \addons\ofxFaceTracker\example-advanced
 Check how you can compile with static linking so it doesn't complain about missing :
 msvcp140.dll
+
+
+
+http://eyalarubas.com/face-detection-and-recognition.html
+
+
 
 
 Checkare auto gia high FPS

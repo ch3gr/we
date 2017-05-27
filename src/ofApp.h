@@ -62,18 +62,23 @@ public:
 	ofxLabel winSize;
 	ofxLabel camSize;
 
+	ofxGuiGroup guiGrpTrackers;
 	ofxFloatSlider guiSpeedThress;
 	ofxFloatSlider guiTrackerWidth;
 	ofxFloatSlider guiTrackerMinSize;
 	ofxFloatSlider guiTrackerMaxSize;
 
+	ofxFloatSlider guiConfidenceThress;
+
+	ofxGuiGroup guiGrpPortrain;
 	ofxFloatSlider guiLumaKey;
 	ofxFloatSlider guiContourImgScale;
 	ofxIntSlider guiContourImgSimplify;
 	ofxIntSlider guiContourSmooth;
 
-	ofxFloatSlider guiDebugSplit;
 
+	ofxGuiGroup guiGrpDebug;
+	ofxFloatSlider guiDebugSplit;
 	ofxToggle guiDebugTrackers;
 	ofxToggle guiDebugPortrait;
 	ofxToggle guiDebugPeople;

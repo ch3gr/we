@@ -67,8 +67,8 @@ manager::manager()
 
 
 	
-
-
+	// FisherFaceRecognizer requires an extra sample ?
+	addMonkey();
 }
 
 
@@ -102,6 +102,25 @@ void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 	}
 	nextPersonId++;
 	flash = 1;
+}
+
+
+
+void manager::addMonkey() {
+
+	// Fisher requires at least two samples 
+	//Mat empty(75, 75, CV_8UC3, Scalar(128, 128, 128));
+	//modelFaces.push_back(empty);
+	//modelLabels.push_back(999);
+
+	ofImage monkeyOf;
+	monkeyOf.load("monkey.jpg");
+	Mat monkeyCv = ofxCv::toCv(monkeyOf);
+	Mat monkeyGray;
+	cvtColor(monkeyCv, monkeyGray, CV_RGB2GRAY);
+
+	model.addSample(monkeyGray, 999);
+	
 }
 
 
@@ -277,6 +296,7 @@ void manager::drawDebugTrackers(){
 				ofMat.update();
 				ofMat.draw((camW*debugTrackersScale) + c * 75, 0);
 			}
+			
 		}
 
 		// Draw snapshots
@@ -316,6 +336,7 @@ void manager::forgetUs() {
 	nextPersonId = 0;
 	model.forget();
 
+	addMonkey();
 }
 
 
@@ -460,6 +481,8 @@ void manager::detectFaces(ofImage & cam) {
 	if (!bg.isAllocated())
 		setBg(cam);
 
+	// because candidate::takeSnapshot() takes a reference of frame, we need to avoid taking two snapshots on one frame
+	bool dirtyFrame = false;
 
 
 	// Prep the debuggin buffer
@@ -473,8 +496,6 @@ void manager::detectFaces(ofImage & cam) {
 	// If model is trainning, dont bother tracking
 	if (model.isReady()) {
 
-		// because candidate::takeSnapshot() takes a reference of frame, we need to avoid taking two snapshots on one frame
-		bool dirtyFrame = false;
 
 		// Adjust tracker
 		scout.setRescale(((ofApp*)ofGetAppPtr())->guiTrackerWidth / float(camW));
@@ -556,7 +577,7 @@ void manager::detectFaces(ofImage & cam) {
 
 				// constant update identification evidence
 				// only useful for debuging
-				if (debugUpdateEvidence && debugTrackers) {
+				if (debugUpdateEvidence && debugTrackers && !dirtyFrame) {
 					// better/slower use the live cam
 					idSnapshot.clone(cam);
 					idSnapshot.crop(followers[i].faceBounds.x, followers[i].faceBounds.y, followers[i].faceBounds.getWidth(), followers[i].faceBounds.getHeight());
@@ -586,7 +607,8 @@ void manager::detectFaces(ofImage & cam) {
 
 				////////////////////////////
 				// RECOGNIZED peson
-				if (true && confidence != -1 && confidence < 1000)
+				double guiConf = ((ofApp*)ofGetAppPtr())->guiConfidenceThress;
+				if (confidence != -1 && confidence < guiConf)	// 1000
 					followers[i].ignore = true;
 
 
@@ -597,21 +619,24 @@ void manager::detectFaces(ofImage & cam) {
 
 					match = followers[i].lastMatch;
 					confidence = followers[i].lastConfidence;
-					float pX = we[match].x;
-					float pY = we[match].y;
-					if (we[match].face.isAllocated()) {
-						pX -= we[match].face.getWidth() / 2;
-						pY -= we[match].face.getHeight();
+
+					if (debugTrackers) {
+						float pX = we[match].x;
+						float pY = we[match].y;
+						if (we[match].face.isAllocated()) {
+							pX -= we[match].face.getWidth() / 2;
+							pY -= we[match].face.getHeight();
+						}
+
+						pX += we[match].face.getWidth() / 2;
+
+						// adjust for debugTrackersScale
+						pX /= debugTrackersScale;
+						pY /= debugTrackersScale;
+
+						ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+						ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() - 15, ofColor::black, ofColor::white);
 					}
-
-					pX += we[match].face.getWidth() / 2;
-
-					// adjust for debugTrackersScale
-					pX /= debugTrackersScale;
-					pY /= debugTrackersScale;
-
-					ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
-					ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() + 15, ofColor::black, ofColor::white);
 				}
 
 			}
