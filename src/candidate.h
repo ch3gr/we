@@ -9,6 +9,7 @@ public:
 	ofRectangle faceBoundsOld;
 	ofVec2f vel;
 	
+	vector<ofImage> frames;
 	vector<ofImage> snapshots;
 	cv::Mat cv_evidence;
 	bool evidenceIsSet;
@@ -40,5 +41,6 @@ public:
 	void draw();
 	bool isPhotoTime();
 	void takeSnapshot(ofImage & snapshot);
+	void storeFrame(ofImage & frame);
 };
 

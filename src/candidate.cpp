@@ -147,8 +147,7 @@ bool candidate::isPhotoTime() {
 
 
 // Will crash if takes two snapshots on the same frame, because of the reference
-void candidate::takeSnapshot(ofImage & snapshot)
-{
+void candidate::takeSnapshot(ofImage & snapshot) {
 	if (snapshots.size() < snapshotSum) {
 
 		snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
@@ -164,4 +163,6 @@ void candidate::takeSnapshot(ofImage & snapshot)
 	}
 }
 
-
+void candidate::storeFrame(ofImage & frame) {
+	frames.push_back(frame);
+}

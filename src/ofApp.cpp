@@ -92,7 +92,7 @@ void ofApp::setup() {
 	guiGrpTrackers.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
 	guiGrpTrackers.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
 	guiGrpTrackers.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
-	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 1000, 50, 2000));
+	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 0, 0, 2000));
 
 	gui.add( &guiGrpTrackers );
 	//guiGrpTrackers.minimize();
@@ -102,11 +102,12 @@ void ofApp::setup() {
 	guiGrpPortrain.setup();
 	guiGrpPortrain.setName("Portrait");
 	guiGrpPortrain.setBorderColor(ofColor::lightBlue);
-	guiGrpPortrain.add( guiLumaKey.setup("key", 0.09, 0, 1));
+	guiGrpPortrain.add( guiLumaKey.setup("key", 0.08, 0, 1));
 	guiGrpPortrain.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
-	guiGrpPortrain.add( guiContourImgSimplify.setup("Simplify Contour Img", 2, 0, 10));
-	guiGrpPortrain.add( guiContourSmooth.setup("Contour smooth", 10, 0, 100));
-
+	guiGrpPortrain.add( guiContourImgSimplify.setup("Simplify Contour Img", 0, 0, 10));
+	guiGrpPortrain.add( guiContourSmooth.setup("Contour smooth", 2, 0, 100));
+	guiGrpPortrain.add( guiAnimationInterval.setup("Animation", 0.1, 0, 1));
+	
 	gui.add(&guiGrpPortrain);
 	//guiGrpPortrain.minimize();
 
@@ -323,6 +324,12 @@ void ofApp::keyPressed(int key) {
 		manage.forgetUs();
 		cout << "People cleared" << endl;
 	}
+	if (key == 'C')
+	{
+		manage.candidates.setPersistence(0);
+		cout << "Forget trackers" << endl;
+	}
+
 	if (key == '`') {
 		showGui = !showGui;
 	}

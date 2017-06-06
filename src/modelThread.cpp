@@ -70,7 +70,7 @@ void modelThread::threadedFunction() {
 }
 
 bool modelThread::isReady() {
-	return !training;
+	return !training ;
 }
 
 

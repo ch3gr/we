@@ -104,6 +104,17 @@ void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots) {
 	flash = 1;
 }
 
+void manager::addPerson(vector<ofImage> &_frames, vector<ofImage> & _snapshots) {
+	person someoneNew = person(nextPersonId, _frames, _snapshots);
+	we.push_back(someoneNew);
+
+	for (int s = 0; s < someoneNew.snapshotsCV.size(); s++) {
+		model.addSample(someoneNew.snapshotsCV[s], nextPersonId);
+	}
+	nextPersonId++;
+	flash = 1;
+}
+
 
 
 void manager::addMonkey() {
@@ -344,11 +355,13 @@ void manager::forgetUs() {
 // Save the group to disk
 void manager::saveUs(bool append) {
 
-	string sessionPath = "sessions/s_02/";
-	string personPrefix = "p_";
-	string snapshotPrefix = "s.";
+	string session = "s01";
+	string sessionPath = "sessions/" + session + "/";
+	string personPrefix = "p";
+	string framePrefix = "f";
+	string snapshotPrefix = "s";
 	string ext = ".tif";
-	cout << "\nSaving session \n" << "data/" << sessionPath << endl;
+	cout << "\nSaving session \n" << "data/" << sessionPath << session << "/" << endl;
 
 	int nextId = 0;
 	if (append) {
@@ -375,24 +388,31 @@ void manager::saveUs(bool append) {
 
 	// ALL OF US
 	for (int p = 0; p < we.size(); p++) {
-		string personPath = personPrefix + padThis(4, p+nextId) + "/";
+		string personId = padThis(4, p + nextId);
+		string personPath = session+"_"+personPrefix + personId + "/";
 		cout << "  |__ " << personPath << endl;
 
-		// SAVE FACE
 		personPath = sessionPath + personPath;
-		string personFacePath = personPath + "face.tif";
-		we[p].face.save(personFacePath, OF_IMAGE_QUALITY_BEST);
+
+		// SAVE FACE
+		//string personFacePath = personPath + "face.tif";
+		//we[p].face.save(personFacePath, OF_IMAGE_QUALITY_BEST);
 
 
-		// SNAPSHOTS
+		// SNAPSHOTS and frames
 		for (int s = 0; s < we[p].snapshots.size(); s++) {
 			
-			string snapshotFile = snapshotPrefix + padThis(4, s) + ext;
+			string snapshotFile = session +"_"+ personPrefix+ personId + "_" + snapshotPrefix + padThis(4, s) + ext;
+			string frameFile = session + "_" + personPrefix+ personId + "_" + framePrefix + padThis(4, s) + ext;
 			cout << "    |__ " << snapshotFile << endl;
+			cout << "    |__ " << frameFile << endl;
 
 			// Prepare snapshot file path and SAVE
 			snapshotFile = personPath + snapshotFile;
 			we[p].snapshots[s].save(snapshotFile, OF_IMAGE_QUALITY_BEST);
+			// Prepare frame file path and SAVE
+			frameFile = personPath + frameFile;
+			we[p].frames[s].save(frameFile, OF_IMAGE_QUALITY_BEST);
 		}
 	}
 }
@@ -406,9 +426,11 @@ void manager::saveUs(bool append) {
 
 // Load a session from disk
 void manager::loadUs() {
-	string sessionPath = "sessions/s_02/";
-	string personPrefix = "p_";
-	string snapshotPrefix = "s.";
+	string session = "s01";
+	string sessionPath = "sessions/"+session+"/";
+	string personPrefix = "p";
+	string snapshotPrefix = "s";
+	string framePrefix = "f";
 	string ext = ".tif";
 
 
@@ -426,10 +448,11 @@ void manager::loadUs() {
 		if (personDir.exists())
 		{
 			// check if person directory actually matches the prefix
-			if (sessionDir.getName(p).substr(0, personPrefix.length()) == personPrefix) {
-
-				ofImage face;
+			//if (sessionDir.getName(p).substr(0, session.length() + personPrefix.length()+1) == session+"_"+personPrefix)
+			{
+				//ofImage face;
 				vector<ofImage> snapshots;
+				vector<ofImage> frames;
 
 				// Read all data
 				personDir.listDir();
@@ -437,21 +460,34 @@ void manager::loadUs() {
 				for (int f = 0; f < files.size(); f++) {
 					cout << "      |__ " << files[f].getBaseName() << endl;
 
+					int tokenIndex = session.length() + personPrefix.length() + 6;
+					string token = files[f].getBaseName().substr(tokenIndex, 1);
 					// Load face
-					if (files[f].getBaseName().substr(0, 4) == "face") {
-						face.load( files[f].path() );
-					}
+//					if (files[f].getBaseName().substr(0, 4) == "face") {
+//						face.load( files[f].path() );
+//					}
 					// Load snapshots
-					if (files[f].getBaseName().substr(0, snapshotPrefix.length()) == snapshotPrefix) {
+//					if (files[f].getBaseName().substr(0, snapshotPrefix.length()) == snapshotPrefix) {
+					if( token == snapshotPrefix) {
 						ofImage snapshot;
 						snapshot.load(files[f].path());
 						snapshots.push_back(snapshot);
 					}
+					// Load frames
+//					if (files[f].getBaseName().substr(0, framePrefix.length()) == framePrefix) {
+					if( token == framePrefix ) {
+						ofImage frame;
+						frame.load(files[f].path());
+						frames.push_back(frame);
+					}
+					cout << files[f].getBaseName() << endl;
 				}
 
 				// Are we good to add a person?
-				if (face.isAllocated() && snapshots.size() > 0) {
-					addPerson(face, snapshots);
+//				if (face.isAllocated() && snapshots.size() > 0) {
+				if (frames.size() > 0 && snapshots.size() > 0) {
+//					addPerson(face, snapshots);
+					addPerson(frames, snapshots);
 				}
 			}
 		}
@@ -526,7 +562,8 @@ void manager::detectFaces(ofImage & cam) {
 					// create Alpha portrait
 					if (portraitWithAlpha) {
 						portrait = makePortrait(cam, followers[c].faceBounds);
-						addPerson(portrait, followers[c].snapshots);
+						//addPerson(portrait, followers[c].snapshots);
+						addPerson(followers[c].frames, followers[c].snapshots);
 					}
 					else {
 						portrait.clone(cam);
@@ -541,7 +578,15 @@ void manager::detectFaces(ofImage & cam) {
 				}
 				// Or take a <<SNAPSHOT>>
 				else if(!dirtyFrame){
+					// add a frame
+					ofImage camFrame;
+					camFrame.clone(cam);
+
 					followers[c].takeSnapshot(cam);
+					
+					ofImage frame = makePortrait(camFrame, followers[c].faceBounds);
+					followers[c].storeFrame(frame);
+					
 					dirtyFrame = true;
 				}
 			}

@@ -25,6 +25,7 @@ public:
 
 	void manager::addPerson(ofImage & _face);
 	void manager::addPerson(ofImage & _face, vector<ofImage> & _snapshots);
+	void manager::addPerson(vector<ofImage> &_frames, vector<ofImage> & _snapshots);
 	void manager::setBg(ofImage & _bg);
 	void manager::setBg(ofVideoGrabber & _cam);
 	void manager::draw();

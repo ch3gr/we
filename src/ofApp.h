@@ -75,6 +75,7 @@ public:
 	ofxFloatSlider guiContourImgScale;
 	ofxIntSlider guiContourImgSimplify;
 	ofxIntSlider guiContourSmooth;
+	ofxFloatSlider guiAnimationInterval;
 
 
 	ofxGuiGroup guiGrpDebug;

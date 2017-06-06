@@ -1,4 +1,5 @@
 #include "person.h"
+#include "ofApp.h"
 
 using namespace cv;
 
@@ -46,6 +47,36 @@ person::person(int _id, ofImage & _face, vector<ofImage> & _snapshots) {
 	cout << "New Person added to the list. ID :" << id << endl;
 }
 
+person::person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots) {
+
+	id = _id;
+	frameNo = 0;
+
+	frames = _frames;
+	face = frames[ 0 ];
+	snapshots = _snapshots;
+
+	ofSeedRandom(ofGetSystemTimeMicros());
+	float p = ofRandomf() * ((ofApp*)ofGetAppPtr())->guiAnimationInterval;
+	nextKeyFrame = ofGetElapsedTimef() + 1;
+
+
+	// convert snapshots to CV Mat
+	for (int s = 0; s < snapshots.size(); s++) {
+		//snapshots[s].getPixelsRef()
+		ofPixels toMatPixels = snapshots[s].getPixels();
+
+		Mat color = ofxCv::toCv(toMatPixels);
+		Mat grey;
+		cvtColor(color, grey, CV_RGB2GRAY);
+		snapshotsCV.push_back(grey);
+
+	}
+
+
+	cout << "New Person added to the list. ID :" << id << endl;
+}
+
 person::person( int _id, ofImage & _face, int _x, int _y) {
 
 	id = _id;
@@ -74,10 +105,24 @@ void person::draw() {
 	ofPushMatrix();
 	ofTranslate(x, y);
 
+	// incremenet frame
+	if (frames.size() != 0) {
+		if (ofGetElapsedTimef() > nextKeyFrame) {
+			frameNo = (frameNo + 1) % frames.size();
+			setFace( frames[ frameNo ]);
+
+			//ofSeedRandom(ofGetSystemTimeMicros());
+			//float p = ofRandom(0.5) ;
+			float p = ((ofApp*)ofGetAppPtr())->guiAnimationInterval;
+			nextKeyFrame = ofGetElapsedTimef() + p;
+		}
+	}
+
 	if (face.isAllocated())
 		face.draw(-face.getWidth()/2, -face.getHeight());
 
 	ofPopMatrix();
+	
 }
 
 void person::drawDebug() {

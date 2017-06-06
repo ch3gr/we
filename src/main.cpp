@@ -8,8 +8,8 @@ int main( ){
 	ofGLWindowSettings settings;
 	settings.setGLVersion(3, 2);
 
-	ofSetupOpenGL(1280, 720, OF_WINDOW);
-//	ofSetupOpenGL(1920,1080, OF_WINDOW);
+//	ofSetupOpenGL(1280, 720, OF_WINDOW);
+	ofSetupOpenGL(1920,1080, OF_WINDOW);
 //	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
@@ -25,7 +25,9 @@ int main( ){
 
 toDo
 
-
+- Add UI controls for candidate.snapshotSum and intervals
+- Add UI control for candidates.setPersistence(10);
+- Crashes if you load session without any prior training
 - curate / add size control on the person
 - fine tune tracker settings
 - fine tune Face recognition
