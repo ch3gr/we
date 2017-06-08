@@ -129,15 +129,15 @@ void manager::curate() {
 	if( debugPortrait || debugTrackers)
 	{
 		// spread them at the bottom of the half window
-		for (int p = 0; p < size; ++p) {
-			int x = (1-(float(p+1) / float(size))) * ofGetWidth() + we[p].face.getWidth()/2;
+		for (float p = 0; p < size; ++p) {
+			float x = (1-((p+1) / float(size))) * ofGetWidth() + we[p].face.getWidth()/2;
 		
-			int yMax = (ofGetHeight()*0.4) + we[p].face.getHeight();
-			int yMin = ofGetHeight();
+			float yMax = (ofGetHeight()*0.4) + we[p].face.getHeight();
+			float yMin = ofGetHeight();
 
 			ofSeedRandom(we[p].id);
 			float wave = cos(ofGetElapsedTimef() + ofRandom(1000))*0.5 +0.5;
-			int y = ofLerp(yMin, yMax, wave);
+			float y = ofLerp(yMin, yMax, wave);
 
 			we[p].setPos(x, y);
 		}
@@ -172,6 +172,14 @@ void manager::curate() {
 
 
 			we[p].setPos(x, y);
+
+			
+			float wave = sin(ofGetElapsedTimef() * ofRandom(3, 4));
+			we[p].rotate = ofMap( wave, -1, 1, -45, 45);
+			wave = sin(ofGetElapsedTimef() * ofRandom(0.2, 1));
+			we[p].scale = ofMap( wave, -1, 1, 50, 400) ;
+			
+
 		}
 	}
 
@@ -404,7 +412,7 @@ void manager::saveUs(bool append) {
 
 // Load a session from disk
 void manager::loadUs() {
-	string session = "s02";
+	string session = "s01";
 	string sessionPath = "sessions/"+session+"/";
 	string personPrefix = "p";
 	string snapshotPrefix = "s";
@@ -531,18 +539,16 @@ void manager::detectFaces(ofImage & cam) {
 					followers[c].ignore = true;
 					followers[c].lastMatch = nextPersonId - 1;
 				}
-				// Or take a <<SNAPSHOT>>
+				// Or take a <<FRAME>> and a <<SNAPSHOT>>
 				else if(!dirtyFrame){
-					// add a frame
-					ofImage camFrame;
-					camFrame.clone(cam);
+
+					captureFrame(cam, followers[c]);
 
 					followers[c].setSnapshotCrop(followers[c].faceBounds);
 					followers[c].takeSnapshot(cam);
 					
+					dirtyFrame = true;
 
-					captureFrame(camFrame, followers[c]);
-					
 					/*
 					ofImage portrait;
 					if (portraitWithAlpha) {
@@ -555,7 +561,6 @@ void manager::detectFaces(ofImage & cam) {
 						addPerson(portrait, followers[c].snapshots);
 					}
 					*/
-					dirtyFrame = true;
 				}
 			}
 		}

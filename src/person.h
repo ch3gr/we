@@ -11,20 +11,23 @@ public:
 	int id;
 	int x;
 	int y;
-	int f;
+
+	int iFrame;
 	float nextTime;
 	ofImage face;
 	vector<ofImage> frames;
 	vector<ofImage> snapshots;
 	vector<Mat> snapshotsCV;
 	vector<ofImage> ofSnapshotsCV;
-	vector<float> scale;
+	float scale;
+	float rotate;
+	ofVec2f translate;
 		
 	person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots);
 	
 	
 
-	void person::setPos(int _x, int _y);
+	void person::setPos(float _x, float _y);
 	void person::draw();
 	void person::drawDebug();
 	void person::info();

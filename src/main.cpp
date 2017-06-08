@@ -25,6 +25,7 @@ int main( ){
 
 toDo
 
+- Add back portraitWithAlpha
 - Add UI controls for candidate.snapshotSum and intervals
 - Add UI control for candidates.setPersistence(10);
 - Crashes if you load session without any prior training
@@ -36,6 +37,8 @@ toDo
 - Webcam frame rate
 - port all shader versions
 - fix scaling of test faces
+
+- move captureFrame(), adjustFaceBounds() & remapSnapshotCrop() to candidate class
 
 - leme twra... instalation autofotizomeni epifania apo piso h opoia na anavei me arduino otan kanei snap to portrait
 - remove or add better timers - https://github.com/armadillu/ofxTimeMeasurements

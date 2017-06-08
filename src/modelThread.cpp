@@ -37,7 +37,7 @@ void modelThread::train() {
 void modelThread::predict(Mat &sample, int &match, double &confidence) {
 	
 	model->predict(sample, match, confidence);
-	cout << "Predict results	match: " << match << " conf: " << confidence << endl;
+//	cout << "Predict results	match: " << match << " conf: " << confidence << endl;
 }
 
 

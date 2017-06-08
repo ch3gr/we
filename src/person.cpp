@@ -9,7 +9,12 @@ using namespace cv;
 person::person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots) {
 
 	id = _id;
-	f = 0;
+	iFrame = 0;
+
+	scale = 250;
+	rotate = 0;
+	translate = ofVec2f(00,00);
+
 
 	frames = _frames;
 	face = frames[ 0 ];
@@ -22,7 +27,6 @@ person::person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots)
 
 	// convert snapshots to CV Mat
 	for (int s = 0; s < snapshots.size(); s++) {
-		//snapshots[s].getPixelsRef()
 		ofPixels toMatPixels = snapshots[s].getPixels();
 
 		Mat color = ofxCv::toCv(toMatPixels);
@@ -39,43 +43,61 @@ person::person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots)
 
 
 
-void person::setPos(int _x, int _y) {
-	x = _x;
-	y = _y;
+void person::setPos(float _x, float _y) {
+	translate.x = _x;
+	translate.y = _y;
 }
 
 
 
 void person::draw() {
-	ofPushMatrix();
-	ofTranslate(x, y);
 
 	// incremenet frame
 	if (frames.size() != 0) {
 		if (ofGetElapsedTimef() > nextTime) {
-			f = (f + 1) % frames.size();
-			float p = ((ofApp*)ofGetAppPtr())->guiAnimationInterval;
-			nextTime = ofGetElapsedTimef() + p;
+			iFrame = (iFrame + 1) % frames.size();
+			float interval = ((ofApp*)ofGetAppPtr())->guiAnimationInterval;
+			nextTime = ofGetElapsedTimef() + interval;
 		}
-		if (frames[f].isAllocated())
-			frames[f].draw(-face.getWidth()/2, -face.getHeight());
-	}
 
+		// transform and draw
+		if (frames[iFrame].isAllocated()) {
 
+			// TRANSFORM
+			ofPushMatrix();
+			// normalize scale first based on width and then by pixels
+			float s = scale / frames[iFrame].getWidth();
+			ofTranslate( translate.x, translate.y);
+			ofScale(s,s);
+			ofRotate(rotate);
+			ofTranslate(-frames[iFrame].getWidth() / 2, -frames[iFrame].getHeight() / 2);
 
-	ofPopMatrix();
-	
+			frames[iFrame].draw(0,0);
+
+			ofPopMatrix();
+		}
+	}	
 }
 
 void person::drawDebug() {
+
+// TRANSFORM
 	ofPushMatrix();
-	ofTranslate(x, y);
-	ofTranslate(-face.getWidth()/2, -face.getHeight());
+// normalize scale first based on width and then by pixels
+	float s = scale / frames[iFrame].getWidth();
+	ofTranslate(translate.x, translate.y);
+	ofScale(s, s);
+	ofRotate(rotate);
+	ofTranslate(-frames[iFrame].getWidth() / 2, -frames[iFrame].getHeight() / 2);
+
+
+
+
 
 	ofPushStyle();
 	ofNoFill();
 	ofSetColor(ofColor::blue);
-	ofDrawRectangle(0, 0, face.getWidth(), face.getHeight());
+	ofDrawRectangle(0, 0, frames[iFrame].getWidth(), frames[iFrame].getHeight() );
 	ofSetColor(ofColor::white);
 
 	ofDrawBitmapString(id, x, y + 20);
