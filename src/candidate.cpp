@@ -150,7 +150,7 @@ bool candidate::isPhotoTime() {
 void candidate::takeSnapshot(ofImage & snapshot) {
 	if (snapshots.size() < snapshotSum) {
 
-		snapshot.crop(faceBounds.x, faceBounds.y, faceBounds.width, faceBounds.height );
+		snapshot.crop(snapshotCrop.x, snapshotCrop.y, snapshotCrop.width, snapshotCrop.height );
 		snapshot.resize(75, 75);
 		snapshots.push_back(snapshot);
 
@@ -165,4 +165,8 @@ void candidate::takeSnapshot(ofImage & snapshot) {
 
 void candidate::storeFrame(ofImage & frame) {
 	frames.push_back(frame);
+}
+
+void candidate::setSnapshotCrop(ofRectangle newCrop) {
+	snapshotCrop = newCrop;
 }

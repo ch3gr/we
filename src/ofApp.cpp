@@ -92,7 +92,7 @@ void ofApp::setup() {
 	guiGrpTrackers.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
 	guiGrpTrackers.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
 	guiGrpTrackers.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
-	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 0, 0, 2000));
+	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 2000, 0, 2000));
 
 	gui.add( &guiGrpTrackers );
 	//guiGrpTrackers.minimize();
@@ -446,19 +446,8 @@ void ofApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {
-
 	
 	mouseLB_Pressed = true;
-
-
-	if (false) {
-		ofRectangle crop = ofRectangle(0, 0, camW, camH);
-		ofImage camFrame;
-		camFrame.setFromPixels(cam.getPixels());
-		ofImage portrait = manage.makePortrait(camFrame, crop);
-		manage.addPerson(portrait);
-	}
-
 
 }
 
@@ -529,6 +518,14 @@ ofRectangle adjustFaceBounds(ofRectangle faceBounds) {
 
 	return faceBounds;
 }
+
+// remap the coordinates of the small snapshot crop to the bigger frame crop
+ofRectangle remapSnapshotCrop(ofRectangle faceBound, ofRectangle newRef) {
+	faceBound.setX(faceBound.getX() - newRef.getX());
+	faceBound.setY(faceBound.getY() - newRef.getY());
+	return faceBound;
+}
+
 
 
 // Get the time difference between the refTime and current time with set precision

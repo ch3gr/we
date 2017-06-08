@@ -8,9 +8,10 @@ public:
 	ofRectangle faceBounds;
 	ofRectangle faceBoundsOld;
 	ofVec2f vel;
-	
+
 	vector<ofImage> frames;
 	vector<ofImage> snapshots;
+	ofRectangle snapshotCrop;
 	cv::Mat cv_evidence;
 	bool evidenceIsSet;
 	
@@ -40,7 +41,8 @@ public:
 	void kill();
 	void draw();
 	bool isPhotoTime();
-	void takeSnapshot(ofImage & snapshot);
 	void storeFrame(ofImage & frame);
+	void takeSnapshot(ofImage & snapshot);
+	void setSnapshotCrop(ofRectangle newCrop);
 };
 

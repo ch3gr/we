@@ -105,6 +105,8 @@ const int camH = 480;
 
 
 
-ofRectangle adjustFaceBounds(ofRectangle _faceBounds);
+ofRectangle adjustFaceBounds(ofRectangle faceBounds);
+ofRectangle remapSnapshotCrop(ofRectangle faceBound, ofRectangle newRef);
+
 float getTimeDiff(float refTime);
 string padThis(int pads, int number);

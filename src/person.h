@@ -11,28 +11,19 @@ public:
 	int id;
 	int x;
 	int y;
+	int f;
+	float nextTime;
 	ofImage face;
 	vector<ofImage> frames;
 	vector<ofImage> snapshots;
 	vector<Mat> snapshotsCV;
 	vector<ofImage> ofSnapshotsCV;
-
-	float nextKeyFrame;
-	int frameNo;
-
-
-	person();
-	person(int _id, int _x, int _y);
-	person(int _id, ofImage & _face);
-	person(int _id, ofImage & _face, vector<ofImage> & _snapshots);
+	vector<float> scale;
+		
 	person(int _id, vector<ofImage> & _frames, vector<ofImage> & _snapshots);
-	person(int _id, ofImage & _face, int _x, int _y);
+	
+	
 
-
-	//void person::track();
-	//void person::train();
-
-	void person::setFace( ofImage & _face);
 	void person::setPos(int _x, int _y);
 	void person::draw();
 	void person::drawDebug();
