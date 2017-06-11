@@ -37,8 +37,9 @@ manager::manager()
 
 
 
-
+	animation = false;
 	portraitWithAlpha = true;
+
 	debugTrackers = true;
 	debugPortrait = true;
 	debugPeople = false;
@@ -132,14 +133,16 @@ void manager::curate() {
 		for (float p = 0; p < size; ++p) {
 			float x = (1-((p+1) / float(size))) * ofGetWidth() + we[p].face.getWidth()/2;
 		
-			float yMax = (ofGetHeight()*0.4) + we[p].face.getHeight();
-			float yMin = ofGetHeight();
+			float yMax = ofGetHeight()*0.7;
+			float yMin = ofGetHeight()*0.9;
 
 			ofSeedRandom(we[p].id);
 			float wave = cos(ofGetElapsedTimef() + ofRandom(1000))*0.5 +0.5;
 			float y = ofLerp(yMin, yMax, wave);
 
-			we[p].setPos(x, y);
+			we[p].setPos(x-100, y);
+			we[p].rotate = 0;
+			we[p].scale = 250;
 		}
 	}
 	else {
@@ -150,35 +153,37 @@ void manager::curate() {
 			float x = 0;
 			float y = 0;
 
-			if (size > 1)
+			if (size == 1)
 			{
-				float yMin = ofGetHeight()*0.2;
-				float yMax = ofGetHeight() + 100;
-
-
-				param = float(p) / float(size - 1);
-				//x = ofMap(sin(ofGetElapsedTimef()+p*10), -1,1,0, ofGetWidth(), 1);
-				x = ofRandom(ofGetWidth());
-				y = ofMap(param, 0, 1, yMin, yMax, true);
+				x = ofGetWidth() / 2;
+				y = ofGetHeight() / 2;
+				param = 0.5;
 			}
 			else
 			{
-				x = ofGetWidth() / 2.0;
-				y = ofGetWidth() / 2.0;
+				float yMin = ofGetHeight()*0.1;
+				float yMax = ofGetHeight() - ofGetHeight()*0.2;
+
+				param = float(p) / float(size - 1);
+
+				x = ofRandom(ofGetWidth()*0.05, ofGetWidth()*0.95);
+				y = ofMap(param, 0, 1, yMin, yMax, true);
 			}
 
-			x += (ofNoise((p + ofGetElapsedTimef()) * 0.1 )*2-1) * 50;
-			y += (ofNoise((p - ofGetElapsedTimef()) * 0.11)*2-1) * 10;
-
-
+			// Animation
+			x += (ofNoise((p + ofGetElapsedTimef()) * -0.2 )*2-1) * 250;
+			y += (ofNoise((p - ofGetElapsedTimef()) * 0.022 )*2-1) * 10;
+			
 			we[p].setPos(x, y);
 
 			
-			float wave = sin(ofGetElapsedTimef() * ofRandom(3, 4));
-			we[p].rotate = ofMap( wave, -1, 1, -45, 45);
-			wave = sin(ofGetElapsedTimef() * ofRandom(0.2, 1));
-			we[p].scale = ofMap( wave, -1, 1, 50, 400) ;
-			
+			float wave = sin( we[p].translate.x * 0.01 );
+			we[p].rotate = ofMap( wave, -1, 1, -15, 15);
+
+			float sMin = ofGetWindowWidth() / ((ofApp*)ofGetAppPtr())->guiPersonSizeMin;
+			float sMax = ofGetWindowWidth() / ((ofApp*)ofGetAppPtr())->guiPersonSizeMax;
+			we[p].scale = ofMap(size, 5, 40, sMin, sMax, true);
+			we[p].scale *= ofMap( param, 0, 1, 0.75, 1.5) ;
 
 		}
 	}
@@ -206,9 +211,11 @@ void manager::draw() {
 	ofColor bgColor = ofColor::darkGray;
 	ofClear(bgColor);
 
+	((ofApp*)ofGetAppPtr())->crowdSize.setup("Crowd size", ofToString(we.size()));
+
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
-
+		
 		if(debugPeople )
 			we[p].drawDebug();
 	}
@@ -270,8 +277,8 @@ void manager::drawDebugPortrait(ofImage & camFrame) {
 
 	vector<candidate> & followers = candidates.getFollowers();
 	if (followers.size() > 0) {
-		ofRectangle someone = followers[0].faceBounds;
-		makePortrait(camFrame, someone);
+		// to force the refresh of the debugger
+		captureFrame(camFrame, followers[0]);
 	}
 
 
@@ -412,7 +419,7 @@ void manager::saveUs(bool append) {
 
 // Load a session from disk
 void manager::loadUs() {
-	string session = "s01";
+	string session = "s02";
 	string sessionPath = "sessions/"+session+"/";
 	string personPrefix = "p";
 	string snapshotPrefix = "s";
@@ -441,7 +448,6 @@ void manager::loadUs() {
 			personDir.listDir();
 			vector<ofFile> files = personDir.getFiles();
 			for (int f = 0; f < files.size(); f++) {
-				cout << "      |__ " << files[f].getBaseName() << endl;
 
 				int tokenIndex = session.length() + personPrefix.length() + 6;
 				string token = files[f].getBaseName().substr(tokenIndex, 1);
@@ -451,12 +457,16 @@ void manager::loadUs() {
 					ofImage snapshot;
 					snapshot.load(files[f].path());
 					snapshots.push_back(snapshot);
+					cout << "      |__ " << files[f].getBaseName() << endl;
 				}
 				// Load frames
 				if( token == framePrefix ) {
-					ofImage frame;
-					frame.load(files[f].path());
-					frames.push_back(frame);
+					if (animation || frames.size() == 0) {
+						ofImage frame;
+						frame.load(files[f].path());
+						frames.push_back(frame);
+						cout << "      |__ " << files[f].getBaseName() << endl;
+					}
 				}
 			}
 
@@ -542,7 +552,8 @@ void manager::detectFaces(ofImage & cam) {
 				// Or take a <<FRAME>> and a <<SNAPSHOT>>
 				else if(!dirtyFrame){
 
-					captureFrame(cam, followers[c]);
+					if( animation || followers[c].frames.size() == 0 )
+						captureFrame(cam, followers[c]);
 
 					followers[c].setSnapshotCrop(followers[c].faceBounds);
 					followers[c].takeSnapshot(cam);
@@ -639,21 +650,13 @@ void manager::detectFaces(ofImage & cam) {
 					confidence = followers[i].lastConfidence;
 
 					if (debugTrackers) {
-						float pX = we[match].x;
-						float pY = we[match].y;
-						if (we[match].face.isAllocated()) {
-							pX -= we[match].face.getWidth() / 2;
-							pY -= we[match].face.getHeight();
-						}
+						
+					
+						ofVec2f pos = we[match].translate;
 
-						pX += we[match].face.getWidth() / 2;
-
-						// adjust for debugTrackersScale
-						pX /= debugTrackersScale;
-						pY /= debugTrackersScale;
-
-						ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pX, pY);
+						ofDrawLine(followers[i].faceBounds.x, followers[i].faceBounds.getBottom(), pos.x, pos.y);
 						ofDrawBitmapStringHighlight(ofToString(match).append(":").append(ofToString(confidence)), followers[i].faceBounds.x, followers[i].faceBounds.getBottom() - 15, ofColor::black, ofColor::white);
+
 					}
 				}
 
@@ -688,299 +691,6 @@ void manager::detectFaces(ofVideoGrabber & cam) {
 	camFrame.setFromPixels(cam.getPixels());
 	detectFaces( camFrame);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ofImage manager::makePortrait( ofImage & camFrame, ofRectangle & faceBounds) {
-
-	// frame size for calculations
-
-	float cScale = ((ofApp*)ofGetAppPtr())->guiContourImgScale;
-	//posterize the value, so it doesn't fuck up the scaling
-	cScale = ceil(cScale * 19 + 0.0001) / 20;
-
-	faceBounds = adjustFaceBounds(faceBounds);
-
-	FBO_debugPortrait.begin();
-	ofClear(0);
-
-
-	//////////////////////
-	// debugPortrait Draw cam
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	camFrame.draw(0, 0);
-	ofPopMatrix();
-	// -----------------------
-
-	// debugPortrait Draw BG
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	bg.draw(camW, 0);		// to debugPortrait buffer
-	ofPopMatrix();
-	// -----------------------
-
-
-
-
-	//////////////////////
-	// Temp Draw face mask - will be replace with faceTracker
-	//ofFbo faceMask;
-	//faceMask.allocate(camW, camH, GL_RGBA);
-	//faceMask.begin();
-	//ofClear(0);
-	//ofSetColor(ofColor::white);
-	//ofDrawCircle(100, 100, 70);
-	//faceMask.end();
-
-	// debugPortrait Draw faceMask
-	//ofPushMatrix();
-	//ofScale(debugPortraitScale, debugPortraitScale);
-	//faceMask.draw(camW*2, 0);
-	//ofPopMatrix();
-	// -----------------------
-
-
-
-
-	//////////////////////
-	// Face detection
-	// Draw a white square that covers the bounding box of the face
-	ofFbo faceBoundsFBO;
-	faceBoundsFBO.allocate(camW, camH, GL_RGBA);
-	faceBoundsFBO.begin();
-	ofClear(0);
-	ofSetColor(ofColor::white);
-	ofDrawRectangle(faceBounds);
-	faceBoundsFBO.end();
-
-	// debugPortrait Draw FaceDetectMask
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	faceBoundsFBO.draw(0, camH);
-	ofPopMatrix();
-	// -----------------------
-
-
-
-
-
-	////////////////////
-	// Prep Render
-
-	ofFbo prep;
-	prep.allocate(camW*cScale, camH*cScale, GL_RGBA);
-	prep.begin();
-	shdPrep.begin();
-	// use as a tex0 the same image you are drawing below
-	shdPrep.setUniformTexture("tex0", camFrame.getTexture(), 0);
-	if (bg.isAllocated())
-		shdPrep.setUniformTexture("tex1", bg.getTexture(), 1);
-	shdPrep.setUniformTexture("tex2", faceBoundsFBO.getTexture(), 2);
-	//shdPrep.setUniformTexture("tex3", faceMask.getTexture(), 3);
-	shdPrep.setUniform1f("thress", ((ofApp*)ofGetAppPtr())->guiLumaKey );
-	
-	shdPrep.setUniform1f("imgW", camW);
-	shdPrep.setUniform1f("imgH", camH);
-
-	// Render Prep
-	ofPushMatrix();
-	ofScale(cScale, cScale);
-	camFrame.draw(0, 0);
-	ofPopMatrix();
-
-	shdPrep.end();
-	prep.end();
-
-	// debugPortrait Draw FaceDetectMask
-	ofPushMatrix();
-	//ofScale(1 / cScale, 1 / cScale);
-	ofScale(debugPortraitScale, debugPortraitScale);
-	//ofTranslate(camW, camH);
-	prep.draw(camW, camH);
-	ofPopMatrix();
-	// -----------------------
-	
-
-
-	
-	
-
-	//////////////////////
-	// Find contrours on the binary image
-	//////////////////////
-	// prep contours
-	// Pass Preped buffer to cvImage and detect contours
-
-
-	ofImage grabPrep;
-	prep.begin();
-	grabPrep.grabScreen(0,0,prep.getWidth(), prep.getHeight());
-	prep.end();
-
-
-	//grabPrep.resize(camW*cScale, camH*cScale);
-
-
-
-
-	ofxCvGrayscaleImage cvImgGrayscale;
-	cvImgGrayscale.allocate(grabPrep.getWidth(), grabPrep.getHeight());
-	cvImgGrayscale.setFromPixels(grabPrep.getPixels().getChannel(0));
-
-
-
-	// dilate and erode the image multiple times to siplify it
-	int simplify = ((ofApp*)ofGetAppPtr())->guiContourImgSimplify;
-	for (int i = 0; i < simplify; i++)
-		cvImgGrayscale.dilate();
-	for (int i = 0; i < simplify; i++)
-		cvImgGrayscale.erode();
-
-
-
-
-	// calc contours
-	ofxCvContourFinder contourFinder;
-	contourFinder.findContours(cvImgGrayscale, ((camW*cScale*0.2)*(camH*cScale*0.2)), ((camW*cScale)*(camH*cScale)), 5, false, true);
-
-	
-
-	// populate arrays of contours
-	vector<ofPath> controurSurfaces;
-	for (unsigned int i = 0; i < contourFinder.blobs.size(); i++) {
-		// add all the current vertices to a polyLine
-		ofPolyline outline;
-		outline.addVertices(contourFinder.blobs[i].pts);
-		outline.setClosed(true);
-		outline = outline.getSmoothed(((ofApp*)ofGetAppPtr())->guiContourSmooth);
-
-		ofPath newPath;
-		for (int i = 0; i < outline.getVertices().size(); i++) {
-			if (i == 0) {
-				newPath.newSubPath();
-				newPath.moveTo(outline.getVertices()[i]);
-			}
-			else
-				newPath.lineTo(outline.getVertices()[i]);
-		}
-		newPath.close();
-		newPath.simplify();
-		// scale path back to the original image of the camera and flip it to convert from texture coord to ofPixel space or something
-		newPath.scale(1/cScale, -1/cScale);
-		newPath.translate(ofPoint(0, camH));
-
-		controurSurfaces.push_back(newPath);
-	}
-
-
-	//////////////////////
-	// create countourMask
-	ofFbo contourMask;
-	contourMask.allocate(camW, camH, GL_RGBA);
-	contourMask.begin();
-	ofPushMatrix();
-	ofClear(0);
-	ofSetColor(ofColor::black);
-	for (unsigned int i = 0; i < controurSurfaces.size(); i++) {
-		controurSurfaces[i].setFillColor(ofColor(255));
-		controurSurfaces[i].draw();
-	}
-	ofPopMatrix();
-	contourMask.end();
-
-	// debugPortrait Draw countourMask
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	contourMask.draw(camW*2, 0);
-	ofPopMatrix();
-	// -----------------------
-
-
-	// debugPortrait Draw countour lines
-	ofSetColor(ofColor::red);
-	ofSetLineWidth(3);
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	ofTranslate(camW*2 , 0);
-
-	for (int i = 0; i < controurSurfaces.size(); i++) {
-		vector <ofPolyline> outlines = controurSurfaces[i].getOutline();
-		for (int i = 0; i < outlines.size(); i++)
-			outlines[i].draw();
-	}
-	ofPopMatrix();
-	ofSetColor(ofColor::white);
-	// -----------------------
-
-
-
-
-
-
-
-
-	// Composite
-	ofFbo comp;
-	comp.allocate(camW, camH, GL_RGBA);
-	comp.begin();
-	ofClear(0);
-	shdComp.begin();
-	// use as a tex0 the same image you are drawing below
-	shdComp.setUniformTexture("tex0", contourMask.getTexture(), 0);
-	shdComp.setUniformTexture("tex1", camFrame.getTexture(), 1);
-	//shdComp.setUniformTexture("tex2", cam.getTexture(), 2);
-
-	contourMask.draw(0, 0);
-	shdComp.end();
-	comp.end();
-
-	// debugPortrait Draw countourMask
-	ofPushMatrix();
-	ofScale(debugPortraitScale, debugPortraitScale);
-	comp.draw(camW * 2, camH);
-	ofPopMatrix();
-	// -----------------------
-
-
-	FBO_debugPortrait.end();
-
-	ofImage fboImage;
-	comp.readToPixels(fboImage.getPixelsRef());
-	ofImage out;
-	out.clone(fboImage);
-	
-
-	out.crop(faceBounds.x, faceBounds.y, faceBounds.getWidth(), faceBounds.getHeight());
-
-
-
-
-
-	return out;
-}
-
-
 
 
 

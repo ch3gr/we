@@ -76,6 +76,7 @@ void person::draw() {
 
 			ofPopMatrix();
 		}
+
 	}	
 }
 
@@ -100,7 +101,7 @@ void person::drawDebug() {
 	ofDrawRectangle(0, 0, frames[iFrame].getWidth(), frames[iFrame].getHeight() );
 	ofSetColor(ofColor::white);
 
-	ofDrawBitmapString(id, x, y + 20);
+	
 
 	// draw snapshots
 	if (false && snapshots.size() > 0) {
@@ -122,8 +123,8 @@ void person::drawDebug() {
 
 	}
 
-
 	ofDrawBitmapStringHighlight(ofToString(id), face.getWidth()/2+5, -5, ofColor::black, ofColor::white);
+	ofDrawBitmapStringHighlight(ofToString(iFrame), face.getWidth() / 2 + 5, +10, ofColor::black, ofColor::white);
 
 
 	ofPopStyle();
@@ -133,5 +134,5 @@ void person::drawDebug() {
 
 void person::info() {
 
-	cout << "I'm person: " << id << "\t\tX: " << x << "\tY: " << y <<endl;
+	cout << "I'm person: " << id << "\t\tX: " << translate.x << "\tY: " << translate.y <<endl;
 }

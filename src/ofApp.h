@@ -61,6 +61,7 @@ public:
 	ofxPanel gui;
 	ofxLabel winSize;
 	ofxLabel camSize;
+	ofxLabel crowdSize;
 
 	ofxGuiGroup guiGrpTrackers;
 	ofxFloatSlider guiSpeedThress;
@@ -75,8 +76,7 @@ public:
 	ofxFloatSlider guiContourImgScale;
 	ofxIntSlider guiContourImgSimplify;
 	ofxIntSlider guiContourSmooth;
-	ofxFloatSlider guiAnimationInterval;
-
+	
 
 	ofxGuiGroup guiGrpDebug;
 	ofxFloatSlider guiDebugSplit;
@@ -85,7 +85,11 @@ public:
 	ofxToggle guiDebugPeople;
 	ofxToggle guiDebugUpdateEvidence;
 	
-	
+	ofxGuiGroup guiGrpCurate;
+	ofxFloatSlider guiPersonSizeMin;
+	ofxFloatSlider guiPersonSizeMax;
+	ofxFloatSlider guiAnimationInterval;
+
 };
 
 

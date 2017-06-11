@@ -39,7 +39,6 @@ public:
 
 	void manager::detectFaces(ofImage & cam);
 	void manager::detectFaces(ofVideoGrabber & cam);
-	ofImage manager::makePortrait(ofImage & cam, ofRectangle & crop);
 	void manager::captureFrame(ofImage & cam, candidate & follower);
 	person manager::getPerson(int id);
 
@@ -48,6 +47,8 @@ public:
 	float debugTrackersScale;
 	float debugPortraitScale;
 
+
+	bool animation;
 	bool portraitWithAlpha;
 
 

@@ -83,6 +83,8 @@ void ofApp::setup() {
 	//gui.setDefaultWidth(500);
 	gui.add( winSize.setup("Win size", ofToString(ofGetWidth()) + "x" + ofToString(ofGetHeight())));
 	gui.add( camSize.setup("Cam size", ofToString(camW) + "x" + ofToString(camH)));
+	gui.add( crowdSize.setup("Crowd size", ofToString(-1) ));
+	
 
 	
 	guiGrpTrackers.setup();
@@ -106,7 +108,6 @@ void ofApp::setup() {
 	guiGrpPortrain.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
 	guiGrpPortrain.add( guiContourImgSimplify.setup("Simplify Contour Img", 0, 0, 10));
 	guiGrpPortrain.add( guiContourSmooth.setup("Contour smooth", 2, 0, 100));
-	guiGrpPortrain.add( guiAnimationInterval.setup("Animation", 0.1, 0, 1));
 	
 	gui.add(&guiGrpPortrain);
 	//guiGrpPortrain.minimize();
@@ -124,6 +125,16 @@ void ofApp::setup() {
 	gui.add(&guiGrpDebug);
 	//guiGrpDebug.minimize();
 	
+
+	guiGrpCurate.setup();
+	guiGrpCurate.setName("Curate");
+	guiGrpCurate.setBorderColor(ofColor::green);
+	guiGrpCurate.add(guiPersonSizeMin.setup("Min size div", 4, 1, 10));
+	guiGrpCurate.add(guiPersonSizeMax.setup("Max size div", 6, 1, 10));
+	guiGrpCurate.add( guiAnimationInterval.setup("Animation", 0.1, 0, 1));
+
+	gui.add(&guiGrpCurate);
+	//guiGrpCurate.minimize();
 
 
 	gui.saveToFile("gui.xml");

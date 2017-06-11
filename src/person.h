@@ -9,8 +9,6 @@ class person
 {
 public:
 	int id;
-	int x;
-	int y;
 
 	int iFrame;
 	float nextTime;
