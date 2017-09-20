@@ -4,8 +4,8 @@
 
 modelThread::modelThread(){
 
-	//model = createEigenFaceRecognizer(80, 5000);
-	model = createFisherFaceRecognizer(80, 5000);
+	model = createEigenFaceRecognizer(80, 5000);
+	//model = createFisherFaceRecognizer(80, 5000);
 	
 	startThread();
 	training = false;

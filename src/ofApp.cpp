@@ -94,7 +94,7 @@ void ofApp::setup() {
 	guiGrpTrackers.add( guiSpeedThress.setup("Trkr Thress", 0.01, 0, 0.1));
 	guiGrpTrackers.add( guiTrackerMaxSize.setup("Trkr Max Size", 0.8, 0, 1));
 	guiGrpTrackers.add( guiTrackerMinSize.setup("Trkr Min Size", 0.1, 0, 1));
-	guiGrpTrackers.add(guiConfidenceThress.setup("Confidence Thress", 2000, 0, 2000));
+	guiGrpTrackers.add( guiConfidenceThress.setup("Confidence Thress", 1000, 0, 2000));
 
 	gui.add( &guiGrpTrackers );
 	//guiGrpTrackers.minimize();

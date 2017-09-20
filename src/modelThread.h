@@ -26,6 +26,8 @@ public:
 
 	void test();
 
+	void test23();
+
 
 	Ptr<FaceRecognizer> model;
 	vector<Mat> modelFaces;
