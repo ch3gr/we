@@ -37,16 +37,18 @@ manager::manager()
 
 
 
-	animation = false;
+	animation = true;
 	portraitWithAlpha = true;
 
 	debugTrackers = true;
 	debugPortrait = true;
 	debugPeople = false;
 	debugUpdateEvidence = false;
-	
+	session = "s02";
 
 	nextPersonId = 0;
+	selection = -1;
+
 	flash = 0;
 	FBO_debugPortrait.allocate(ofGetWindowWidth(), ofGetWindowHeight());
 	FBO_debugTrackers.allocate(ofGetWindowWidth(), ofGetWindowHeight());
@@ -216,8 +218,13 @@ void manager::draw() {
 	for (int p = 0; p < we.size(); ++p) {
 		we[p].draw();
 		
-		if(debugPeople )
-			we[p].drawDebug();
+		if (debugPeople) {
+			bool selected = false;
+			if (selection == p)
+				selected = true;
+			we[p].drawDebug(selected);
+			
+		}
 	}
 
 
@@ -340,6 +347,21 @@ void manager::info() {
 }
 
 
+void manager::remove() {
+
+	selection = ofClamp(selection, -1, we.size() - 1);
+	cout << "Gonna delete " << selection << endl;
+	if (selection >= 0 && we.size() != 0 ) {
+		we.erase( we.begin()+ selection);
+		model.train();
+	}
+	else {
+		selection = -1;
+		cout << "Nothing to delete" << endl;
+	}
+	selection = ofClamp(selection, -1, we.size() - 1);
+}
+
 void manager::forgetUs() {
 	we.clear();
 	nextPersonId = 0;
@@ -352,8 +374,6 @@ void manager::forgetUs() {
 
 // Save the group to disk
 void manager::saveUs(bool append) {
-
-	string session = "s02";
 	string sessionPath = "sessions/" + session + "/";
 	string personPrefix = "p";
 	string framePrefix = "f";
@@ -419,7 +439,6 @@ void manager::saveUs(bool append) {
 
 // Load a session from disk
 void manager::loadUs() {
-	string session = "s02";
 	string sessionPath = "sessions/"+session+"/";
 	string personPrefix = "p";
 	string snapshotPrefix = "s";

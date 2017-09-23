@@ -8,9 +8,20 @@ int main( ){
 	ofGLWindowSettings settings;
 	settings.setGLVersion(3, 2);
 
+	ofAppGLFWWindow win;
+	//win.setNumSamples(8);  
+//	win.setMultiDisplayFullscreen(true); //this makes the fullscreen window span across all your monitors  
+//	win.setWindowShape(1920, 1080);
+//	ofSetupOpenGL(&win, 1920, 1080, OF_FULLSCREEN);
+
 //	ofSetupOpenGL(1280, 720, OF_WINDOW);
 	ofSetupOpenGL(1920,1080, OF_WINDOW);
+//	ofSetupOpenGL(1920, 1080, OF_FULLSCREEN);
 //	ofSetupOpenGL(1920, 1200, OF_FULLSCREEN);
+
+//	ofSetWindowShape(1920, 1080);
+//	ofSetWindowPosition(0, -1080);
+
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
 //	ofSetWindowPosition(1920, 20);

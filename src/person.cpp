@@ -80,7 +80,7 @@ void person::draw() {
 	}	
 }
 
-void person::drawDebug() {
+void person::drawDebug( bool selected) {
 
 // TRANSFORM
 	ofPushMatrix();
@@ -99,6 +99,13 @@ void person::drawDebug() {
 	ofNoFill();
 	ofSetColor(ofColor::blue);
 	ofDrawRectangle(0, 0, frames[iFrame].getWidth(), frames[iFrame].getHeight() );
+
+	if (selected) {
+		ofSetColor(ofColor::red);
+		ofSetLineWidth(4);
+		ofDrawRectangle(0, 0, frames[iFrame].getWidth(), frames[iFrame].getHeight());
+	}
+
 	ofSetColor(ofColor::white);
 
 	
@@ -125,6 +132,7 @@ void person::drawDebug() {
 
 	ofDrawBitmapStringHighlight(ofToString(id), face.getWidth()/2+5, -5, ofColor::black, ofColor::white);
 	ofDrawBitmapStringHighlight(ofToString(iFrame), face.getWidth() / 2 + 5, +10, ofColor::black, ofColor::white);
+
 
 
 	ofPopStyle();

@@ -30,8 +30,9 @@ public:
 	void manager::drawDebugPortrait(ofImage & camFrame);
 	void manager::drawDebugTrackers();
 	void manager::info();
+	void manager::remove();
 	void manager::forgetUs();
-	void manager::saveUs(bool append);
+	void manager::saveUs(bool);
 	void manager::loadUs();
 	void manager::curate();
 
@@ -61,7 +62,8 @@ public:
 	int nextPersonId;
 	ofFbo FBO_debugPortrait;
 	ofFbo FBO_debugTrackers;
-	
+	int selection;
+	string session;
 
 	ofShader shdPrep, shdComp;
 

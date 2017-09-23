@@ -104,7 +104,7 @@ void ofApp::setup() {
 	guiGrpPortrain.setup();
 	guiGrpPortrain.setName("Portrait");
 	guiGrpPortrain.setBorderColor(ofColor::lightBlue);
-	guiGrpPortrain.add( guiLumaKey.setup("key", 0.08, 0, 1));
+	guiGrpPortrain.add( guiLumaKey.setup("key", 0.2, 0, 1));
 	guiGrpPortrain.add( guiContourImgScale.setup("Contour Img scale", 0.25, 0.01, 1));
 	guiGrpPortrain.add( guiContourImgSimplify.setup("Simplify Contour Img", 0, 0, 10));
 	guiGrpPortrain.add( guiContourSmooth.setup("Contour smooth", 2, 0, 100));
@@ -330,6 +330,22 @@ void ofApp::keyPressed(int key) {
 		cout << "Background Saved to disk" << endl;
 	}
 
+	if (key == OF_KEY_LEFT) {
+		manage.selection = ofClamp(manage.selection - 1, -1, manage.we.size() - 1);
+		cout << "Selection " << manage.selection << endl;
+	}
+
+	if (key == OF_KEY_RIGHT) {
+		manage.selection = ofClamp(manage.selection + 1, -1, manage.we.size() - 1);
+		cout << "Selection " << manage.selection << endl;
+	}
+
+	if (key == 'd')
+	{
+		manage.remove();
+		cout << "Removed person " << manage.selection << endl;
+	}
+
 	if (key == 'c')
 	{
 		manage.forgetUs();
@@ -384,14 +400,15 @@ void ofApp::keyPressed(int key) {
 
 	// saveUs
 	if (key == 's' || key == 'S') {
-		manage.saveUs(key == 's');
+//		manage.saveUs(key == 's');
+		manage.saveUs(true);
 	}
 
 
 	// loadUs
 	if (key == 'l' || key == 'L') {
 		manage.loadUs();
-		if(key == 'L')
+		if(key == 'l')
 			manage.model.train();
 	}
 
@@ -410,14 +427,17 @@ void ofApp::keyPressed(int key) {
 	}
 
 
+	if (key == 'F')
+		ofToggleFullscreen();
+
 
 	/////// temp keys
 
-	if (key == OF_KEY_LEFT) {
+	if (key == ',' ) {
 		selectSamplePerson = ofClamp(--selectSamplePerson, -1, samplePeople.size() - 1);
 		cout << "Select Sample Person : " << selectSamplePerson << endl;
 	}
-	if (key == OF_KEY_RIGHT) {
+	if (key == '.' ) {
 		selectSamplePerson = ofClamp(++selectSamplePerson, -1, samplePeople.size() - 1);
 		cout << "Select Sample Person : " << selectSamplePerson << endl;
 	}

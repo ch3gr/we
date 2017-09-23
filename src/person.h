@@ -27,7 +27,7 @@ public:
 
 	void person::setPos(float _x, float _y);
 	void person::draw();
-	void person::drawDebug();
+	void person::drawDebug( bool );
 	void person::info();
 };
 
